@@ -1,0 +1,84 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Styles personnalisés pour le tableau de bord */
+.dashboard-card {
+    @apply bg-white rounded-lg shadow-sm overflow-hidden border-l-4;
+    transition: all 0.3s ease;
+}
+
+.dashboard-card:hover {
+    @apply shadow-md;
+    transform: translateY(-2px);
+}
+
+.dashboard-card-header {
+    @apply px-4 py-3 border-b border-gray-100 flex items-center justify-between;
+}
+
+.dashboard-card-body {
+    @apply p-4;
+}
+
+.dashboard-stat {
+    @apply text-2xl font-bold;
+}
+
+.dashboard-stat-label {
+    @apply text-sm text-gray-500 uppercase tracking-wider;
+}
+
+/* Styles pour les barres latérales colorées */
+.border-primary {
+    border-left-color: #3b82f6; /* blue-500 */
+}
+
+.border-success {
+    border-left-color: #10b981; /* emerald-500 */
+}
+
+.border-warning {
+    border-left-color: #f59e0b; /* amber-500 */
+}
+
+.border-danger {
+    border-left-color: #ef4444; /* red-500 */
+}
+
+/* Styles pour les onglets */
+.nav-tabs {
+    @apply flex border-b border-gray-200;
+}
+
+.nav-tab {
+    @apply py-3 px-6 font-medium text-sm border-b-2 border-transparent;
+    @apply text-gray-500 hover:text-gray-700 hover:border-gray-300;
+    transition: all 0.2s ease;
+}
+
+.nav-tab.active {
+    @apply text-blue-600 border-blue-500 font-semibold;
+}
+
+/* Style pour les notifications */
+.notification-badge {
+    @apply absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center;
+    min-width: 1.25rem;
+}
+
+/* Animation pour les cartes */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-fadeInUp {
+    animation: fadeInUp 0.5s ease-out forwards;
+}
