@@ -19,46 +19,8 @@ Route::get('/', function () {
     return redirect('/login');
 });
 
-// Routes d'authentification simples
-Route::get('/login', function () {
-    return view('auth.login');
-})->name('login');
-
-Route::post('/login', function (Illuminate\Http\Request $request) {
-    $credentials = $request->only('email', 'password');
-    
-    // Vérifier si l'utilisateur existe dans la base de données
-    $user = \App\Models\User::where('email', $credentials['email'])->first();
-    
-    if ($user && \Hash::check($credentials['password'], $user->password)) {
-        // Authentifier l'utilisateur
-        \Auth::login($user);
-        
-        // Rediriger selon le rôle
-        switch($user->role) {
-            case 'admin':
-                return redirect('/admin/dashboard');
-            case 'gestionnaire':
-                return redirect('/gestionnaire/dashboard');
-            case 'vendeur':
-                return redirect('/vendeur/dashboard');
-            default:
-                return redirect('/dashboard');
-        }
-    }
-    
-    // Si échec, rediriger vers login avec erreur
-    return redirect('/login')->with('error', 'Email ou mot de passe incorrect');
-});
-
-Route::get('/register', function () {
-    return view('auth.register');
-})->name('register');
-
-Route::post('/register', function () {
-    // Logique d'inscription simple
-    return redirect('/dashboard');
-});
+// Authentication routes handled by Laravel Breeze
+require __DIR__.'/auth.php';
 
 Route::post('/logout', function () {
     \Auth::logout();
@@ -143,6 +105,9 @@ Route::middleware('auth')->group(function () {
         'destroy' => 'ventes.destroy'
     ]);
     
+    // Route pour le reçu de vente
+    Route::get('/ventes/{vente}/recu', [VenteController::class, 'recu'])->middleware('vendeur')->name('ventes.recu');
+    
     // Routes pour les rapports (admin et gestionnaire uniquement)
     Route::get('/rapports', [RapportController::class, 'index'])->middleware('gestionnaire')->name('rapports.index');
     Route::get('/rapports/stock/pdf', [RapportController::class, 'rapportStockPDF'])->middleware('gestionnaire')->name('rapports.stock.pdf');
@@ -162,13 +127,13 @@ Route::middleware('auth')->group(function () {
     Route::get('/api/stock-boutique', [VenteController::class, 'getStockDisponible'])->middleware('vendeur');
     
     // Routes pour le système de caisse (POS)
-    Route::prefix('pos')->name('pos.')->middleware('vendeur')->group(function () {
+    Route::prefix('pos')->name('pos.')->middleware(['auth'])->group(function () {
         Route::get('/', [POSController::class, 'index'])->name('index');
         Route::get('/open', [POSController::class, 'open'])->name('open');
         Route::post('/open', [POSController::class, 'storeOpen'])->name('store_open');
         Route::get('/close', [POSController::class, 'close'])->name('close');
         Route::post('/close', [POSController::class, 'storeClose'])->name('store_close');
-        
+
         // API routes pour le POS
         Route::post('/cart/add', [POSController::class, 'addToCart'])->name('cart.add');
         Route::delete('/cart/remove', [POSController::class, 'removeFromCart'])->name('cart.remove');

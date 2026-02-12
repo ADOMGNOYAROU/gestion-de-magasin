@@ -235,7 +235,7 @@ class VenteController extends Controller
      */
     public function show(string $id)
     {
-        $vente = Vente::with(['produit', 'boutique.magasin'])->findOrFail($id);
+        $vente = Vente::with(['venteProduits.produit', 'boutique.magasin'])->findOrFail($id);
         
         // Vérifier les permissions
         if (Auth::user()->isVendeur() && $vente->boutique_id != Auth::user()->boutique_id) {
@@ -273,24 +273,19 @@ class VenteController extends Controller
         DB::beginTransaction();
         try {
             $vente = Vente::findOrFail($id);
-            
+
             // Vérifier les permissions
             if (Auth::user()->isVendeur() && $vente->boutique_id != Auth::user()->boutique_id) {
                 throw new \Exception('Vous n\'avez pas les permissions pour annuler cette vente.');
             }
-            
-            // Restaurer le stock de la boutique
-            $stockBoutique = StockBoutique::where('produit_id', $vente->produit_id)
-                                        ->where('boutique_id', $vente->boutique_id)
-                                        ->first();
 
-            if ($stockBoutique) {
-                $stockBoutique->quantite += $vente->quantite;
-                $stockBoutique->save();
+            // Annuler la vente (remet automatiquement le stock via la méthode annuler())
+            $vente->annuler();
+
+            // Supprimer la vente seulement si elle est annulée
+            if ($vente->isAnnulee()) {
+                $vente->delete();
             }
-
-            // Supprimer la vente
-            $vente->delete();
 
             DB::commit();
 
@@ -299,7 +294,7 @@ class VenteController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
-            
+
             return back()->withErrors([
                 'error' => 'Erreur lors de l\'annulation : ' . $e->getMessage()
             ]);
@@ -428,5 +423,31 @@ class VenteController extends Controller
             'seuil_alerte' => $stock ? $stock->seuil_alerte : 0,
             'en_alerte' => $stock ? $stock->en_alerte : false,
         ]);
+    }
+
+    /**
+     * Afficher le reçu de vente
+     */
+    public function recu(Vente $vente)
+    {
+        // Vérifier que l'utilisateur a accès à cette vente
+        Gate::authorize('manage-ventes');
+
+        $user = Auth::user();
+
+        // Vérifier les permissions selon le rôle
+        if ($user->isVendeur() && $vente->boutique_id !== $user->boutique_id) {
+            abort(403, 'Accès non autorisé à cette vente');
+        } elseif ($user->isGestionnaire()) {
+            $magasin = $user->magasinResponsable;
+            if ($magasin && !$vente->boutique->magasin()->where('id', $magasin->id)->exists()) {
+                abort(403, 'Accès non autorisé à cette vente');
+            }
+        }
+
+        // Charger les relations nécessaires
+        $vente->load(['venteProduits.produit', 'boutique.magasin', 'user', 'paymentMethod']);
+
+        return view('ventes.recu', compact('vente'));
     }
 }

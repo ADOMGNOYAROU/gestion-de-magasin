@@ -4,10 +4,11 @@
 <div class="container-fluid">
     <div class="row">
         <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h1 class="h3 mb-0 text-gray-800">Modifier l'Utilisateur</h1>
-                <a href="{{ route('users.index') }}" class="btn btn-secondary">
-                    <i class="fas fa-arrow-left"></i> Retour
+            <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center mb-4">
+                <h1 class="h4 h3-md mb-3 mb-sm-0 text-gray-800">Modifier l'Utilisateur</h1>
+                <a href="{{ route('users.index') }}" class="btn btn-secondary btn-mobile">
+                    <i class="fas fa-arrow-left"></i>
+                    <span class="d-none d-sm-inline ms-1">Retour</span>
                 </a>
             </div>
 
@@ -93,9 +94,22 @@
                                     @enderror
                                 </div>
                             </div>
-                        </div>
-
-                        <div class="d-flex justify-content-end">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="boutique_id" class="form-label">Boutique</label>
+                                    <select class="form-select @error('boutique_id') is-invalid @enderror" id="boutique_id" name="boutique_id">
+                                        <option value="">Aucune boutique</option>
+                                        @foreach($boutiques as $boutique)
+                                            <option value="{{ $boutique->id }}" {{ old('boutique_id', $user->boutique_id) == $boutique->id ? 'selected' : '' }}>
+                                                {{ $boutique->nom }} ({{ $boutique->magasin->nom ?? 'N/A' }})
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    @error('boutique_id')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
                             <button type="submit" class="btn btn-primary">
                                 <i class="fas fa-save"></i> Mettre à jour l'utilisateur
                             </button>

@@ -80,8 +80,9 @@ class UserController extends Controller
     public function edit(User $user)
     {
         $magasins = \App\Models\Magasin::all();
+        $boutiques = \App\Models\Boutique::with('magasin')->get();
 
-        return view('users.edit', compact('user', 'magasins'));
+        return view('users.edit', compact('user', 'magasins', 'boutiques'));
     }
 
     /**
@@ -95,6 +96,7 @@ class UserController extends Controller
             'password' => 'nullable|string|min:8|confirmed',
             'role' => ['required', Rule::in(['admin', 'gestionnaire', 'vendeur'])],
             'magasin_id' => 'nullable|exists:magasins,id',
+            'boutique_id' => 'nullable|exists:boutiques,id',
         ]);
 
         if ($validator->fails()) {
@@ -104,16 +106,19 @@ class UserController extends Controller
         }
 
         try {
-            $user->update([
+            $updateData = [
                 'name' => $request->name,
                 'email' => $request->email,
                 'role' => $request->role,
                 'magasin_id' => $request->magasin_id,
-            ]);
+                'boutique_id' => $request->boutique_id,
+            ];
 
             if ($request->filled('password')) {
-                $user->update(['password' => Hash::make($request->password)]);
+                $updateData['password'] = Hash::make($request->password);
             }
+
+            $user->update($updateData);
 
             return redirect()->route('users.index')->with('success', 'Utilisateur mis à jour avec succès.');
         } catch (\Exception $e) {

@@ -419,11 +419,11 @@ class DashboardController extends Controller
      */
     private function getVentesParJourMagasin($jours = 7, $magasinId)
     {
-        $data = Vente::whereDate('date', '>=', Carbon::now()->subDays($jours - 1))
+        $data = Vente::whereDate('date_vente', '>=', Carbon::now()->subDays($jours - 1))
                    ->whereHas('boutique', function($q) use ($magasinId) {
                        $q->where('magasin_id', $magasinId);
                    })
-                   ->selectRaw('DATE(date) as date, SUM(prix_total) as ca, COUNT(*) as ventes')
+                   ->selectRaw('DATE(date_vente) as date, SUM(montant_total) as ca, COUNT(*) as ventes')
                    ->groupBy('date')
                    ->orderBy('date')
                    ->get();
@@ -447,9 +447,9 @@ class DashboardController extends Controller
      */
     private function getVentesParJourBoutique($jours = 7, $boutiqueId)
     {
-        $data = Vente::whereDate('date', '>=', Carbon::now()->subDays($jours - 1))
+        $data = Vente::whereDate('date_vente', '>=', Carbon::now()->subDays($jours - 1))
                    ->where('boutique_id', $boutiqueId)
-                   ->selectRaw('DATE(date) as date, SUM(prix_total) as ca, COUNT(*) as ventes')
+                   ->selectRaw('DATE(date_vente) as date, SUM(montant_total) as ca, COUNT(*) as ventes')
                    ->groupBy('date')
                    ->orderBy('date')
                    ->get();

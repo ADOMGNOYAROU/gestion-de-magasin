@@ -28,7 +28,7 @@ class GestionnaireController extends Controller
                 ->count(),
             'ventes_boutiques' => Vente::whereIn('boutique_id', 
                 Boutique::where('magasin_id', $magasin->id)->pluck('id')
-            )->whereDate('date', today())->count(),
+            )->whereDate('date_vente', today())->count(),
         ];
 
         return view('gestionnaire.dashboard', compact('stats'));

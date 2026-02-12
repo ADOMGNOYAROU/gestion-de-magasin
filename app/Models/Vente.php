@@ -32,7 +32,7 @@ class Vente extends Model
     {
         static::creating(function ($vente) {
             if (!$vente->numero_ticket) {
-                $vente->numero_ticket = 'TKT-' . strtoupper(Str::random(8));
+                $vente->numero_ticket = static::generateNumeroTicket();
             }
         });
     }
@@ -95,6 +95,24 @@ class Vente extends Model
     }
 
     // Helper methods
+    public static function generateNumeroTicket()
+    {
+        $date = now()->format('Ymd');
+        $lastTicket = static::where('numero_ticket', 'like', "TKT-{$date}-%")
+                           ->orderBy('numero_ticket', 'desc')
+                           ->first();
+
+        $sequence = 1;
+        if ($lastTicket) {
+            // Extraire le numéro séquentiel du dernier ticket
+            $parts = explode('-', $lastTicket->numero_ticket);
+            if (count($parts) >= 3) {
+                $sequence = (int)$parts[2] + 1;
+            }
+        }
+
+        return sprintf('TKT-%s-%04d', $date, $sequence);
+    }
     public function isTerminee()
     {
         return $this->status === 'terminee';

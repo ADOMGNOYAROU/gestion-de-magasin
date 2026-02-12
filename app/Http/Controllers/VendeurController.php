@@ -26,10 +26,10 @@ class VendeurController extends Controller
                 ->whereColumn('quantite', '<=', 'seuil_alerte')
                 ->count(),
             'ventes_aujourd_hui' => Vente::where('boutique_id', $boutique->id)
-                ->whereDate('date', today())->count(),
+                ->whereDate('date_vente', today())->count(),
             'ventes_mois' => Vente::where('boutique_id', $boutique->id)
-                ->whereMonth('date', now()->month)
-                ->sum('prix_total'),
+                ->whereMonth('date_vente', now()->month)
+                ->sum('montant_total'),
         ];
 
         return view('vendeur.dashboard', compact('stats'));

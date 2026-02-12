@@ -20,11 +20,17 @@
                         <x-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.*')">
                             {{ __('Administration') }}
                         </x-nav-link>
+                        <x-nav-link :href="route('pos.index')" :active="request()->routeIs('pos.*')">
+                            <i class="fas fa-cash-register me-1"></i>{{ __('Caisse') }}
+                        </x-nav-link>
                     @endif
                     
                     @if(auth()->user()->isGestionnaire())
                         <x-nav-link :href="route('gestionnaire.dashboard')" :active="request()->routeIs('gestionnaire.*')">
                             {{ __('Mon Magasin') }}
+                        </x-nav-link>
+                        <x-nav-link :href="route('pos.index')" :active="request()->routeIs('pos.*')">
+                            <i class="fas fa-cash-register me-1"></i>{{ __('Caisse') }}
                         </x-nav-link>
                     @endif
                     
@@ -100,11 +106,17 @@
                 <x-responsive-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.*')">
                     {{ __('Administration') }}
                 </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('pos.index')" :active="request()->routeIs('pos.*')">
+                    <i class="fas fa-cash-register me-1"></i>{{ __('Caisse') }}
+                </x-responsive-nav-link>
             @endif
             
             @if(auth()->user()->isGestionnaire())
                 <x-responsive-nav-link :href="route('gestionnaire.dashboard')" :active="request()->routeIs('gestionnaire.*')">
                     {{ __('Mon Magasin') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('pos.index')" :active="request()->routeIs('pos.*')">
+                    <i class="fas fa-cash-register me-1"></i>{{ __('Caisse') }}
                 </x-responsive-nav-link>
             @endif
             

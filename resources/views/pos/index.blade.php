@@ -8,23 +8,24 @@
 @endsection
 
 @section('header')
-<div class="d-flex justify-content-between align-items-center">
-    <div>
-        <h1 class="h3 mb-0">Caisse - {{ $boutique->nom }}</h1>
-        <p class="text-muted mb-0">Session ouverte: {{ $sessionActive->date_ouverture->format('d/m/Y H:i') }}</p>
+<div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center">
+    <div class="mb-3 mb-sm-0">
+        <h1 class="h4 h3-sm mb-1">Caisse - {{ $boutique->nom }}</h1>
+        <p class="text-muted mb-0 small">Session: {{ $sessionActive->date_ouverture->format('d/m/Y H:i') }}</p>
     </div>
-    <div>
-        <a href="{{ route('pos.close') }}" class="btn btn-warning">
-            <i class="fas fa-sign-out-alt me-2"></i>Fermer la caisse
+    <div class="w-100 w-sm-auto">
+        <a href="{{ route('pos.close') }}" class="btn btn-warning btn-mobile w-100">
+            <i class="fas fa-sign-out-alt me-2"></i>
+            <span class="d-sm-inline">Fermer la caisse</span>
         </a>
     </div>
 </div>
 @endsection
 
 @section('content')
-<div class="row g-4">
+<div class="row g-3 g-lg-4">
     <!-- Section Recherche et Produits -->
-    <div class="col-lg-8">
+    <div class="col-12 col-lg-8 order-2 order-lg-1">
         <div class="card h-100">
             <div class="card-header">
                 <h5 class="mb-0">Recherche de produits</h5>
@@ -34,7 +35,7 @@
                 <div class="mb-4">
                     <div class="input-group">
                         <input type="text" id="productSearch" class="form-control form-control-lg"
-                               placeholder="Rechercher un produit par nom, code-barres ou catégorie..."
+                               placeholder="Rechercher un produit..."
                                autocomplete="off">
                         <button class="btn btn-outline-secondary" type="button" id="clearSearch">
                             <i class="fas fa-times"></i>
@@ -53,16 +54,23 @@
                     <h6>Produits populaires:</h6>
                     <div class="row g-2" id="popularProductGrid">
                         @foreach($produits->take(20) as $produit)
-                        <div class="col-md-4 col-sm-6">
-                            <button class="btn btn-outline-primary w-100 product-btn"
+                        <div class="col-6 col-sm-4 col-md-3">
+                            <button class="btn btn-outline-primary w-100 product-btn product-btn-mobile {{ $produit->stock_disponible <= 0 ? 'disabled' : '' }}"
                                     data-product-id="{{ $produit->id }}"
                                     data-product-name="{{ $produit->nom }}"
                                     data-product-price="{{ $produit->prix_vente }}"
-                                    data-product-category="{{ $produit->categorie }}">
-                                <div class="text-start">
-                                    <strong>{{ Str::limit($produit->nom, 20) }}</strong><br>
-                                    <small class="text-muted">{{ $produit->categorie }}</small><br>
-                                    <span class="fw-bold">{{ number_format($produit->prix_vente, 0, ',', ' ') }} FCFA</span>
+                                    data-product-category="{{ $produit->categorie }}"
+                                    {{ $produit->stock_disponible <= 0 ? 'disabled' : '' }}>
+                                <div class="text-start p-2">
+                                    <strong class="d-block mb-1" style="font-size: 0.85rem; line-height: 1.2;">{{ Str::limit($produit->nom, 18) }}</strong>
+                                    <small class="text-muted d-block mb-1" style="font-size: 0.75rem;">{{ $produit->categorie }}</small>
+                                    <span class="fw-bold d-block mb-1" style="font-size: 0.8rem;">{{ number_format($produit->prix_vente, 0, ',', ' ') }} FCFA</span>
+                                    <small class="text-{{ $produit->stock_disponible > 10 ? 'success' : ($produit->stock_disponible > 0 ? 'warning' : 'danger') }}" style="font-size: 0.7rem;">
+                                        Stock: {{ $produit->stock_disponible ?? 'NULL' }}
+                                    </small>
+                                    @if(!$produit->stock_disponible && $produit->stock_disponible !== 0)
+                                        <br><small class="text-danger" style="font-size: 0.7rem;">DEBUG: Stock non chargé</small>
+                                    @endif
                                 </div>
                             </button>
                         </div>
@@ -74,17 +82,18 @@
     </div>
 
     <!-- Section Panier et Paiement -->
-    <div class="col-lg-4">
+    <div class="col-12 col-lg-4 order-1 order-lg-2">
         <div class="card h-100">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h5 class="mb-0">Panier <span class="badge bg-primary" id="cartCount">0</span></h5>
                 <button class="btn btn-sm btn-outline-danger" id="clearCartBtn">
-                    <i class="fas fa-trash me-1"></i>Vider
+                    <i class="fas fa-trash me-1"></i>
+                    <span class="d-none d-sm-inline">Vider</span>
                 </button>
             </div>
             <div class="card-body d-flex flex-column">
                 <!-- Liste des articles -->
-                <div class="flex-grow-1" style="min-height: 300px;">
+                <div class="flex-grow-1" style="min-height: 200px;">
                     <div id="cartItems" class="mb-3">
                         <p class="text-muted text-center mb-0">Le panier est vide</p>
                     </div>
@@ -250,17 +259,22 @@ function displaySearchResults(products) {
 
     let html = '';
     products.forEach(product => {
+        const stockClass = product.stock_disponible > 10 ? 'text-success' : (product.stock_disponible > 0 ? 'text-warning' : 'text-danger');
+        const isDisabled = product.stock_disponible <= 0 ? 'disabled' : '';
+
         html += `
             <div class="col-md-6">
-                <button class="btn btn-outline-success w-100 product-btn"
+                <button class="btn btn-outline-success w-100 product-btn ${isDisabled}"
                         data-product-id="${product.id}"
                         data-product-name="${product.nom}"
                         data-product-price="${product.prix_vente}"
-                        data-product-category="${product.categorie}">
+                        data-product-category="${product.categorie}"
+                        ${isDisabled}>
                     <div class="text-start">
                         <strong>${product.nom}</strong><br>
                         <small class="text-muted">${product.categorie}</small><br>
-                        <span class="fw-bold">${formatCurrency(product.prix_vente)}</span>
+                        <span class="fw-bold">${formatCurrency(product.prix_vente)}</span><br>
+                        <small class="${stockClass}">Stock: ${product.stock_disponible}</small>
                     </div>
                 </button>
             </div>

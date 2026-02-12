@@ -491,12 +491,187 @@
             }
         }
 
-        /* Action Cards */
-        .action-card {
-            display: block;
-            text-decoration: none;
-            color: inherit;
-            border-radius: 0.75rem;
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+
+            .sidebar.show {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0 !important;
+            }
+
+            .sidebar-overlay {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.5);
+                z-index: 1040;
+            }
+
+            .sidebar-overlay.show {
+                display: block;
+            }
+
+            /* Mobile navigation adjustments */
+            .topbar-left {
+                flex: 1;
+            }
+
+            .breadcrumb {
+                font-size: 0.875rem;
+            }
+
+            /* Mobile buttons */
+            .btn {
+                min-height: 44px;
+                padding: 0.75rem 1rem;
+                font-size: 0.9rem;
+            }
+
+            .btn-sm {
+                min-height: 36px;
+                padding: 0.5rem 0.75rem;
+                font-size: 0.8rem;
+            }
+
+            .btn-mobile {
+                width: 100%;
+                margin-bottom: 1rem;
+            }
+
+            /* Mobile POS specific */
+            .product-btn-mobile {
+                min-height: 80px;
+                padding: 0.5rem;
+                margin-bottom: 0.5rem;
+                font-size: 0.85rem;
+                border-radius: 0.5rem;
+                transition: all 0.2s ease;
+            }
+
+            .product-btn-mobile:hover:not(:disabled) {
+                transform: translateY(-2px);
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            }
+
+            .product-btn-mobile:active:not(:disabled) {
+                transform: translateY(0);
+                box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+            }
+
+            @media (max-width: 576px) {
+                .product-btn-mobile {
+                    min-height: 70px;
+                    font-size: 0.8rem;
+                }
+            }
+
+            /* Mobile cards */
+            .card {
+                margin-bottom: 1rem;
+                border-radius: 0.5rem;
+            }
+
+            .card-header {
+                padding: 1rem;
+                font-size: 1rem;
+            }
+
+            .card-body {
+                padding: 1rem;
+            }
+
+            /* Mobile tables */
+            .table-responsive {
+                border: none;
+                margin: -1rem;
+                margin-top: 0;
+            }
+
+            .table-responsive .table {
+                margin-bottom: 0;
+            }
+
+            /* Mobile forms */
+            .form-control, .form-select {
+                min-height: 44px;
+                font-size: 1rem;
+            }
+
+            .form-label {
+                font-weight: 600;
+                margin-bottom: 0.5rem;
+            }
+
+            /* Mobile alerts */
+            .alert {
+                margin-bottom: 1rem;
+                border-radius: 0.5rem;
+                padding: 1rem;
+            }
+
+            /* Mobile dropdowns */
+            .dropdown-menu {
+                border: none;
+                box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+                border-radius: 0.5rem;
+                margin-top: 0.5rem;
+            }
+
+            /* Mobile modals */
+            .modal-dialog {
+                margin: 0.5rem;
+                max-width: none;
+            }
+
+            /* Mobile pagination */
+            .pagination {
+                justify-content: center;
+                margin-top: 1rem;
+            }
+
+            .pagination .page-link {
+                padding: 0.5rem 0.75rem;
+                min-width: 44px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .container-fluid {
+                padding-left: 0.5rem;
+                padding-right: 0.5rem;
+            }
+
+            .topbar {
+                padding: 0.75rem 1rem;
+            }
+
+            .page-content {
+                padding: 1rem 0.5rem;
+            }
+
+            /* Hide breadcrumb text on very small screens */
+            .breadcrumb-item:not(:first-child):not(:last-child) {
+                display: none;
+            }
+
+            .breadcrumb-item:first-child .fa-home {
+                display: inline;
+            }
+
+            .breadcrumb-item:first-child span:not(.fa) {
+                display: none;
+            }
+        }
             padding: 1.5rem;
             background: white;
             transition: all 0.3s ease;
@@ -659,6 +834,16 @@
             </div>
             @endif
 
+            <!-- Gestion des Caisses (Admin/Gestionnaire) -->
+            @if(auth()->user()->isAdmin() || auth()->user()->isGestionnaire())
+            <div class="sidebar-item">
+                <a href="{{ route('pos.index') }}" class="sidebar-link {{ request()->is('pos*') ? 'active' : '' }}">
+                    <i class="fas fa-cash-register"></i>
+                    <span class="sidebar-link-text">Gestion des Caisses</span>
+                </a>
+            </div>
+            @endif
+
             <!-- Rapports -->
             @if(canManageRapports())
             <div class="sidebar-item">
@@ -705,8 +890,10 @@
                 </a>
             </div>
             @endif
-        </nav>
     </aside>
+
+    <!-- Mobile Sidebar Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
     <!-- Main Content -->
     <div class="main-content" id="mainContent">
@@ -951,6 +1138,52 @@
         function formatDate(date) {
             return new Date(date).toLocaleDateString('fr-FR');
         }
+
+        // Mobile sidebar functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const sidebarToggle = document.getElementById('sidebarToggle');
+            const sidebar = document.getElementById('sidebar');
+            const sidebarOverlay = document.getElementById('sidebarOverlay');
+            const mainContent = document.getElementById('mainContent');
+
+            // Toggle sidebar on mobile
+            if (sidebarToggle && sidebar && sidebarOverlay) {
+                sidebarToggle.addEventListener('click', function() {
+                    sidebar.classList.toggle('show');
+                    sidebarOverlay.classList.toggle('show');
+
+                    // Prevent body scroll when sidebar is open
+                    document.body.style.overflow = sidebar.classList.contains('show') ? 'hidden' : '';
+                });
+
+                // Close sidebar when clicking overlay
+                sidebarOverlay.addEventListener('click', function() {
+                    sidebar.classList.remove('show');
+                    sidebarOverlay.classList.remove('show');
+                    document.body.style.overflow = '';
+                });
+
+                // Close sidebar when clicking a link (on mobile)
+                sidebar.querySelectorAll('.sidebar-link').forEach(link => {
+                    link.addEventListener('click', function() {
+                        if (window.innerWidth <= 768) {
+                            sidebar.classList.remove('show');
+                            sidebarOverlay.classList.remove('show');
+                            document.body.style.overflow = '';
+                        }
+                    });
+                });
+            }
+
+            // Close sidebar on window resize if desktop
+            window.addEventListener('resize', function() {
+                if (window.innerWidth > 768) {
+                    sidebar.classList.remove('show');
+                    sidebarOverlay.classList.remove('show');
+                    document.body.style.overflow = '';
+                }
+            });
+        });
     </script>
 
     @stack('scripts')
