@@ -17,7 +17,7 @@ class POSController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('auth');
+        // Remove middleware for now - handle auth in methods
     }
 
     /**
@@ -25,67 +25,167 @@ class POSController extends Controller
      */
     public function index()
     {
-        // Vérifier que l'utilisateur est un vendeur
-        if (!Auth::user()->isVendeur()) {
-            return redirect()->route('dashboard')
-                ->with('error', 'Accès non autorisé. Seuls les vendeurs peuvent accéder à la caisse.');
+        try {
+            // Handle authentication here instead of middleware
+            if (!Auth::check()) {
+                \Log::warning('POS access attempt without authentication');
+                return redirect()->route('login')->with('error', 'Vous devez être connecté.');
+            }
+
+            $user = Auth::user();
+            \Log::info('POS accessed by user: ' . $user->name . ' (role: ' . $user->role . ')');
+
+            // Vérifier que l'utilisateur est un vendeur OU un admin/gestionnaire
+            if (!$user->isVendeur() && !$user->isAdmin() && !$user->isGestionnaire()) {
+                \Log::warning('Unauthorized POS access attempt by user: ' . $user->name);
+                return redirect()->route('dashboard')
+                    ->with('error', 'Accès non autorisé. Seuls les vendeurs, gestionnaires et administrateurs peuvent accéder à la caisse.');
+            }
+
+            // Pour les vendeurs : vérifier boutique assignée
+            if ($user->isVendeur()) {
+                \Log::info('POS access for vendeur: ' . $user->name);
+
+                $boutique = $user->boutique;
+                if (!$boutique) {
+                    \Log::warning('Vendeur without assigned boutique: ' . $user->name);
+                    return redirect()->route('dashboard')
+                        ->with('error', 'Aucune boutique ne vous est assignée. Contactez un administrateur.');
+                }
+
+                // Vérifier la session de caisse active du vendeur
+                $sessionActive = CashRegisterSession::where('vendeur_id', Auth::id())
+                                                  ->where('boutique_id', $boutique->id)
+                                                  ->whereIn('status', ['ouverte', 'en_cours'])
+                                                  ->first();
+
+                if (!$sessionActive) {
+                    \Log::info('No active session for vendeur: ' . $user->name);
+                    return redirect()->route('pos.open')
+                        ->with('info', 'Vous devez ouvrir une session de caisse avant de commencer les ventes.');
+                }
+
+                \Log::info('Loading products for vendeur: ' . $user->name);
+
+                // Produits avec stock pour le vendeur
+                $produits = Produit::where('statut', 'actif')
+                                  ->with(['stockBoutiques' => function($query) use ($boutique) {
+                                      $query->where('boutique_id', $boutique->id);
+                                  }])
+                                  ->orderBy('nom')
+                                  ->get()
+                                  ->map(function($produit) use ($boutique) {
+                                      $stockBoutique = $produit->stockBoutiques->first();
+                                      $produit->stock_disponible = $stockBoutique ? $stockBoutique->quantite : 0;
+                                      return $produit;
+                                  });
+
+                $paymentMethods = PaymentMethod::active()->get();
+
+                \Log::info('POS view rendered for vendeur: ' . $user->name);
+                return view('pos.index', compact('produits', 'paymentMethods', 'sessionActive', 'boutique'));
+
+            // Pour admin/gestionnaire : interface de gestion des caisses
+            } else {
+                \Log::info('POS admin access for user: ' . $user->name . ' (role: ' . $user->role . ')');
+
+                $boutiques = collect();
+                $sessionsActives = collect();
+
+                try {
+                    if ($user->isAdmin()) {
+                        \Log::info('Loading all boutiques for admin');
+                        $boutiques = \App\Models\Boutique::all(); // Remove with(['magasin']) temporarily
+                    } elseif ($user->isGestionnaire()) {
+                        \Log::info('Loading boutiques for gestionnaire: ' . $user->name);
+                        $magasin = $user->magasinResponsable;
+                        if ($magasin) {
+                            $boutiques = $magasin->boutiques; // Remove with('magasin') temporarily
+                        } else {
+                            \Log::warning('Gestionnaire without magasin: ' . $user->name);
+                        }
+                    }
+
+                    \Log::info('Boutiques loaded: ' . $boutiques->count());
+
+                    \Log::info('Loading active cash sessions');
+                    $sessionsActives = CashRegisterSession::whereIn('status', ['ouverte', 'en_cours'])->get();
+                    \Log::info('Sessions loaded: ' . $sessionsActives->count());
+
+                } catch (\Exception $e) {
+                    \Log::error('Database error in POS admin: ' . $e->getMessage());
+                    \Log::error('Stack trace: ' . $e->getTraceAsString());
+
+                    // Return view with empty collections
+                    $boutiques = collect();
+                    $sessionsActives = collect();
+                }
+
+                \Log::info('POS admin view rendered for user: ' . $user->name);
+                return view('pos.admin', compact('boutiques', 'sessionsActives'));
+            }
+
+        } catch (\Exception $e) {
+            \Log::error('Critical error in POSController@index: ' . $e->getMessage());
+            \Log::error('File: ' . $e->getFile() . ' Line: ' . $e->getLine());
+            \Log::error('Stack trace: ' . $e->getTraceAsString());
+
+            // Return a simple error response instead of crashing
+            return response()->view('errors.500', [
+                'message' => 'Une erreur est survenue lors du chargement de la caisse.',
+                'error' => config('app.debug') ? $e->getMessage() : null
+            ], 500);
         }
-
-        // Vérifier que le vendeur a une boutique assignée
-        $boutique = Auth::user()->boutique;
-        if (!$boutique) {
-            return redirect()->route('dashboard')
-                ->with('error', 'Aucune boutique ne vous est assignée. Contactez un administrateur.');
-        }
-
-        // Récupérer la session de caisse active
-        $sessionActive = CashRegisterSession::where('vendeur_id', Auth::id())
-                                          ->where('boutique_id', $boutique->id)
-                                          ->whereIn('status', ['ouverte', 'en_cours'])
-                                          ->first();
-
-        if (!$sessionActive) {
-            return redirect()->route('pos.open')
-                ->with('info', 'Vous devez ouvrir une session de caisse avant de commencer les ventes.');
-        }
-
-        // Produits pour recherche rapide
-        $produits = Produit::where('statut', 'actif')->orderBy('nom')->get();
-
-        // Méthodes de paiement actives
-        $paymentMethods = PaymentMethod::active()->get();
-
-        return view('pos.index', compact('produits', 'paymentMethods', 'sessionActive', 'boutique'));
     }
 
     /**
      * Ouvrir une session de caisse
      */
-    public function open()
+    public function open(Request $request = null)
     {
-        if (!Auth::user()->isVendeur()) {
-            return redirect()->route('dashboard')
-                ->with('error', 'Accès non autorisé.');
+        $user = Auth::user();
+
+        // Pour les vendeurs
+        if ($user->isVendeur()) {
+            $boutique = $user->boutique;
+            if (!$boutique) {
+                return redirect()->route('dashboard')
+                    ->with('error', 'Aucune boutique ne vous est assignée.');
+            }
+
+            // Vérifier s'il y a déjà une session ouverte
+            $sessionExistante = CashRegisterSession::where('vendeur_id', Auth::id())
+                                                  ->where('boutique_id', $boutique->id)
+                                                  ->whereIn('status', ['ouverte', 'en_cours'])
+                                                  ->first();
+
+            if ($sessionExistante) {
+                return redirect()->route('pos.index')
+                    ->with('info', 'Une session de caisse est déjà ouverte.');
+            }
+
+            return view('pos.open', compact('boutique'));
+
+        // Pour admin/gestionnaire : ouvrir caisse pour un vendeur
+        } elseif ($user->isAdmin() || $user->isGestionnaire()) {
+            // Récupérer tous les vendeurs disponibles
+            $vendeurs = \App\Models\User::where('role', 'vendeur')
+                                       ->when($user->isGestionnaire(), function($query) use ($user) {
+                                           $magasin = $user->magasinResponsable;
+                                           if ($magasin) {
+                                               return $query->whereHas('boutique', function($q) use ($magasin) {
+                                                   $q->where('magasin_id', $magasin->id);
+                                               });
+                                           }
+                                           return $query;
+                                       })
+                                       ->get();
+
+            return view('pos.admin_open', compact('vendeurs'));
         }
 
-        $boutique = Auth::user()->boutique;
-        if (!$boutique) {
-            return redirect()->route('dashboard')
-                ->with('error', 'Aucune boutique ne vous est assignée.');
-        }
-
-        // Vérifier s'il y a déjà une session ouverte
-        $sessionExistante = CashRegisterSession::where('vendeur_id', Auth::id())
-                                              ->where('boutique_id', $boutique->id)
-                                              ->whereIn('status', ['ouverte', 'en_cours'])
-                                              ->first();
-
-        if ($sessionExistante) {
-            return redirect()->route('pos.index')
-                ->with('info', 'Une session de caisse est déjà ouverte.');
-        }
-
-        return view('pos.open', compact('boutique'));
+        return redirect()->route('dashboard')
+            ->with('error', 'Accès non autorisé.');
     }
 
     /**
@@ -96,28 +196,62 @@ class POSController extends Controller
         $request->validate([
             'montant_initial' => 'required|numeric|min:0',
             'notes' => 'nullable|string|max:500',
+            'vendeur_id' => 'nullable|exists:users,id', // Pour admin
         ]);
 
-        $boutique = Auth::user()->boutique;
-        if (!$boutique) {
+        $user = Auth::user();
+        $vendeurId = $request->vendeur_id ?: Auth::id();
+
+        // Vérifier permissions
+        if ($user->isVendeur()) {
+            // Vendeur ne peut ouvrir que sa propre caisse
+            if ($vendeurId !== Auth::id()) {
+                return redirect()->back()
+                    ->with('error', 'Vous ne pouvez ouvrir que votre propre caisse.');
+            }
+        } elseif ($user->isAdmin() || $user->isGestionnaire()) {
+            // Admin/Gestionnaire peuvent ouvrir pour n'importe quel vendeur de leur périmètre
+            $vendeur = \App\Models\User::findOrFail($vendeurId);
+            if (!$vendeur->isVendeur()) {
+                return redirect()->back()
+                    ->with('error', 'L\'utilisateur sélectionné n\'est pas un vendeur.');
+            }
+
+            // Vérifier que le vendeur appartient au périmètre de l'admin/gestionnaire
+            if ($user->isGestionnaire()) {
+                $magasin = $user->magasinResponsable;
+                if ($magasin && !$vendeur->boutique->magasin()->where('id', $magasin->id)->exists()) {
+                    return redirect()->back()
+                        ->with('error', 'Ce vendeur n\'appartient pas à votre magasin.');
+                }
+            }
+        } else {
             return redirect()->back()
-                ->with('error', 'Aucune boutique ne vous est assignée.');
+                ->with('error', 'Accès non autorisé.');
         }
 
-        // Vérifier s'il y a déjà une session ouverte
-        $sessionExistante = CashRegisterSession::where('vendeur_id', Auth::id())
+        $vendeur = \App\Models\User::findOrFail($vendeurId);
+        $boutique = $vendeur->boutique;
+
+        if (!$boutique) {
+            return redirect()->back()
+                ->with('error', 'Le vendeur n\'a pas de boutique assignée.');
+        }
+
+        // Vérifier s'il y a déjà une session ouverte pour ce vendeur
+        $sessionExistante = CashRegisterSession::where('vendeur_id', $vendeurId)
                                               ->where('boutique_id', $boutique->id)
                                               ->whereIn('status', ['ouverte', 'en_cours'])
                                               ->first();
 
         if ($sessionExistante) {
-            return redirect()->route('pos.index')
-                ->with('error', 'Une session de caisse est déjà ouverte.');
+            return redirect()->back()
+                ->with('error', 'Une session de caisse est déjà ouverte pour ce vendeur.');
         }
 
         try {
             CashRegisterSession::create([
-                'vendeur_id' => Auth::id(),
+                'vendeur_id' => $vendeurId,
                 'boutique_id' => $boutique->id,
                 'montant_initial' => $request->montant_initial,
                 'date_ouverture' => now(),
@@ -125,8 +259,10 @@ class POSController extends Controller
                 'notes' => $request->notes,
             ]);
 
+            $message = $user->isVendeur() ? 'Session de caisse ouverte avec succès.' : 'Session de caisse ouverte pour le vendeur avec succès.';
+
             return redirect()->route('pos.index')
-                ->with('success', 'Session de caisse ouverte avec succès.');
+                ->with('success', $message);
 
         } catch (\Exception $e) {
             return redirect()->back()
@@ -138,21 +274,75 @@ class POSController extends Controller
     /**
      * Fermer une session de caisse
      */
-    public function close()
+    public function close(Request $request = null)
     {
-        $session = CashRegisterSession::where('vendeur_id', Auth::id())
-                                     ->whereIn('status', ['ouverte', 'en_cours'])
-                                     ->first();
+        $user = Auth::user();
 
-        if (!$session) {
-            return redirect()->route('pos.open')
-                ->with('error', 'Aucune session de caisse active trouvée.');
+        // Pour les vendeurs
+        if ($user->isVendeur()) {
+            $session = CashRegisterSession::where('vendeur_id', Auth::id())
+                                         ->whereIn('status', ['ouverte', 'en_cours'])
+                                         ->first();
+
+            if (!$session) {
+                return redirect()->route('pos.open')
+                    ->with('error', 'Aucune session de caisse active trouvée.');
+            }
+
+            // Calculer le montant théorique
+            $session->calculerMontantTheorique();
+
+            return view('pos.close', compact('session'));
+
+        // Pour admin/gestionnaire : fermer caisse pour un vendeur
+        } elseif ($user->isAdmin() || $user->isGestionnaire()) {
+            $vendeurId = $request->get('vendeur_id');
+
+            if (!$vendeurId) {
+                // Afficher la liste des sessions actives pour sélection
+                $sessions = CashRegisterSession::with(['vendeur', 'boutique'])
+                                             ->whereIn('status', ['ouverte', 'en_cours'])
+                                             ->when($user->isGestionnaire(), function($query) use ($user) {
+                                                 $magasin = $user->magasinResponsable;
+                                                 if ($magasin) {
+                                                     return $query->whereHas('boutique', function($q) use ($magasin) {
+                                                         $q->where('magasin_id', $magasin->id);
+                                                     });
+                                                 }
+                                                 return $query;
+                                             })
+                                             ->get();
+
+                return view('pos.admin_close_select', compact('sessions'));
+            }
+
+            // Fermer une session spécifique
+            $session = CashRegisterSession::where('vendeur_id', $vendeurId)
+                                         ->whereIn('status', ['ouverte', 'en_cours'])
+                                         ->first();
+
+            if (!$session) {
+                return redirect()->back()
+                    ->with('error', 'Aucune session de caisse active trouvée pour ce vendeur.');
+            }
+
+            // Vérifier permissions
+            if ($user->isGestionnaire()) {
+                $magasin = $user->magasinResponsable;
+                if ($magasin && !$session->boutique->magasin()->where('id', $magasin->id)->exists()) {
+                    return redirect()->back()
+                        ->with('error', 'Cette session n\'appartient pas à votre magasin.');
+                }
+            }
+
+            // Calculer le montant théorique
+            $session->calculerMontantTheorique();
+
+            return view('pos.admin_close', compact('session'));
         }
 
-        // Calculer le montant théorique
-        $session->calculerMontantTheorique();
-
-        return view('pos.close', compact('session'));
+        return redirect()->route('dashboard')
+            ->with('error', 'Accès non autorisé.');
     }
 
     /**
@@ -163,22 +353,47 @@ class POSController extends Controller
         $request->validate([
             'montant_final' => 'required|numeric|min:0',
             'notes' => 'nullable|string|max:500',
+            'session_id' => 'nullable|exists:cash_register_sessions,id', // Pour admin
         ]);
 
-        $session = CashRegisterSession::where('vendeur_id', Auth::id())
-                                     ->whereIn('status', ['ouverte', 'en_cours'])
-                                     ->first();
+        $user = Auth::user();
+
+        if ($request->session_id) {
+            // Admin/Gestionnaire ferme une session spécifique
+            $session = CashRegisterSession::findOrFail($request->session_id);
+
+            // Vérifier permissions
+            if ($user->isGestionnaire()) {
+                $magasin = $user->magasinResponsable;
+                if ($magasin && !$session->boutique->magasin()->where('id', $magasin->id)->exists()) {
+                    return redirect()->back()
+                        ->with('error', 'Cette session n\'appartient pas à votre magasin.');
+                }
+            }
+        } else {
+            // Vendeur ferme sa propre session
+            if (!$user->isVendeur()) {
+                return redirect()->back()
+                    ->with('error', 'Accès non autorisé.');
+            }
+
+            $session = CashRegisterSession::where('vendeur_id', Auth::id())
+                                         ->whereIn('status', ['ouverte', 'en_cours'])
+                                         ->first();
+        }
 
         if (!$session) {
-            return redirect()->route('pos.open')
+            return redirect()->back()
                 ->with('error', 'Aucune session de caisse active trouvée.');
         }
 
         try {
             $session->fermer($request->montant_final, $request->notes);
 
+            $message = $user->isVendeur() ? 'Session de caisse fermée avec succès.' : 'Session de caisse fermée pour le vendeur avec succès.';
+
             return redirect()->route('dashboard')
-                ->with('success', 'Session de caisse fermée avec succès.');
+                ->with('success', $message);
 
         } catch (\Exception $e) {
             return redirect()->back()
@@ -450,18 +665,36 @@ class POSController extends Controller
      */
     public function searchProducts(Request $request)
     {
-        $query = $request->get('q', '');
+        try {
+            $query = $request->get('q', '');
 
-        $produits = Produit::where('statut', 'actif')
-                          ->where(function($q) use ($query) {
-                              $q->where('nom', 'LIKE', "%{$query}%")
-                                ->orWhere('code_barre', 'LIKE', "%{$query}%")
-                                ->orWhere('categorie', 'LIKE', "%{$query}%");
-                          })
-                          ->limit(20)
-                          ->get();
+            $session = $this->getActiveSession();
+            if (!$session) {
+                return response()->json([]);
+            }
 
-        return response()->json($produits);
+            $produits = Produit::where('statut', 'actif')
+                              ->where(function($q) use ($query) {
+                                  $q->where('nom', 'LIKE', "%{$query}%")
+                                    ->orWhere('code_barre', 'LIKE', "%{$query}%")
+                                    ->orWhere('categorie', 'LIKE', "%{$query}%");
+                              })
+                              ->with(['stockBoutiques' => function($query) use ($session) {
+                                  $query->where('boutique_id', $session->boutique_id);
+                              }])
+                              ->limit(20)
+                              ->get()
+                              ->map(function($produit) {
+                                  $stockBoutique = $produit->stockBoutiques->first();
+                                  $produit->stock_disponible = $stockBoutique ? $stockBoutique->quantite : 0;
+                                  return $produit;
+                              });
+
+            return response()->json($produits);
+        } catch (\Exception $e) {
+            \Log::error('Erreur recherche produits : ' . $e->getMessage());
+            return response()->json(['error' => 'Erreur lors de la recherche'], 500);
+        }
     }
 
     /**

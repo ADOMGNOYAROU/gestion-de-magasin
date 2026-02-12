@@ -23,6 +23,7 @@ class User extends Authenticatable
         'password',
         'role',
         'magasin_id',
+        'boutique_id',
     ];
 
     /**
@@ -49,24 +50,19 @@ class User extends Authenticatable
     }
 
     // Relations
-    public function magasin()
+    public function magasinResponsable()
     {
-        return $this->belongsTo(Magasin::class);
+        return $this->belongsTo(Magasin::class, 'magasin_id');
     }
 
-    public function magasinsResponsables()
+    public function magasinsGeres()
     {
         return $this->hasMany(Magasin::class, 'responsable_id');
     }
 
-    public function magasinResponsable()
-    {
-        return $this->hasOne(Magasin::class, 'responsable_id');
-    }
-
     public function boutique()
     {
-        return $this->hasOne(Boutique::class, 'vendeur_id');
+        return $this->belongsTo(Boutique::class, 'boutique_id');
     }
 
     public function isAdmin()

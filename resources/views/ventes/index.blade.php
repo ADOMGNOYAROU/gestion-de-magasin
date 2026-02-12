@@ -66,77 +66,138 @@
             <!-- Tableau des ventes -->
             <div class="card">
                 <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-striped table-hover">
-                            <thead class="table-dark">
-                                <tr>
-                                    <th>Date</th>
-                                    <th>Produit</th>
-                                    <th>Boutique</th>
-                                    <th>Quantité</th>
-                                    <th>Prix Unitaire</th>
-                                    <th>Total</th>
-                                    <th>Bénéfice</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @forelse($ventes as $vente)
+                    <!-- Desktop Table -->
+                    <div class="d-none d-md-block">
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover">
+                                <thead class="table-dark">
                                     <tr>
-                                        <td>{{ $vente->date_vente->format('d/m/Y') }}</td>
-                                        <td>
+                                        <th>Date</th>
+                                        <th>Produit</th>
+                                        <th>Boutique</th>
+                                        <th>Quantité</th>
+                                        <th>Prix Unitaire</th>
+                                        <th>Total</th>
+                                        <th>Bénéfice</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @forelse($ventes as $vente)
+                                        <tr>
+                                            <td>{{ $vente->date_vente->format('d/m/Y') }}</td>
+                                            <td>
+                                                @foreach($vente->venteProduits as $vp)
+                                                    <strong>{{ $vp->produit->nom }}</strong> ({{ $vp->quantite }})
+                                                    @if(!$loop->last)<br>@endif
+                                                    <br><small class="text-muted">{{ $vp->produit->categorie }}</small>
+                                                @endforeach
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-info">{{ $vente->boutique->nom }}</span>
+                                                <br><small class="text-muted">{{ $vente->boutique->magasin->nom }}</small>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-warning">{{ $vente->total_produits }}</span>
+                                            </td>
+                                            <td>{{ $vente->total_produits > 0 ? number_format($vente->montant_total / $vente->total_produits, 0, ',', ' ') : 0 }} FCFA</td>
+                                            <td>
+                                                <strong class="text-primary">{{ number_format($vente->montant_total, 0, ',', ' ') }} FCFA</strong>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-success">{{ number_format($vente->benefice_total, 0, ',', ' ') }} FCFA</span>
+                                            </td>
+                                            <td>
+                                                <div class="btn-group" role="group">
+                                                    <a href="{{ route('ventes.show', $vente->id) }}"
+                                                       class="btn btn-sm btn-outline-info" title="Voir">
+                                                        <i class="fas fa-eye"></i>
+                                                    </a>
+                                                    <form action="{{ route('ventes.destroy', $vente->id) }}"
+                                                          method="POST" class="d-inline"
+                                                          onsubmit="return confirm('Êtes-vous sûr de vouloir annuler cette vente ?')">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Annuler">
+                                                            <i class="fas fa-trash"></i>
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="8" class="text-center py-4">
+                                                <i class="fas fa-shopping-cart fa-3x text-muted mb-3"></i>
+                                                <p class="text-muted">Aucune vente trouvée</p>
+                                            </td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Mobile Card Layout -->
+                    <div class="d-md-none">
+                        @forelse($ventes as $vente)
+                            <div class="mobile-card mb-3">
+                                <div class="card border">
+                                    <div class="card-body p-3">
+                                        <div class="d-flex justify-content-between align-items-start mb-2">
+                                            <div>
+                                                <h6 class="card-title mb-1">{{ $vente->date_vente->format('d/m/Y') }}</h6>
+                                                <small class="text-muted">{{ $vente->boutique->nom }}</small>
+                                            </div>
+                                            <div class="text-end">
+                                                <div class="fw-bold text-primary">{{ number_format($vente->montant_total, 0, ',', ' ') }} FCFA</div>
+                                                <small class="text-success">{{ number_format($vente->benefice_total, 0, ',', ' ') }} FCFA</small>
+                                            </div>
+                                        </div>
+
+                                        <div class="mb-2">
                                             @foreach($vente->venteProduits as $vp)
-                                                <strong>{{ $vp->produit->nom }}</strong> ({{ $vp->quantite }})
-                                                @if(!$loop->last)<br>@endif
-                                                <br><small class="text-muted">{{ $vp->produit->categorie }}</small>
+                                                <div class="d-flex justify-content-between align-items-center py-1 border-bottom">
+                                                    <div>
+                                                        <strong class="text-sm">{{ $vp->produit->nom }}</strong>
+                                                        <br><small class="text-muted">{{ $vp->produit->categorie }}</small>
+                                                    </div>
+                                                    <div class="text-end">
+                                                        <span class="badge bg-warning">{{ $vp->quantite }}</span>
+                                                        <div class="text-sm">{{ number_format($vp->prix_unitaire, 0) }} FCFA</div>
+                                                    </div>
+                                                </div>
                                             @endforeach
-                                        </td>
-                                        <td>
-                                            <span class="badge bg-info">{{ $vente->boutique->nom }}</span>
-                                            <br><small class="text-muted">{{ $vente->boutique->magasin->nom }}</small>
-                                        </td>
-                                        <td>
-                                            <span class="badge bg-warning">{{ $vente->total_produits }}</span>
-                                        </td>
-                                        <td>{{ $vente->total_produits > 0 ? number_format($vente->montant_total / $vente->total_produits, 0, ',', ' ') : 0 }} FCFA</td>
-                                        <td>
-                                            <strong class="text-primary">{{ number_format($vente->montant_total, 0, ',', ' ') }} FCFA</strong>
-                                        </td>
-                                        <td>
-                                            <span class="badge bg-success">{{ number_format($vente->benefice_total, 0, ',', ' ') }} FCFA</span>
-                                        </td>
-                                        <td>
-                                            <div class="btn-group" role="group">
-                                                <a href="{{ route('ventes.show', $vente->id) }}" 
-                                                   class="btn btn-sm btn-outline-info" title="Voir">
+                                        </div>
+
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <small class="text-muted">Total produits: {{ $vente->total_produits }}</small>
+                                            <div class="btn-group btn-group-sm" role="group">
+                                                <a href="{{ route('ventes.show', $vente->id) }}"
+                                                   class="btn btn-outline-info">
                                                     <i class="fas fa-eye"></i>
                                                 </a>
-                                                <form action="{{ route('ventes.destroy', $vente->id) }}" 
-                                                      method="POST" style="display: inline-block;">
+                                                <form action="{{ route('ventes.destroy', $vente->id) }}"
+                                                      method="POST" class="d-inline"
+                                                      onsubmit="return confirm('Êtes-vous sûr de vouloir annuler cette vente ?')">
                                                     @csrf
                                                     @method('DELETE')
-                                                    <button type="submit" class="btn btn-sm btn-outline-danger" 
-                                                            title="Annuler la vente" 
-                                                            onclick="return confirm('Êtes-vous sûr de vouloir annuler cette vente? Le stock sera restauré.')">
-                                                        <i class="fas fa-undo"></i>
+                                                    <button type="submit" class="btn btn-outline-danger">
+                                                        <i class="fas fa-trash"></i>
                                                     </button>
                                                 </form>
                                             </div>
-                                        </td>
-                                    </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="8" class="text-center py-4">
-                                            <i class="fas fa-shopping-cart fa-3x text-muted mb-3"></i>
-                                            <p class="text-muted">Aucune vente trouvée</p>
-                                            <a href="{{ route('ventes.create') }}" class="btn btn-success">
-                                                Enregistrer la première vente
-                                            </a>
-                                        </td>
-                                    </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        @empty
+                            <div class="text-center py-5">
+                                <i class="fas fa-shopping-cart fa-4x text-muted mb-3"></i>
+                                <h5 class="text-muted">Aucune vente trouvée</h5>
+                                <p class="text-muted">Les ventes apparaîtront ici une fois effectuées</p>
+                            </div>
+                        @endforelse
                     </div>
 
                     <!-- Pagination -->
