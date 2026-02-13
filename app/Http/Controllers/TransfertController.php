@@ -84,12 +84,21 @@ class TransfertController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'produit_id' => 'required|exists:produits,id',
             'magasin_id' => 'required|exists:magasins,id',
             'boutique_id' => 'required|exists:boutiques,id',
-            'quantite' => 'required|integer|min:1',
             'date' => 'required|date',
+            'quantite' => 'required|array',
+            'quantite.*' => 'integer|min:0',
         ]);
+
+        // Filtrer les produits avec quantité > 0
+        $transferData = array_filter($validated['quantite'], function($q) {
+            return $q > 0;
+        });
+
+        if (empty($transferData)) {
+            return back()->withErrors(['error' => 'Aucun produit sélectionné pour le transfert.']);
+        }
 
         DB::beginTransaction();
         try {
@@ -99,62 +108,67 @@ class TransfertController extends Controller
                 throw new \Exception('La boutique sélectionnée n\'appartient pas au magasin spécifié.');
             }
 
-            // 2. Vérifier le stock disponible dans le magasin
-            $stockMagasin = StockMagasin::where('produit_id', $validated['produit_id'])
-                                       ->where('magasin_id', $validated['magasin_id'])
-                                       ->first();
+            $totalTransfers = 0;
 
-            if (!$stockMagasin || $stockMagasin->quantite < $validated['quantite']) {
-                $quantiteDisponible = $stockMagasin ? $stockMagasin->quantite : 0;
-                throw new \Exception("Stock insuffisant. Quantité disponible : {$quantiteDisponible}, Quantité demandée : {$validated['quantite']}");
-            }
+            // 2. Pour chaque produit sélectionné, effectuer le transfert
+            foreach ($transferData as $produitId => $quantite) {
+                // Vérifier le stock disponible dans le magasin
+                $stockMagasin = StockMagasin::where('produit_id', $produitId)
+                                           ->where('magasin_id', $validated['magasin_id'])
+                                           ->first();
 
-            // 3. Créer le transfert
-            $transfert = Transfert::create([
-                'produit_id' => $validated['produit_id'],
-                'magasin_id' => $validated['magasin_id'],
-                'boutique_id' => $validated['boutique_id'],
-                'quantite' => $validated['quantite'],
-                'date' => $validated['date'],
-            ]);
+                if (!$stockMagasin || $stockMagasin->quantite < $quantite) {
+                    $quantiteDisponible = $stockMagasin ? $stockMagasin->quantite : 0;
+                    throw new \Exception("Stock insuffisant pour le produit ID {$produitId}. Quantité disponible : {$quantiteDisponible}, Quantité demandée : {$quantite}");
+                }
 
-            // 4. Diminuer le stock du magasin
-            $stockMagasin->quantite -= $validated['quantite'];
-            $stockMagasin->save();
-
-            // 5. Augmenter le stock de la boutique
-            $stockBoutique = StockBoutique::where('produit_id', $validated['produit_id'])
-                                        ->where('boutique_id', $validated['boutique_id'])
-                                        ->first();
-
-            // Récupérer le produit pour obtenir le prix de vente
-            $produit = Produit::find($validated['produit_id']);
-
-            if ($stockBoutique) {
-                // Mettre à jour le stock existant
-                $stockBoutique->quantite += $validated['quantite'];
-                $stockBoutique->save();
-            } else {
-                // Créer un nouveau stock
-                StockBoutique::create([
-                    'produit_id' => $validated['produit_id'],
+                // Créer le transfert
+                Transfert::create([
+                    'produit_id' => $produitId,
+                    'magasin_id' => $validated['magasin_id'],
                     'boutique_id' => $validated['boutique_id'],
-                    'quantite' => $validated['quantite'],
-                    'prix_vente' => $produit->prix_vente,
-                    'seuil_alerte' => 5, // Valeur par défaut pour les boutiques
+                    'quantite' => $quantite,
+                    'date' => $validated['date'],
                 ]);
+
+                // Diminuer le stock du magasin
+                $stockMagasin->quantite -= $quantite;
+                $stockMagasin->save();
+
+                // Augmenter le stock de la boutique
+                $produit = Produit::find($produitId);
+                $stockBoutique = StockBoutique::where('produit_id', $produitId)
+                                            ->where('boutique_id', $validated['boutique_id'])
+                                            ->first();
+
+                if ($stockBoutique) {
+                    // Mettre à jour le stock existant
+                    $stockBoutique->quantite += $quantite;
+                    $stockBoutique->save();
+                } else {
+                    // Créer un nouveau stock
+                    StockBoutique::create([
+                        'produit_id' => $produitId,
+                        'boutique_id' => $validated['boutique_id'],
+                        'quantite' => $quantite,
+                        'prix_vente' => $produit->prix_vente,
+                        'seuil_alerte' => 5, // Valeur par défaut pour les boutiques
+                    ]);
+                }
+
+                $totalTransfers++;
             }
 
             DB::commit();
 
             return redirect()->route('transferts.index')
-                ->with('success', "Transfert de {$validated['quantite']} unités effectué avec succès. Stock mis à jour.");
+                ->with('success', "{$totalTransfers} transfert(s) effectué(s) avec succès. Stocks mis à jour.");
 
         } catch (\Exception $e) {
             DB::rollBack();
             
             return back()->withErrors([
-                'error' => 'Erreur lors du transfert : ' . $e->getMessage()
+                'error' => 'Erreur lors des transferts : ' . $e->getMessage()
             ])->withInput();
         }
     }
@@ -269,5 +283,25 @@ class TransfertController extends Controller
                             ->get();
 
         return response()->json($boutiques);
+    }
+
+    /**
+     * API pour récupérer les produits avec leur stock dans un magasin
+     */
+    public function getProduitsAvecStock(Request $request)
+    {
+        $magasinId = $request->get('magasin_id');
+
+        $produits = Produit::leftJoin('stock_magasins', function($join) use ($magasinId) {
+                                $join->on('produits.id', '=', 'stock_magasins.produit_id')
+                                     ->where('stock_magasins.magasin_id', $magasinId);
+                            })
+                            ->where('produits.statut', 'actif')
+                            ->select('produits.id', 'produits.nom', 'produits.categorie', 
+                                     'stock_magasins.quantite as stock', 'stock_magasins.seuil_alerte')
+                            ->orderBy('produits.nom')
+                            ->get();
+
+        return response()->json($produits);
     }
 }

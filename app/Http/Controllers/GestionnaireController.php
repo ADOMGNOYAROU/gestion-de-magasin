@@ -7,6 +7,7 @@ use App\Models\Boutique;
 use App\Models\Produit;
 use App\Models\StockMagasin;
 use App\Models\Vente;
+use App\Models\AlerteStock;
 use Illuminate\Http\Request;
 
 class GestionnaireController extends Controller
@@ -29,6 +30,8 @@ class GestionnaireController extends Controller
             'ventes_boutiques' => Vente::whereIn('boutique_id', 
                 Boutique::where('magasin_id', $magasin->id)->pluck('id')
             )->whereDate('date_vente', today())->count(),
+            'alertes' => AlerteStock::with('produit')->where('statut', 'active')->orderBy('created_at', 'desc')->limit(5)->get(),
+            'alertes_count' => AlerteStock::where('statut', 'active')->count(),
         ];
 
         return view('gestionnaire.dashboard', compact('stats'));

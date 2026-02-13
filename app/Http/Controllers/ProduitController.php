@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Produit;
 use Illuminate\Support\Facades\Gate;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Imports\ProduitsImport;
 
 class ProduitController extends Controller
 {
@@ -106,5 +108,22 @@ class ProduitController extends Controller
 
         return redirect()->route('produits.index')
             ->with('success', 'Produit supprimé avec succès.');
+    }
+
+    /**
+     * Import products from Excel file.
+     */
+    public function import(Request $request)
+    {
+        Gate::authorize('manage-produits');
+
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls|max:2048'
+        ]);
+
+        Excel::import(new ProduitsImport, $request->file('file'));
+
+        return redirect()->route('produits.index')
+            ->with('success', 'Produits importés avec succès.');
     }
 }

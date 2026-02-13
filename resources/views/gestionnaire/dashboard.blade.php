@@ -140,63 +140,51 @@
         <div class="bg-white rounded-lg shadow-sm overflow-hidden mb-8">
             <div class="px-6 py-4 border-b border-gray-200">
                 <div class="flex items-center justify-between">
-                    <h2 class="text-lg font-medium text-gray-900">Notifications récentes</h2>
+                    <h2 class="text-lg font-medium text-gray-900">Alertes de Stock</h2>
                     <div class="relative">
                         <button class="text-gray-500 hover:text-gray-700 focus:outline-none">
                             <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                             </svg>
-                            <span class="notification-badge">3</span>
+                            <span class="notification-badge">{{ $stats['alertes_count'] }}</span>
                         </button>
                     </div>
                 </div>
             </div>
             <div class="divide-y divide-gray-200">
-                <div class="p-4 hover:bg-gray-50">
-                    <div class="flex items-start">
-                        <div class="flex-shrink-0 h-10 w-10 rounded-full bg-red-100 flex items-center justify-center">
-                            <svg class="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 18.5c-.77.833.192 2.5 1.732 2.5z" />
-                            </svg>
-                        </div>
-                        <div class="ml-4">
-                            <p class="text-sm font-medium text-gray-900">Stock faible pour Produit A</p>
-                            <p class="text-sm text-gray-500">Il reste moins de 10 unités en stock</p>
-                            <p class="text-xs text-gray-400 mt-1">Il y a 2 heures</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="p-4 hover:bg-gray-50">
-                    <div class="flex items-start">
-                        <div class="flex-shrink-0 h-10 w-10 rounded-full bg-green-100 flex items-center justify-center">
-                            <svg class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                            </svg>
-                        </div>
-                        <div class="ml-4">
-                            <p class="text-sm font-medium text-gray-900">Nouvelle vente enregistrée</p>
-                            <p class="text-sm text-gray-500">Vente #4567 pour 12 500 FCFA</p>
-                            <p class="text-xs text-gray-400 mt-1">Il y a 5 heures</p>
+                @forelse($stats['alertes'] as $alerte)
+                    <div class="p-4 hover:bg-gray-50">
+                        <div class="flex items-start">
+                            <div class="flex-shrink-0 h-10 w-10 rounded-full 
+                                @if($alerte->niveau == 'normal') bg-green-100 @elseif($alerte->niveau == 'faible') bg-yellow-100 @else bg-red-100 @endif 
+                                flex items-center justify-center">
+                                <svg class="h-6 w-6 
+                                    @if($alerte->niveau == 'normal') text-green-600 @elseif($alerte->niveau == 'faible') text-yellow-600 @else text-red-600 @endif" 
+                                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    @if($alerte->niveau == 'normal')
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                    @elseif($alerte->niveau == 'faible')
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 18.5c-.77.833.192 2.5 1.732 2.5z" />
+                                    @else
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 18.5c-.77.833.192 2.5 1.732 2.5z" />
+                                    @endif
+                                </svg>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm font-medium text-gray-900">{{ $alerte->message }}</p>
+                                <p class="text-sm text-gray-500">{{ $alerte->produit->nom }} - Niveau: {{ ucfirst($alerte->niveau) }}</p>
+                                <p class="text-xs text-gray-400 mt-1">{{ $alerte->created_at->diffForHumans() }}</p>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div class="p-4 hover:bg-gray-50">
-                    <div class="flex items-start">
-                        <div class="flex-shrink-0 h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
-                            <svg class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                            </svg>
-                        </div>
-                        <div class="ml-4">
-                            <p class="text-sm font-medium text-gray-900">Rapport mensuel disponible</p>
-                            <p class="text-sm text-gray-500">Le rapport de janvier 2026 est prêt</p>
-                            <p class="text-xs text-gray-400 mt-1">Hier</p>
-                        </div>
+                @empty
+                    <div class="p-4 text-center text-gray-500">
+                        Aucune alerte de stock active
                     </div>
-                </div>
+                @endforelse
             </div>
             <div class="px-6 py-3 bg-gray-50 text-right">
-                <a href="#" class="text-sm font-medium text-blue-600 hover:text-blue-500">Voir toutes les notifications</a>
+                <a href="#" class="text-sm font-medium text-blue-600 hover:text-blue-500">Voir toutes les alertes</a>
             </div>
         </div>
     </div>

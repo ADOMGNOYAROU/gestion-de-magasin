@@ -56,6 +56,7 @@ Route::middleware('auth')->group(function () {
     
     // Routes CRUD pour les produits (admin et gestionnaire uniquement)
     Route::resource('produits', ProduitController::class)->middleware('gestionnaire');
+    Route::post('produits/import', [ProduitController::class, 'import'])->middleware('gestionnaire')->name('produits.import');
     
     // Routes CRUD pour les boutiques (admin et gestionnaire uniquement)
     Route::resource('boutiques', \App\Http\Controllers\BoutiqueController::class)->middleware('gestionnaire');
@@ -119,6 +120,7 @@ Route::middleware('auth')->group(function () {
     // Routes API pour les transferts
     Route::get('/api/stock-disponible', [TransfertController::class, 'getStockDisponible'])->middleware('gestionnaire');
     Route::get('/api/boutiques-par-magasin', [TransfertController::class, 'getBoutiquesByMagasin'])->middleware('gestionnaire');
+    Route::get('/api/produits-avec-stock', [TransfertController::class, 'getProduitsAvecStock'])->middleware('gestionnaire');
     
     // Routes API pour les ventes (panier)
     Route::post('/api/panier/ajouter', [VenteController::class, 'ajouterPanier'])->middleware('vendeur');

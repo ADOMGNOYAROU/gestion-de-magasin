@@ -10,6 +10,9 @@
                     <a href="<?php echo e(route('rapports.stock.pdf')); ?>" class="btn btn-outline-danger me-2 <?php echo e(hideIfCannot('manage-rapports')); ?>">
                         <i class="fas fa-warehouse"></i> Rapport Stock
                     </a>
+                    <button type="button" class="btn btn-success me-2" data-bs-toggle="modal" data-bs-target="#importModal">
+                        <i class="fas fa-upload"></i> Importer Excel
+                    </button>
                     <a href="<?php echo e(route('produits.create')); ?>" class="btn btn-primary">
                         <i class="fas fa-plus"></i> Nouveau Produit
                     </a>
@@ -139,6 +142,38 @@
                     <?php endif; ?>
                 </div>
             </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal d'import Excel -->
+<div class="modal fade" id="importModal" tabindex="-1" aria-labelledby="importModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="importModalLabel">Importer des Produits depuis Excel</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="POST" action="<?php echo e(route('produits.import')); ?>" enctype="multipart/form-data">
+                <?php echo csrf_field(); ?>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="file" class="form-label">Sélectionner le fichier Excel</label>
+                        <input type="file" class="form-control" id="file" name="file" accept=".xlsx,.xls" required>
+                        <div class="form-text">
+                            Formats acceptés : .xlsx, .xls (Maximum 2MB)
+                        </div>
+                    </div>
+                    <div class="alert alert-info">
+                        <strong>Format attendu :</strong><br>
+                        Le fichier Excel doit contenir les colonnes : nom, categorie, prix_vente (obligatoire), prix_achat, reference, seuil_alerte (optionnelles).
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-success">Importer</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>

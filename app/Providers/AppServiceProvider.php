@@ -4,6 +4,10 @@ namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Blade;
+use App\Models\StockMagasin;
+use App\Models\StockBoutique;
+use App\Observers\StockMagasinObserver;
+use App\Observers\StockBoutiqueObserver;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -20,6 +24,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Register observers
+        StockMagasin::observe(StockMagasinObserver::class);
+        StockBoutique::observe(StockBoutiqueObserver::class);
+
         // Permissions helpers pour la sidebar
         Blade::if('canManageProduits', function() {
             return auth()->check() && (auth()->user()->isAdmin() || auth()->user()->isGestionnaire());

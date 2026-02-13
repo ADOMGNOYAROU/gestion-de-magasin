@@ -66,77 +66,138 @@
             <!-- Tableau des ventes -->
             <div class="card">
                 <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-striped table-hover">
-                            <thead class="table-dark">
-                                <tr>
-                                    <th>Date</th>
-                                    <th>Produit</th>
-                                    <th>Boutique</th>
-                                    <th>Quantité</th>
-                                    <th>Prix Unitaire</th>
-                                    <th>Total</th>
-                                    <th>Bénéfice</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php $__empty_1 = true; $__currentLoopData = $ventes; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $vente): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                    <!-- Desktop Table -->
+                    <div class="d-none d-md-block">
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover">
+                                <thead class="table-dark">
                                     <tr>
-                                        <td><?php echo e($vente->date_vente->format('d/m/Y')); ?></td>
-                                        <td>
+                                        <th>Date</th>
+                                        <th>Produit</th>
+                                        <th>Boutique</th>
+                                        <th>Quantité</th>
+                                        <th>Prix Unitaire</th>
+                                        <th>Total</th>
+                                        <th>Bénéfice</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php $__empty_1 = true; $__currentLoopData = $ventes; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $vente): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                                        <tr>
+                                            <td><?php echo e($vente->date_vente->format('d/m/Y')); ?></td>
+                                            <td>
+                                                <?php $__currentLoopData = $vente->venteProduits; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $vp): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                    <strong><?php echo e($vp->produit->nom); ?></strong> (<?php echo e($vp->quantite); ?>)
+                                                    <?php if(!$loop->last): ?><br><?php endif; ?>
+                                                    <br><small class="text-muted"><?php echo e($vp->produit->categorie); ?></small>
+                                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-info"><?php echo e($vente->boutique->nom); ?></span>
+                                                <br><small class="text-muted"><?php echo e($vente->boutique->magasin->nom); ?></small>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-warning"><?php echo e($vente->total_produits); ?></span>
+                                            </td>
+                                            <td><?php echo e($vente->total_produits > 0 ? number_format($vente->montant_total / $vente->total_produits, 0, ',', ' ') : 0); ?> FCFA</td>
+                                            <td>
+                                                <strong class="text-primary"><?php echo e(number_format($vente->montant_total, 0, ',', ' ')); ?> FCFA</strong>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-success"><?php echo e(number_format($vente->benefice_total, 0, ',', ' ')); ?> FCFA</span>
+                                            </td>
+                                            <td>
+                                                <div class="btn-group" role="group">
+                                                    <a href="<?php echo e(route('ventes.show', $vente->id)); ?>"
+                                                       class="btn btn-sm btn-outline-info" title="Voir">
+                                                        <i class="fas fa-eye"></i>
+                                                    </a>
+                                                    <form action="<?php echo e(route('ventes.destroy', $vente->id)); ?>"
+                                                          method="POST" class="d-inline"
+                                                          onsubmit="return confirm('Êtes-vous sûr de vouloir annuler cette vente ?')">
+                                                        <?php echo csrf_field(); ?>
+                                                        <?php echo method_field('DELETE'); ?>
+                                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Annuler">
+                                                            <i class="fas fa-trash"></i>
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
+                                        <tr>
+                                            <td colspan="8" class="text-center py-4">
+                                                <i class="fas fa-shopping-cart fa-3x text-muted mb-3"></i>
+                                                <p class="text-muted">Aucune vente trouvée</p>
+                                            </td>
+                                        </tr>
+                                    <?php endif; ?>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Mobile Card Layout -->
+                    <div class="d-md-none">
+                        <?php $__empty_1 = true; $__currentLoopData = $ventes; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $vente): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                            <div class="mobile-card mb-3">
+                                <div class="card border">
+                                    <div class="card-body p-3">
+                                        <div class="d-flex justify-content-between align-items-start mb-2">
+                                            <div>
+                                                <h6 class="card-title mb-1"><?php echo e($vente->date_vente->format('d/m/Y')); ?></h6>
+                                                <small class="text-muted"><?php echo e($vente->boutique->nom); ?></small>
+                                            </div>
+                                            <div class="text-end">
+                                                <div class="fw-bold text-primary"><?php echo e(number_format($vente->montant_total, 0, ',', ' ')); ?> FCFA</div>
+                                                <small class="text-success"><?php echo e(number_format($vente->benefice_total, 0, ',', ' ')); ?> FCFA</small>
+                                            </div>
+                                        </div>
+
+                                        <div class="mb-2">
                                             <?php $__currentLoopData = $vente->venteProduits; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $vp): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                                <strong><?php echo e($vp->produit->nom); ?></strong> (<?php echo e($vp->quantite); ?>)
-                                                <?php if(!$loop->last): ?><br><?php endif; ?>
-                                                <br><small class="text-muted"><?php echo e($vp->produit->categorie); ?></small>
+                                                <div class="d-flex justify-content-between align-items-center py-1 border-bottom">
+                                                    <div>
+                                                        <strong class="text-sm"><?php echo e($vp->produit->nom); ?></strong>
+                                                        <br><small class="text-muted"><?php echo e($vp->produit->categorie); ?></small>
+                                                    </div>
+                                                    <div class="text-end">
+                                                        <span class="badge bg-warning"><?php echo e($vp->quantite); ?></span>
+                                                        <div class="text-sm"><?php echo e(number_format($vp->prix_unitaire, 0)); ?> FCFA</div>
+                                                    </div>
+                                                </div>
                                             <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-                                        </td>
-                                        <td>
-                                            <span class="badge bg-info"><?php echo e($vente->boutique->nom); ?></span>
-                                            <br><small class="text-muted"><?php echo e($vente->boutique->magasin->nom); ?></small>
-                                        </td>
-                                        <td>
-                                            <span class="badge bg-warning"><?php echo e($vente->total_produits); ?></span>
-                                        </td>
-                                        <td><?php echo e($vente->total_produits > 0 ? number_format($vente->montant_total / $vente->total_produits, 0, ',', ' ') : 0); ?> FCFA</td>
-                                        <td>
-                                            <strong class="text-primary"><?php echo e(number_format($vente->montant_total, 0, ',', ' ')); ?> FCFA</strong>
-                                        </td>
-                                        <td>
-                                            <span class="badge bg-success"><?php echo e(number_format($vente->benefice_total, 0, ',', ' ')); ?> FCFA</span>
-                                        </td>
-                                        <td>
-                                            <div class="btn-group" role="group">
-                                                <a href="<?php echo e(route('ventes.show', $vente->id)); ?>" 
-                                                   class="btn btn-sm btn-outline-info" title="Voir">
+                                        </div>
+
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <small class="text-muted">Total produits: <?php echo e($vente->total_produits); ?></small>
+                                            <div class="btn-group btn-group-sm" role="group">
+                                                <a href="<?php echo e(route('ventes.show', $vente->id)); ?>"
+                                                   class="btn btn-outline-info">
                                                     <i class="fas fa-eye"></i>
                                                 </a>
-                                                <form action="<?php echo e(route('ventes.destroy', $vente->id)); ?>" 
-                                                      method="POST" style="display: inline-block;">
+                                                <form action="<?php echo e(route('ventes.destroy', $vente->id)); ?>"
+                                                      method="POST" class="d-inline"
+                                                      onsubmit="return confirm('Êtes-vous sûr de vouloir annuler cette vente ?')">
                                                     <?php echo csrf_field(); ?>
                                                     <?php echo method_field('DELETE'); ?>
-                                                    <button type="submit" class="btn btn-sm btn-outline-danger" 
-                                                            title="Annuler la vente" 
-                                                            onclick="return confirm('Êtes-vous sûr de vouloir annuler cette vente? Le stock sera restauré.')">
-                                                        <i class="fas fa-undo"></i>
+                                                    <button type="submit" class="btn btn-outline-danger">
+                                                        <i class="fas fa-trash"></i>
                                                     </button>
                                                 </form>
                                             </div>
-                                        </td>
-                                    </tr>
-                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
-                                    <tr>
-                                        <td colspan="8" class="text-center py-4">
-                                            <i class="fas fa-shopping-cart fa-3x text-muted mb-3"></i>
-                                            <p class="text-muted">Aucune vente trouvée</p>
-                                            <a href="<?php echo e(route('ventes.create')); ?>" class="btn btn-success">
-                                                Enregistrer la première vente
-                                            </a>
-                                        </td>
-                                    </tr>
-                                <?php endif; ?>
-                            </tbody>
-                        </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
+                            <div class="text-center py-5">
+                                <i class="fas fa-shopping-cart fa-4x text-muted mb-3"></i>
+                                <h5 class="text-muted">Aucune vente trouvée</h5>
+                                <p class="text-muted">Les ventes apparaîtront ici une fois effectuées</p>
+                            </div>
+                        <?php endif; ?>
                     </div>
 
                     <!-- Pagination -->

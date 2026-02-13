@@ -74,16 +74,16 @@ class VentesExport implements FromCollection, WithHeadings, WithTitle, WithStyle
         $collection->push(['DÉTAIL DES VENTES']);
         $collection->push(['Date', 'Produit', 'Boutique', 'Magasin', 'Quantité', 'Prix unitaire', 'Total', 'Bénéfice']);
         
-        foreach ($this->data['ventes'] as $vente) {
+        foreach ($this->data['venteProduits'] as $vp) {
             $collection->push([
-                $vente->date->format('d/m/Y'),
-                $vente->produit->nom,
-                $vente->boutique->nom,
-                $vente->boutique->magasin->nom,
-                $vente->quantite,
-                number_format($vente->prix_unitaire, 0, ',', ' ') . ' FCFA',
-                number_format($vente->prix_total, 0, ',', ' ') . ' FCFA',
-                number_format($vente->benefice, 0, ',', ' ') . ' FCFA'
+                $vp->vente->date_vente->format('d/m/Y'),
+                $vp->produit->nom,
+                $vp->vente->boutique->nom,
+                $vp->vente->boutique->magasin->nom,
+                $vp->quantite,
+                number_format($vp->prix_unitaire, 0, ',', ' ') . ' FCFA',
+                number_format($vp->sous_total, 0, ',', ' ') . ' FCFA',
+                number_format(($vp->prix_unitaire - $vp->produit->prix_achat) * $vp->quantite, 0, ',', ' ') . ' FCFA'
             ]);
         }
 

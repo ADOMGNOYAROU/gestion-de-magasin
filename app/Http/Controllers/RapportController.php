@@ -230,7 +230,17 @@ class RapportController extends Controller
 
         // Calculer les totaux
         $data['ventes'] = $ventes;
-        $data['venteProduits'] = $ventes->pluck('venteProduits')->flatten();
+        
+        // Préparer les venteProduits avec la relation vente
+        $venteProduits = collect();
+        foreach ($ventes as $vente) {
+            foreach ($vente->venteProduits as $vp) {
+                $vp->vente = $vente;
+                $venteProduits->push($vp);
+            }
+        }
+        $data['venteProduits'] = $venteProduits;
+        
         $data['totalVentes'] = $ventes->count();
         $data['totalCA'] = $ventes->sum('montant_total');
         $data['totalBenefice'] = $ventes->sum(function($v) { return $v->benefice_total; });

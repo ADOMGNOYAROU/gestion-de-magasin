@@ -1,50 +1,79 @@
-@extends('layouts.app')
 
-@section('content')
+
+<?php $__env->startSection('content'); ?>
 <div class="container-fluid">
     <div class="row">
         <div class="col-12">
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h1 class="h3 mb-0 text-gray-800">Nouveau Transfert de Stock</h1>
-                <a href="{{ route('transferts.index') }}" class="btn btn-secondary">
+                <a href="<?php echo e(route('transferts.index')); ?>" class="btn btn-secondary">
                     <i class="fas fa-arrow-left"></i> Retour
                 </a>
             </div>
 
             <div class="card">
                 <div class="card-body">
-                    <form method="POST" action="{{ route('transferts.store') }}">
-                        @csrf
+                    <form method="POST" action="<?php echo e(route('transferts.store')); ?>">
+                        <?php echo csrf_field(); ?>
 
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label for="magasin_id" class="form-label">Magasin Source <span class="text-danger">*</span></label>
-                                    <select class="form-select @error('magasin_id') is-invalid @enderror" 
+                                    <select class="form-select <?php $__errorArgs = ['magasin_id'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" 
                                             id="magasin_id" name="magasin_id" required>
                                         <option value="">Sélectionner un magasin</option>
-                                        @foreach($magasins as $magasin)
-                                            <option value="{{ $magasin->id }}" 
-                                                    {{ old('magasin_id') == $magasin->id ? 'selected' : '' }}>
-                                                {{ $magasin->nom }} - {{ $magasin->localisation }}
+                                        <?php $__currentLoopData = $magasins; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $magasin): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                            <option value="<?php echo e($magasin->id); ?>" 
+                                                    <?php echo e(old('magasin_id') == $magasin->id ? 'selected' : ''); ?>>
+                                                <?php echo e($magasin->nom); ?> - <?php echo e($magasin->localisation); ?>
+
                                             </option>
-                                        @endforeach
+                                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                     </select>
-                                    @error('magasin_id')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
+                                    <?php $__errorArgs = ['magasin_id'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                        <div class="invalid-feedback"><?php echo e($message); ?></div>
+                                    <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label for="boutique_id" class="form-label">Boutique Destination <span class="text-danger">*</span></label>
-                                    <select class="form-select @error('boutique_id') is-invalid @enderror" 
+                                    <select class="form-select <?php $__errorArgs = ['boutique_id'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" 
                                             id="boutique_id" name="boutique_id" required disabled>
                                         <option value="">Sélectionnez d'abord un magasin</option>
                                     </select>
-                                    @error('boutique_id')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
+                                    <?php $__errorArgs = ['boutique_id'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                        <div class="invalid-feedback"><?php echo e($message); ?></div>
+                                    <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                                 </div>
                             </div>
                         </div>
@@ -53,11 +82,25 @@
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label for="date" class="form-label">Date <span class="text-danger">*</span></label>
-                                    <input type="date" class="form-control @error('date') is-invalid @enderror" 
-                                           id="date" name="date" value="{{ old('date', now()->format('Y-m-d')) }}" required>
-                                    @error('date')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
+                                    <input type="date" class="form-control <?php $__errorArgs = ['date'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" 
+                                           id="date" name="date" value="<?php echo e(old('date', now()->format('Y-m-d'))); ?>" required>
+                                    <?php $__errorArgs = ['date'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                        <div class="invalid-feedback"><?php echo e($message); ?></div>
+                                    <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                                 </div>
                             </div>
                         </div>
@@ -113,7 +156,7 @@
                         </div>
 
                         <div class="d-flex justify-content-end">
-                            <a href="{{ route('transferts.index') }}" class="btn btn-secondary me-2">
+                            <a href="<?php echo e(route('transferts.index')); ?>" class="btn btn-secondary me-2">
                                 <i class="fas fa-times"></i> Annuler
                             </a>
                             <button type="submit" class="btn btn-primary" id="submit-btn" disabled>
@@ -290,4 +333,6 @@ document.addEventListener('DOMContentLoaded', function() {
     updateValidation();
 });
 </script>
-@endsection
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\xampp\htdocs\gestion-magasin\resources\views/transferts/create.blade.php ENDPATH**/ ?>
