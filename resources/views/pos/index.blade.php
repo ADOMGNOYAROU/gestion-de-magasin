@@ -20,6 +20,9 @@
         </a>
     </div>
 </div>
+
+<!-- CSS pour Select2 -->
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 @endsection
 
 @section('content')
@@ -92,6 +95,56 @@
                 </button>
             </div>
             <div class="card-body d-flex flex-column">
+                <!-- Section Client -->
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <label class="form-label mb-0">Client:</label>
+                        <button class="btn btn-sm btn-outline-secondary" id="clearClientBtn" style="display: none;">
+                            <i class="fas fa-times"></i> Retirer
+                        </button>
+                    </div>
+
+                    <!-- Sélection client -->
+                    <div id="clientSelection" class="mb-3">
+                        <select class="form-select" id="clientSelect" style="width: 100%;">
+                            <option value="">Vente anonyme (pas de fidélité)</option>
+                        </select>
+                    </div>
+
+                    <!-- Infos client sélectionné -->
+                    <div id="clientInfo" style="display: none;" class="border rounded p-2 bg-light">
+                        <div class="row">
+                            <div class="col-8">
+                                <strong id="clientName"></strong><br>
+                                <small class="text-muted">
+                                    <i class="fas fa-phone"></i> <span id="clientPhone"></span> |
+                                    <i class="fas fa-star"></i> <span id="clientPoints"></span> pts
+                                </small>
+                            </div>
+                            <div class="col-4 text-end">
+                                <small class="text-muted">Total achats:</small><br>
+                                <strong id="clientTotal"></strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Code coupon -->
+                    <div id="couponSection" style="display: none;" class="mt-2">
+                        <label for="couponCode" class="form-label">Code coupon:</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="couponCode" placeholder="Entrez le code coupon">
+                            <button class="btn btn-outline-primary" type="button" id="applyCouponBtn">
+                                <i class="fas fa-check"></i>
+                            </button>
+                        </div>
+                        <div id="couponInfo" class="mt-1" style="display: none;">
+                            <small class="text-success" id="couponMessage"></small>
+                        </div>
+                    </div>
+                </div>
+
+                <hr>
+
                 <!-- Liste des articles -->
                 <div class="flex-grow-1" style="min-height: 200px;">
                     <div id="cartItems" class="mb-3">
@@ -178,11 +231,15 @@
 // Variables globales
 let cart = [];
 let products = @json($produits);
+let selectedClient = null;
+let appliedCoupon = null;
+let couponDiscount = 0;
 
 // Initialisation
 document.addEventListener('DOMContentLoaded', function() {
     loadCart();
     setupEventListeners();
+    setupClientSearch();
     updateCartDisplay();
 });
 
@@ -222,6 +279,167 @@ function setupEventListeners() {
 
     // Bouton vider panier
     document.getElementById('clearCartBtn').addEventListener('click', clearCart);
+
+    // Bouton retirer client
+    document.getElementById('clearClientBtn').addEventListener('click', clearClient);
+
+    // Bouton appliquer coupon
+    document.getElementById('applyCouponBtn').addEventListener('click', applyCoupon);
+}
+
+// Configuration de la recherche de clients
+function setupClientSearch() {
+    $('#clientSelect').select2({
+        placeholder: 'Rechercher un client...',
+        minimumInputLength: 2,
+        ajax: {
+            url: '{{ route('pos.search_clients') }}',
+            dataType: 'json',
+            delay: 300,
+            data: function (params) {
+                return {
+                    q: params.term
+                };
+            },
+            processResults: function (data) {
+                return {
+                    results: data.map(client => ({
+                        id: client.id,
+                        text: client.text
+                    }))
+                };
+            },
+            cache: true
+        },
+        allowClear: true,
+        language: {
+            inputTooShort: function () {
+                return 'Tapez au moins 2 caractères...';
+            },
+            noResults: function () {
+                return 'Aucun client trouvé';
+            },
+            searching: function () {
+                return 'Recherche en cours...';
+            }
+        }
+    });
+
+    // Gestionnaire de changement de sélection client
+    $('#clientSelect').on('change', function() {
+        const clientId = $(this).val();
+        if (clientId) {
+            loadClientInfo(clientId);
+        } else {
+            clearClient();
+        }
+    });
+}
+
+// Charger les informations du client
+function loadClientInfo(clientId) {
+    fetch(`{{ url('pos/client') }}/${clientId}`)
+        .then(response => response.json())
+        .then(data => {
+            selectedClient = data;
+            updateClientDisplay();
+        })
+        .catch(error => {
+            console.error('Erreur chargement client:', error);
+            showToast('Erreur lors du chargement des informations client', 'error');
+        });
+}
+
+// Mettre à jour l'affichage du client
+function updateClientDisplay() {
+    const clientInfo = document.getElementById('clientInfo');
+    const couponSection = document.getElementById('couponSection');
+    const clearClientBtn = document.getElementById('clearClientBtn');
+
+    if (selectedClient) {
+        document.getElementById('clientName').textContent = selectedClient.nom_complet;
+        document.getElementById('clientPhone').textContent = selectedClient.telephone || 'N/A';
+        document.getElementById('clientPoints').textContent = selectedClient.solde_points;
+        document.getElementById('clientTotal').textContent = formatCurrency(selectedClient.total_achats);
+
+        clientInfo.style.display = 'block';
+        couponSection.style.display = 'block';
+        clearClientBtn.style.display = 'inline-block';
+
+        // Réinitialiser le coupon
+        clearCoupon();
+    } else {
+        clientInfo.style.display = 'none';
+        couponSection.style.display = 'none';
+        clearClientBtn.style.display = 'none';
+        clearCoupon();
+    }
+}
+
+// Retirer le client sélectionné
+function clearClient() {
+    selectedClient = null;
+    $('#clientSelect').val(null).trigger('change');
+    updateClientDisplay();
+}
+
+// Appliquer un coupon
+function applyCoupon() {
+    const couponCode = document.getElementById('couponCode').value.trim().toUpperCase();
+    const couponInfo = document.getElementById('couponInfo');
+    const couponMessage = document.getElementById('couponMessage');
+
+    if (!selectedClient) {
+        showToast('Veuillez d\'abord sélectionner un client', 'warning');
+        return;
+    }
+
+    if (!couponCode) {
+        showToast('Veuillez entrer un code coupon', 'warning');
+        return;
+    }
+
+    const cartTotal = getCartTotal();
+
+    fetch('/api/coupons/valider?code=' + encodeURIComponent(couponCode) + '&client_id=' + selectedClient.id + '&montant_total=' + cartTotal, {
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.valid) {
+            appliedCoupon = data.coupon;
+            couponDiscount = data.reduction;
+            couponMessage.textContent = `Coupon appliqué: -${formatCurrency(couponDiscount)}`;
+            couponMessage.className = 'text-success';
+            couponInfo.style.display = 'block';
+            updateCartDisplay();
+            showToast('Coupon appliqué avec succès', 'success');
+        } else {
+            couponMessage.textContent = data.message || 'Coupon invalide';
+            couponMessage.className = 'text-danger';
+            couponInfo.style.display = 'block';
+            clearCoupon();
+        }
+    })
+    .catch(error => {
+        console.error('Erreur validation coupon:', error);
+        couponMessage.textContent = 'Erreur lors de la validation du coupon';
+        couponMessage.className = 'text-danger';
+        couponInfo.style.display = 'block';
+        clearCoupon();
+    });
+}
+
+// Retirer le coupon appliqué
+function clearCoupon() {
+    appliedCoupon = null;
+    couponDiscount = 0;
+    document.getElementById('couponCode').value = '';
+    document.getElementById('couponInfo').style.display = 'none';
+    updateCartDisplay();
 }
 
 // Recherche de produits
@@ -382,7 +600,19 @@ function updateCartDisplay() {
 
     html += '</div>';
     cartItems.innerHTML = html;
-    cartTotal.textContent = formatCurrency(total);
+
+    // Afficher le total avec réduction si coupon appliqué
+    let finalTotal = total;
+    if (couponDiscount > 0) {
+        finalTotal = Math.max(0, total - couponDiscount);
+    }
+
+    cartTotal.innerHTML = `
+        ${couponDiscount > 0 ? `<span class="text-decoration-line-through text-muted">${formatCurrency(total)}</span><br>` : ''}
+        <strong>${formatCurrency(finalTotal)}</strong>
+        ${couponDiscount > 0 ? `<br><small class="text-success">Réduction: -${formatCurrency(couponDiscount)}</small>` : ''}
+    `;
+
     checkoutBtn.disabled = false;
 
     calculateChange();
@@ -472,10 +702,16 @@ function clearCart() {
 // Calculer la monnaie
 function calculateChange() {
     const cashReceived = parseFloat(document.getElementById('cashReceived').value) || 0;
-    const total = getCartTotal();
+    const total = getCartTotalWithDiscount();
     const change = Math.max(0, cashReceived - total);
 
     document.getElementById('changeAmount').textContent = formatCurrency(change);
+}
+
+// Obtenir le total du panier avec réduction
+function getCartTotalWithDiscount() {
+    const baseTotal = getCartTotal();
+    return Math.max(0, baseTotal - couponDiscount);
 }
 
 // Obtenir le total du panier
@@ -504,11 +740,11 @@ function checkout() {
 
     const paymentMethodId = selectedPayment.value;
     const paymentMethod = @json($paymentMethods)->find(m => m.id == paymentMethodId);
-    let montantRecu = getCartTotal();
+    let montantRecu = getCartTotalWithDiscount();
 
     if (paymentMethod.code === 'cash') {
         montantRecu = parseFloat(document.getElementById('cashReceived').value) || 0;
-        if (montantRecu < getCartTotal()) {
+        if (montantRecu < getCartTotalWithDiscount()) {
             showToast('Le montant reçu est insuffisant', 'error');
             return;
         }
@@ -518,16 +754,20 @@ function checkout() {
         return;
     }
 
+    const checkoutData = {
+        payment_method_id: paymentMethodId,
+        montant_recu: montantRecu,
+        client_id: selectedClient ? selectedClient.id : null,
+        coupon_code: appliedCoupon ? appliedCoupon.code : null
+    };
+
     fetch('{{ route('pos.checkout') }}', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
             'X-CSRF-TOKEN': '{{ csrf_token() }}'
         },
-        body: JSON.stringify({
-            payment_method_id: paymentMethodId,
-            montant_recu: montantRecu
-        })
+        body: JSON.stringify(checkoutData)
     })
     .then(response => response.json())
     .then(data => {
@@ -560,6 +800,9 @@ function newSale() {
     updateCartDisplay();
     document.getElementById('cashReceived').value = '';
     document.getElementById('changeAmount').textContent = '0 FCFA';
+
+    // Réinitialiser le client et coupon
+    clearClient();
 }
 
 // Imprimer le ticket
@@ -617,5 +860,58 @@ function debounce(func, wait) {
 
 // Initialisation
 toggleCashInput();
+</script>
+
+<!-- JavaScript pour Select2 -->
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script>
+$(document).ready(function() {
+    // Initialisation Select2 pour la recherche de clients
+    $('#clientSelect').select2({
+        placeholder: 'Rechercher un client...',
+        minimumInputLength: 2,
+        ajax: {
+            url: '{{ route('pos.search_clients') }}',
+            dataType: 'json',
+            delay: 300,
+            data: function (params) {
+                return {
+                    q: params.term
+                };
+            },
+            processResults: function (data) {
+                return {
+                    results: data.map(client => ({
+                        id: client.id,
+                        text: client.text
+                    }))
+                };
+            },
+            cache: true
+        },
+        allowClear: true,
+        language: {
+            inputTooShort: function () {
+                return 'Tapez au moins 2 caractères...';
+            },
+            noResults: function () {
+                return 'Aucun client trouvé';
+            },
+            searching: function () {
+                return 'Recherche en cours...';
+            }
+        }
+    });
+
+    // Gestionnaire de changement de sélection client
+    $('#clientSelect').on('change', function() {
+        const clientId = $(this).val();
+        if (clientId) {
+            loadClientInfo(clientId);
+        } else {
+            clearClient();
+        }
+    });
+});
 </script>
 @endpush

@@ -98,8 +98,13 @@
                                         @foreach($vente->venteProduits as $produit)
                                         <tr>
                                             <td>
-                                                <strong>{{ $produit->produit->nom }}</strong>
-                                                <br><small class="text-muted">{{ $produit->produit->categorie }}</small>
+                                                @if($produit->produit)
+                                                    <strong>{{ $produit->produit->nom ?? 'Produit supprimé' }}</strong>
+                                                    <br><small class="text-muted">{{ $produit->produit->categorie ?? 'N/A' }}</small>
+                                                @else
+                                                    <strong class="text-danger">Produit supprimé</strong>
+                                                    <br><small class="text-muted">Référence: {{ $produit->produit_id }}</small>
+                                                @endif
                                             </td>
                                             <td class="text-center">{{ $produit->quantite }}</td>
                                             <td class="text-end">{{ number_format($produit->prix_unitaire, 0) }} FCFA</td>

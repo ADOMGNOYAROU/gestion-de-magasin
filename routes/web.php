@@ -13,6 +13,7 @@ use App\Http\Controllers\RapportController;
 use App\Http\Controllers\POSController;
 use App\Http\Controllers\FournisseurController;
 use App\Http\Controllers\PartenaireController;
+use App\Http\Controllers\ClientController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -57,6 +58,7 @@ Route::middleware('auth')->group(function () {
     // Routes CRUD pour les produits (admin et gestionnaire uniquement)
     Route::resource('produits', ProduitController::class)->middleware('gestionnaire');
     Route::post('produits/import', [ProduitController::class, 'import'])->middleware('gestionnaire')->name('produits.import');
+    Route::get('produits/search', [ProduitController::class, 'search'])->middleware('gestionnaire')->name('produits.search');
     
     // Routes CRUD pour les boutiques (admin et gestionnaire uniquement)
     Route::resource('boutiques', \App\Http\Controllers\BoutiqueController::class)->middleware('gestionnaire');
@@ -72,6 +74,34 @@ Route::middleware('auth')->group(function () {
     
     // Routes CRUD pour les partenaires (admin et gestionnaire uniquement)
     Route::resource('partenaires', PartenaireController::class)->middleware('gestionnaire');
+    
+    // Routes CRUD pour les clients (gestionnaires et vendeurs)
+    Route::middleware(['auth', 'gestionnaire'])->group(function() {
+        Route::resource('clients', ClientController::class)->names([
+            'index' => 'clients.index',
+            'create' => 'clients.create',
+            'store' => 'clients.store',
+            'show' => 'clients.show',
+            'edit' => 'clients.edit',
+            'update' => 'clients.update',
+            'destroy' => 'clients.destroy'
+        ]);
+    });
+    
+    // ROUTE DE TEST TEMPORAIRE - Supprimer après diagnostic
+    Route::get('/test-clients', function() {
+        return 'Route de test clients fonctionne ! Role: ' . auth()->user()->role . ' | isGestionnaire: ' . (auth()->user()->isGestionnaire() ? 'true' : 'false');
+    })->middleware('auth')->name('test.clients');
+    
+    // Routes supplémentaires pour les clients
+    Route::post('/clients/{client}/ajouter-points', [ClientController::class, 'ajouterPoints'])->middleware('vendeur')->name('clients.ajouter_points');
+    Route::post('/clients/{client}/utiliser-points', [ClientController::class, 'utiliserPoints'])->middleware('vendeur')->name('clients.utiliser_points');
+    Route::post('/clients/{client}/generer-coupon', [ClientController::class, 'genererCoupon'])->middleware('vendeur')->name('clients.generer_coupon');
+    
+    // API routes pour les clients
+    Route::get('/api/clients/search', [ClientController::class, 'search'])->middleware('vendeur');
+    Route::get('/api/coupons/valider', [ClientController::class, 'validerCoupon'])->middleware('vendeur');
+    Route::post('/api/coupons/{coupon}/utiliser', [ClientController::class, 'utiliserCoupon'])->middleware('vendeur');
     
     // Routes CRUD pour les entrées de stock (admin et gestionnaire uniquement)
     Route::resource('entrees-stock', EntreeStockController::class)->middleware('gestionnaire')->names([
@@ -94,6 +124,9 @@ Route::middleware('auth')->group(function () {
         'update' => 'transferts.update',
         'destroy' => 'transferts.destroy'
     ]);
+
+    // Route pour l'historique des mouvements de stock
+    Route::get('mouvements-stock', [App\Http\Controllers\MouvementsStockController::class, 'index'])->middleware('gestionnaire')->name('mouvements-stock.index');
     
     // Routes CRUD pour les ventes (tous les rôles)
     Route::resource('ventes', VenteController::class)->middleware('vendeur')->names([
@@ -128,21 +161,24 @@ Route::middleware('auth')->group(function () {
     Route::delete('/api/panier/vider', [VenteController::class, 'viderPanier'])->middleware('vendeur');
     Route::get('/api/stock-boutique', [VenteController::class, 'getStockDisponible'])->middleware('vendeur');
     
-    // Routes pour le système de caisse (POS)
-    Route::prefix('pos')->name('pos.')->middleware(['auth'])->group(function () {
-        Route::get('/', [POSController::class, 'index'])->name('index');
-        Route::get('/open', [POSController::class, 'open'])->name('open');
-        Route::post('/open', [POSController::class, 'storeOpen'])->name('store_open');
-        Route::get('/close', [POSController::class, 'close'])->name('close');
-        Route::post('/close', [POSController::class, 'storeClose'])->name('store_close');
+    // Routes CRUD pour les commandes fournisseurs (gestionnaire uniquement)
+    Route::get('/commandes-fournisseurs/comparer-prix', [\App\Http\Controllers\CommandeFournisseurController::class, 'comparerPrix'])->middleware('gestionnaire')->name('commandes-fournisseurs.comparer-prix');
+    Route::get('/commandes-fournisseurs/generer-reappro', [\App\Http\Controllers\CommandeFournisseurController::class, 'genererReappro'])->middleware('gestionnaire')->name('commandes-fournisseurs.generer-reappro');
+    Route::post('/commandes-fournisseurs/{commandeFournisseur}/changer-status', [\App\Http\Controllers\CommandeFournisseurController::class, 'changerStatus'])->middleware('gestionnaire')->name('commandes-fournisseurs.changer-status');
+    Route::get('/commandes-fournisseurs/historique/{fournisseur}', [\App\Http\Controllers\CommandeFournisseurController::class, 'historiqueFournisseur'])->middleware('gestionnaire')->name('commandes-fournisseurs.historique-fournisseur');
+    Route::resource('commandes-fournisseurs', \App\Http\Controllers\CommandeFournisseurController::class)->middleware('gestionnaire')->names([
+        'index' => 'commandes-fournisseurs.index',
+        'create' => 'commandes-fournisseurs.create',
+        'store' => 'commandes-fournisseurs.store',
+        'show' => 'commandes-fournisseurs.show',
+        'edit' => 'commandes-fournisseurs.edit',
+        'update' => 'commandes-fournisseurs.update',
+        'destroy' => 'commandes-fournisseurs.destroy'
+    ]);
 
-        // API routes pour le POS
-        Route::post('/cart/add', [POSController::class, 'addToCart'])->name('cart.add');
-        Route::delete('/cart/remove', [POSController::class, 'removeFromCart'])->name('cart.remove');
-        Route::patch('/cart/update-quantity', [POSController::class, 'updateCartQuantity'])->name('cart.update_quantity');
-        Route::delete('/cart/clear', [POSController::class, 'clearCart'])->name('cart.clear');
-        Route::get('/cart', [POSController::class, 'getCart'])->name('cart.get');
-        Route::post('/checkout', [POSController::class, 'checkout'])->name('checkout');
-        Route::get('/search-products', [POSController::class, 'searchProducts'])->name('search_products');
-    });
+    // Route pour le rapport PDF d'une commande fournisseur
+    Route::get('/commandes-fournisseurs/{commandeFournisseur}/pdf', [\App\Http\Controllers\CommandeFournisseurController::class, 'rapportPDF'])->middleware('gestionnaire')->name('commandes-fournisseurs.rapport-pdf');
+
+    // Routes CRUD pour le POS (tous les rôles authentifiés)
+    Route::resource('pos', POSController::class)->middleware('auth');
 });

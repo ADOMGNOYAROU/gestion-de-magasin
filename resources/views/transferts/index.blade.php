@@ -79,18 +79,34 @@
                                     <tr>
                                         <td>{{ $transfert->date->format('d/m/Y') }}</td>
                                         <td>
-                                            <strong>{{ $transfert->produit->nom }}</strong>
-                                            <br><small class="text-muted">{{ $transfert->produit->categorie }}</small>
+                                            @if($transfert->produit)
+                                                <strong>{{ $transfert->produit->nom ?? 'Produit supprimé' }}</strong>
+                                                <br><small class="text-muted">{{ $transfert->produit->categorie ?? '' }}</small>
+                                            @else
+                                                <span class="text-danger">Produit introuvable</span>
+                                            @endif
                                         </td>
                                         <td>
-                                            <span class="badge bg-warning text-dark">
-                                                <i class="fas fa-minus"></i> {{ $transfert->magasin->nom }}
-                                            </span>
+                                            @if($transfert->magasin)
+                                                <span class="badge bg-warning text-dark">
+                                                    <i class="fas fa-minus"></i> {{ $transfert->magasin->nom }}
+                                                </span>
+                                            @else
+                                                <span class="badge bg-danger">
+                                                    <i class="fas fa-question"></i> Magasin inconnu
+                                                </span>
+                                            @endif
                                         </td>
                                         <td>
-                                            <span class="badge bg-success">
-                                                <i class="fas fa-plus"></i> {{ $transfert->boutique->nom }}
-                                            </span>
+                                            @if($transfert->boutique)
+                                                <span class="badge bg-success">
+                                                    <i class="fas fa-plus"></i> {{ $transfert->boutique->nom }}
+                                                </span>
+                                            @else
+                                                <span class="badge bg-danger">
+                                                    <i class="fas fa-question"></i> Boutique inconnue
+                                                </span>
+                                            @endif
                                         </td>
                                         <td>
                                             <span class="badge bg-info">{{ $transfert->quantite }}</span>
@@ -102,18 +118,17 @@
                                         </td>
                                         <td>
                                             <div class="btn-group" role="group">
-                                                <a href="{{ route('transferts.show', $transfert->id) }}" 
-                                                   class="btn btn-sm btn-outline-info" title="Voir">
+                                                <a href="{{ route('transferts.edit', $transfert->id) }}" class="btn btn-sm btn-primary" title="Modifier">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <a href="{{ route('transferts.show', $transfert->id) }}" class="btn btn-sm btn-info" title="Voir les détails">
                                                     <i class="fas fa-eye"></i>
                                                 </a>
-                                                <form action="{{ route('transferts.destroy', $transfert->id) }}" 
-                                                      method="POST" style="display: inline-block;">
+                                                <form action="{{ route('transferts.destroy', $transfert->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce transfert ? Cette action est irréversible.');">
                                                     @csrf
                                                     @method('DELETE')
-                                                    <button type="submit" class="btn btn-sm btn-outline-danger" 
-                                                            title="Annuler le transfert" 
-                                                            onclick="return confirm('Êtes-vous sûr de vouloir annuler ce transfert? Les stocks seront restaurés.')">
-                                                        <i class="fas fa-undo"></i>
+                                                    <button type="submit" class="btn btn-sm btn-danger" title="Supprimer">
+                                                        <i class="fas fa-trash"></i>
                                                     </button>
                                                 </form>
                                             </div>

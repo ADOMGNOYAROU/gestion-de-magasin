@@ -88,14 +88,26 @@
                                             <td>{{ $vente->date_vente->format('d/m/Y') }}</td>
                                             <td>
                                                 @foreach($vente->venteProduits as $vp)
-                                                    <strong>{{ $vp->produit->nom }}</strong> ({{ $vp->quantite }})
-                                                    @if(!$loop->last)<br>@endif
-                                                    <br><small class="text-muted">{{ $vp->produit->categorie }}</small>
+                                                    @if($vp->produit)
+                                                        <strong>{{ $vp->produit->nom ?? 'Produit supprimé' }}</strong> ({{ $vp->quantite }})
+                                                        @if(!$loop->last)<br>@endif
+                                                        <br><small class="text-muted">{{ $vp->produit->categorie ?? 'N/A' }}</small>
+                                                    @else
+                                                        <span class="text-danger">Produit supprimé</span> ({{ $vp->quantité }})
+                                                    @endif
                                                 @endforeach
                                             </td>
                                             <td>
-                                                <span class="badge bg-info">{{ $vente->boutique->nom }}</span>
-                                                <br><small class="text-muted">{{ $vente->boutique->magasin->nom }}</small>
+                                                @if($vente->boutique)
+                                                    <span class="badge bg-info">{{ $vente->boutique->nom ?? 'Boutique inconnue' }}</span>
+                                                    @if($vente->boutique->magasin)
+                                                        <br><small class="text-muted">{{ $vente->boutique->magasin->nom ?? 'Magasin inconnu' }}</small>
+                                                    @else
+                                                        <br><small class="text-muted text-danger">Magasin inconnu</small>
+                                                    @endif
+                                                @else
+                                                    <span class="badge bg-danger">Boutique supprimée</span>
+                                                @endif
                                             </td>
                                             <td>
                                                 <span class="badge bg-warning">{{ $vente->total_produits }}</span>
@@ -147,7 +159,11 @@
                                         <div class="d-flex justify-content-between align-items-start mb-2">
                                             <div>
                                                 <h6 class="card-title mb-1">{{ $vente->date_vente->format('d/m/Y') }}</h6>
-                                                <small class="text-muted">{{ $vente->boutique->nom }}</small>
+                                                @if($vente->boutique)
+                                                    <small class="text-muted">{{ $vente->boutique->nom ?? 'Boutique inconnue' }}</small>
+                                                @else
+                                                    <small class="text-danger">Boutique supprimée</small>
+                                                @endif
                                             </div>
                                             <div class="text-end">
                                                 <div class="fw-bold text-primary">{{ number_format($vente->montant_total, 0, ',', ' ') }} FCFA</div>
@@ -159,8 +175,12 @@
                                             @foreach($vente->venteProduits as $vp)
                                                 <div class="d-flex justify-content-between align-items-center py-1 border-bottom">
                                                     <div>
-                                                        <strong class="text-sm">{{ $vp->produit->nom }}</strong>
-                                                        <br><small class="text-muted">{{ $vp->produit->categorie }}</small>
+                                                        @if($vp->produit)
+                                                            <strong class="text-sm">{{ $vp->produit->nom ?? 'Produit supprimé' }}</strong>
+                                                            <br><small class="text-muted">{{ $vp->produit->categorie ?? 'N/A' }}</small>
+                                                        @else
+                                                            <strong class="text-sm text-danger">Produit supprimé</strong>
+                                                        @endif
                                                     </div>
                                                     <div class="text-end">
                                                         <span class="badge bg-warning">{{ $vp->quantite }}</span>

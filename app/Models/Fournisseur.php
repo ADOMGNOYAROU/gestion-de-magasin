@@ -12,4 +12,9 @@ class Fournisseur extends Model
     {
         return $this->hasMany(EntreeStock::class);
     }
+
+    public function commandesFournisseurs()
+    {
+        return $this->hasMany(CommandeFournisseur::class);
+    }
 }

@@ -12,6 +12,8 @@ use App\Models\VenteProduit;
 use App\Models\PaymentMethod;
 use App\Models\CashRegisterSession;
 use App\Models\StockBoutique;
+use App\Models\Client;
+use App\Models\Coupon;
 
 class POSController extends Controller
 {
@@ -274,7 +276,7 @@ class POSController extends Controller
     /**
      * Fermer une session de caisse
      */
-    public function close(Request $request = null)
+    public function close(Request $request)
     {
         $user = Auth::user();
 
@@ -296,7 +298,7 @@ class POSController extends Controller
 
         // Pour admin/gestionnaire : fermer caisse pour un vendeur
         } elseif ($user->isAdmin() || $user->isGestionnaire()) {
-            $vendeurId = $request->get('vendeur_id');
+            $vendeurId = $request->input('vendeur_id');
 
             if (!$vendeurId) {
                 // Afficher la liste des sessions actives pour sélection
@@ -554,6 +556,8 @@ class POSController extends Controller
         $request->validate([
             'payment_method_id' => 'required|exists:payment_methods,id',
             'montant_recu' => 'required|numeric|min:0',
+            'client_id' => 'nullable|exists:clients,id',
+            'coupon_code' => 'nullable|string',
         ]);
 
         $session = $this->getActiveSession();
@@ -568,18 +572,34 @@ class POSController extends Controller
 
         DB::beginTransaction();
         try {
+            // Valider et appliquer le coupon si fourni
+            $reductionCoupon = 0;
+            $couponUtilise = null;
+            if ($request->coupon_code && $request->client_id) {
+                $coupon = $this->validerCouponPourClient($request->coupon_code, $request->client_id, $this->calculerTotalPanier($panier));
+                if ($coupon) {
+                    $reductionCoupon = $coupon->calculerReduction($this->calculerTotalPanier($panier));
+                    $couponUtilise = $coupon;
+                }
+            }
+
             // Créer la vente
+            $montantTotalBrut = $this->calculerTotalPanier($panier);
+            $montantTotalNet = $montantTotalBrut - $reductionCoupon;
+
             $vente = Vente::create([
                 'boutique_id' => $session->boutique_id,
                 'user_id' => Auth::id(),
+                'client_id' => $request->client_id,
                 'session_caisse_id' => $session->id,
                 'payment_method_id' => $request->payment_method_id,
+                'montant_total' => $montantTotalNet,
                 'montant_recu' => $request->montant_recu,
                 'date_vente' => now(),
                 'status' => 'terminee',
             ]);
 
-            $montantTotal = 0;
+            $montantTotalProduits = 0;
 
             // Ajouter les produits à la vente et mettre à jour le stock
             foreach ($panier as $item) {
@@ -607,13 +627,16 @@ class POSController extends Controller
                     $stock->save();
                 }
 
-                $montantTotal += $sousTotal;
+                $montantTotalProduits += $sousTotal;
             }
 
-            // Mettre à jour le montant total de la vente
-            $vente->montant_total = $montantTotal;
-            $vente->calculerMonnaie();
-            $vente->save();
+            // Appliquer la réduction du coupon si utilisé
+            if ($couponUtilise) {
+                $couponUtilise->utiliser();
+            }
+
+            // Finaliser la vente (calcul des points de fidélité)
+            $vente->finaliser();
 
             // Mettre à jour la session
             $session->calculerMontantTheorique();
@@ -628,8 +651,10 @@ class POSController extends Controller
                 'message' => 'Vente finalisée avec succès',
                 'vente_id' => $vente->id,
                 'numero_ticket' => $vente->numero_ticket,
-                'montant_total' => $montantTotal,
+                'montant_total' => $montantTotalNet,
+                'reduction_coupon' => $reductionCoupon,
                 'monnaie' => $vente->monnaie,
+                'points_gagnes' => $request->client_id ? floor($montantTotalNet / 1000) : 0,
             ]);
 
         } catch (\Exception $e) {
@@ -695,6 +720,92 @@ class POSController extends Controller
             \Log::error('Erreur recherche produits : ' . $e->getMessage());
             return response()->json(['error' => 'Erreur lors de la recherche'], 500);
         }
+    }
+
+    /**
+     * Rechercher des clients pour le POS
+     */
+    public function searchClients(Request $request)
+    {
+        $query = $request->get('q', '');
+
+        $clients = Client::where('statut', 'actif')
+                        ->where(function($q) use ($query) {
+                            $q->where('nom', 'like', "%{$query}%")
+                              ->orWhere('prenom', 'like', "%{$query}%")
+                              ->orWhere('email', 'like', "%{$query}%")
+                              ->orWhere('telephone', 'like', "%{$query}%");
+                        })
+                        ->select('id', 'nom', 'prenom', 'email', 'telephone', 'solde_points')
+                        ->limit(10)
+                        ->get()
+                        ->map(function($client) {
+                            return [
+                                'id' => $client->id,
+                                'text' => $client->nom_complet . ' (' . $client->solde_points . ' pts)',
+                                'nom_complet' => $client->nom_complet,
+                                'email' => $client->email,
+                                'telephone' => $client->telephone,
+                                'solde_points' => $client->solde_points,
+                            ];
+                        });
+
+        return response()->json($clients);
+    }
+
+    /**
+     * Obtenir les informations d'un client
+     */
+    public function getClientInfo(Request $request, Client $client)
+    {
+        return response()->json([
+            'id' => $client->id,
+            'nom_complet' => $client->nom_complet,
+            'email' => $client->email,
+            'telephone' => $client->telephone,
+            'solde_points' => $client->solde_points,
+            'total_achats' => $client->total_achats,
+            'derniere_vente' => $client->derniere_vente?->format('d/m/Y'),
+            'coupons_actifs' => $client->coupons()->where('utilise', false)->where(function($q) {
+                $q->whereNull('date_expiration')->orWhere('date_expiration', '>', now());
+            })->count(),
+        ]);
+    }
+
+    /**
+     * Calculer le total du panier
+     */
+    private function calculerTotalPanier($panier)
+    {
+        return array_reduce($panier, function($total, $item) {
+            return $total + ($item['prix_unitaire'] * $item['quantite']);
+        }, 0);
+    }
+
+    /**
+     * Valider un coupon pour un client
+     */
+    private function validerCouponPourClient($code, $clientId, $montantTotal)
+    {
+        $coupon = Coupon::where('code', $code)
+                       ->where('client_id', $clientId)
+                       ->where('utilise', false)
+                       ->where(function($q) {
+                           $q->whereNull('date_expiration')
+                             ->orWhere('date_expiration', '>', now());
+                       })
+                       ->first();
+
+        if (!$coupon) {
+            return null;
+        }
+
+        // Vérifier le montant minimum
+        if ($montantTotal < $coupon->montant_minimum) {
+            return null;
+        }
+
+        return $coupon;
     }
 
     /**

@@ -672,79 +672,6 @@
                 display: none;
             }
         }
-            padding: 1.5rem;
-            background: white;
-            transition: all 0.3s ease;
-            border: 1px solid #e3e6f0;
-        }
-
-        .action-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.1);
-            border-color: var(--primary-color);
-        }
-
-        /* Pulsing Animation for Alerts */
-        .pulse-alert {
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0% {
-                box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.4);
-            }
-            70% {
-                box-shadow: 0 0 0 10px rgba(220, 53, 69, 0);
-            }
-            100% {
-                box-shadow: 0 0 0 0 rgba(220, 53, 69, 0);
-            }
-        }
-
-        /* Loading */
-        .loading {
-            opacity: 0.6;
-            pointer-events: none;
-        }
-
-        .spinner-border-sm {
-            width: 1rem;
-            height: 1rem;
-        }
-
-        /* Custom scrollbar */
-        .sidebar::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .sidebar::-webkit-scrollbar-track {
-            background: rgba(255, 255, 255, 0.1);
-        }
-
-        .sidebar::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.3);
-            border-radius: 3px;
-        }
-
-        .sidebar::-webkit-scrollbar-thumb:hover {
-            background: rgba(255, 255, 255, 0.5);
-        }
-
-        /* Sidebar Overlay */
-        .sidebar-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            z-index: 999;
-            display: none;
-        }
-
-        .sidebar-overlay.show {
-            display: block;
-        }
     </style>
 </head>
 <body>
@@ -790,6 +717,24 @@
                 <a href="{{ route('fournisseurs.index') }}" class="sidebar-link {{ request()->is('fournisseurs*') ? 'active' : '' }}">
                     <i class="fas fa-truck"></i>
                     <span class="sidebar-link-text">Fournisseurs</span>
+                </a>
+            </div>
+
+            <!-- Commandes Fournisseurs -->
+            <div class="sidebar-item">
+                <a href="{{ route('commandes-fournisseurs.index') }}" class="sidebar-link {{ request()->is('commandes-fournisseurs*') ? 'active' : '' }}">
+                    <i class="fas fa-shopping-bag"></i>
+                    <span class="sidebar-link-text">Commandes Fournisseurs</span>
+                </a>
+            </div>
+            @endif
+
+            <!-- Clients -->
+            @if(auth()->user()->isAdmin() || auth()->user()->isGestionnaire() || auth()->user()->isVendeur())
+            <div class="sidebar-item">
+                <a href="{{ route('clients.index') }}" class="sidebar-link {{ request()->is('clients*') ? 'active' : '' }}">
+                    <i class="fas fa-users"></i>
+                    <span class="sidebar-link-text">Clients</span>
                 </a>
             </div>
             @endif
@@ -865,7 +810,9 @@
                     <span class="sidebar-link-text">Dashboard Admin</span>
                 </a>
             </div>
-            
+            @endif
+
+            @if(auth()->user()->isAdmin())
             <!-- Gestion des utilisateurs -->
             <div class="sidebar-item">
                 <a href="{{ route('users.index') }}" class="sidebar-link {{ request()->is('users*') ? 'active' : '' }}">
@@ -873,7 +820,7 @@
                     <span class="sidebar-link-text">Gestion Utilisateurs</span>
                 </a>
             </div>
-            
+
             <!-- Gestion des magasins -->
             <div class="sidebar-item">
                 <a href="{{ route('magasins.index') }}" class="sidebar-link {{ request()->is('magasins*') ? 'active' : '' }}">
@@ -881,7 +828,7 @@
                     <span class="sidebar-link-text">Gestion Magasins</span>
                 </a>
             </div>
-            
+
             <!-- Gestion des boutiques -->
             <div class="sidebar-item">
                 <a href="{{ route('boutiques.index') }}" class="sidebar-link {{ request()->is('boutiques*') ? 'active' : '' }}">
@@ -1003,11 +950,9 @@
             @endif
 
             <!-- Page Header -->
-            @hasSection('header')
-                <div class="d-sm-flex align-items-center justify-content-between mb-4">
-                    @yield('header')
-                </div>
-            @endif
+            <div class="d-sm-flex align-items-center justify-content-between mb-4">
+                @yield('header')
+            </div>
 
             <!-- Main Content -->
             <div class="fade-in">

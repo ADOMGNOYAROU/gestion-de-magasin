@@ -232,11 +232,18 @@ class DashboardController extends Controller
         $rupturesMagasin = StockMagasin::with('produit', 'magasin')
                                       ->where('quantite', '<=', $seuilAlerte)
                                       ->get()
+                                      ->filter(function($stock) {
+                                          return $stock->produit !== null && $stock->magasin !== null;
+                                      })
                                       ->map(function($stock) use ($seuilAlerte) {
                                           return [
-                                              'produit' => $stock->produit,
+                                              'produit' => (object)[
+                                                  'id' => $stock->produit->id,
+                                                  'nom' => $stock->produit ? $stock->produit->nom : 'Produit inconnu',
+                                                  'reference' => $stock->produit ? $stock->produit->reference ?? 'N/A' : 'N/A'
+                                              ],
                                               'type' => 'Magasin',
-                                              'lieu' => $stock->magasin->nom,
+                                              'lieu' => $stock->magasin ? $stock->magasin->nom : 'Magasin inconnu',
                                               'quantite' => $stock->quantite,
                                               'seuil' => $seuilAlerte
                                           ];
@@ -245,17 +252,26 @@ class DashboardController extends Controller
         $rupturesBoutique = StockBoutique::with('produit', 'boutique')
                                         ->where('quantite', '<=', $seuilAlerte)
                                         ->get()
+                                        ->filter(function($stock) {
+                                            return $stock->produit !== null && $stock->boutique !== null;
+                                        })
                                         ->map(function($stock) use ($seuilAlerte) {
                                             return [
-                                                'produit' => $stock->produit,
+                                                'produit' => (object)[
+                                                    'id' => $stock->produit->id,
+                                                    'nom' => $stock->produit ? $stock->produit->nom : 'Produit inconnu',
+                                                    'reference' => $stock->produit ? $stock->produit->reference ?? 'N/A' : 'N/A'
+                                                ],
                                                 'type' => 'Boutique',
-                                                'lieu' => $stock->boutique->nom,
+                                                'lieu' => $stock->boutique ? $stock->boutique->nom : 'Boutique inconnue',
                                                 'quantite' => $stock->quantite,
                                                 'seuil' => $seuilAlerte
                                             ];
                                         });
 
-        return $rupturesMagasin->merge($rupturesBoutique)->sortBy('quantite')->take(10);
+        $allRuptures = collect(array_merge($rupturesMagasin->toArray(), $rupturesBoutique->toArray()));
+
+        return $allRuptures->sortBy('quantite')->take(10);
     }
 
     /**
@@ -269,11 +285,18 @@ class DashboardController extends Controller
                                       ->where('magasin_id', $magasinId)
                                       ->where('quantite', '<=', $seuilAlerte)
                                       ->get()
+                                      ->filter(function($stock) {
+                                          return $stock->produit !== null && $stock->magasin !== null;
+                                      })
                                       ->map(function($stock) use ($seuilAlerte) {
                                           return [
-                                              'produit' => $stock->produit,
+                                              'produit' => (object)[
+                                                  'id' => $stock->produit->id,
+                                                  'nom' => $stock->produit ? $stock->produit->nom : 'Produit inconnu',
+                                                  'reference' => $stock->produit ? $stock->produit->reference ?? 'N/A' : 'N/A'
+                                              ],
                                               'type' => 'Magasin',
-                                              'lieu' => $stock->magasin->nom,
+                                              'lieu' => $stock->magasin ? $stock->magasin->nom : 'Magasin inconnu',
                                               'quantite' => $stock->quantite,
                                               'seuil' => $seuilAlerte
                                           ];
@@ -285,17 +308,26 @@ class DashboardController extends Controller
                                         })
                                         ->where('quantite', '<=', $seuilAlerte)
                                         ->get()
+                                        ->filter(function($stock) {
+                                            return $stock->produit !== null && $stock->boutique !== null;
+                                        })
                                         ->map(function($stock) use ($seuilAlerte) {
                                             return [
-                                                'produit' => $stock->produit,
+                                                'produit' => (object)[
+                                                    'id' => $stock->produit->id,
+                                                    'nom' => $stock->produit ? $stock->produit->nom : 'Produit inconnu',
+                                                    'reference' => $stock->produit ? $stock->produit->reference ?? 'N/A' : 'N/A'
+                                                ],
                                                 'type' => 'Boutique',
-                                                'lieu' => $stock->boutique->nom,
+                                                'lieu' => $stock->boutique ? $stock->boutique->nom : 'Boutique inconnue',
                                                 'quantite' => $stock->quantite,
                                                 'seuil' => $seuilAlerte
                                             ];
                                         });
 
-        return $rupturesMagasin->merge($rupturesBoutique)->sortBy('quantite')->take(10);
+        $allRuptures = collect(array_merge($rupturesMagasin->toArray(), $rupturesBoutique->toArray()));
+
+        return $allRuptures->sortBy('quantite')->take(10);
     }
 
     /**
@@ -309,16 +341,24 @@ class DashboardController extends Controller
                            ->where('boutique_id', $boutiqueId)
                            ->where('quantite', '<=', $seuilAlerte)
                            ->get()
+                           ->filter(function($stock) {
+                               return $stock->produit !== null && $stock->boutique !== null;
+                           })
                            ->map(function($stock) use ($seuilAlerte) {
                                return [
-                                   'produit' => $stock->produit,
+                                   'produit' => (object)[
+                                       'id' => $stock->produit->id,
+                                       'nom' => $stock->produit ? $stock->produit->nom : 'Produit inconnu',
+                                       'reference' => $stock->produit ? $stock->produit->reference ?? 'N/A' : 'N/A'
+                                   ],
                                    'type' => 'Boutique',
-                                   'lieu' => $stock->boutique->nom,
+                                   'lieu' => $stock->boutique ? $stock->boutique->nom : 'Boutique inconnue',
                                    'quantite' => $stock->quantite,
                                    'seuil' => $seuilAlerte
                                ];
                            })
                            ->sortBy('quantite')
+                           ->values()
                            ->take(10);
     }
 
@@ -327,20 +367,28 @@ class DashboardController extends Controller
      */
     private function getTopProduits($limit = 5)
     {
-        return VenteProduit::with(['produit', 'vente'])
+        return VenteProduit::with('produit')
                    ->select('produit_id', DB::raw('SUM(quantite) as total_vendu'), DB::raw('SUM(sous_total) as total_ca'))
                    ->join('ventes', 'vente_produits.vente_id', '=', 'ventes.id')
                    ->groupBy('produit_id')
                    ->orderBy('total_vendu', 'desc')
                    ->limit($limit)
                    ->get()
+                   ->filter(function($venteProduit) {
+                       return $venteProduit->produit !== null;
+                   })
                    ->map(function($venteProduit) {
                        return [
-                           'produit' => $venteProduit->produit,
+                           'produit' => (object)[
+                               'id' => $venteProduit->produit->id,
+                               'nom' => $venteProduit->produit ? $venteProduit->produit->nom : 'Produit supprimé',
+                               'reference' => $venteProduit->produit ? $venteProduit->produit->reference ?? 'N/A' : 'N/A'
+                           ],
                            'quantite' => $venteProduit->total_vendu,
                            'ca' => $venteProduit->total_ca
                        ];
-                   });
+                   })
+                   ->values();
     }
 
     /**
@@ -348,7 +396,7 @@ class DashboardController extends Controller
      */
     private function getTopProduitsMagasin($limit = 5, $magasinId)
     {
-        return VenteProduit::with(['produit', 'vente.boutique'])
+        return VenteProduit::with('produit')
                    ->select('produit_id', DB::raw('SUM(quantite) as total_vendu'), DB::raw('SUM(sous_total) as total_ca'))
                    ->join('ventes', 'vente_produits.vente_id', '=', 'ventes.id')
                    ->join('boutiques', 'ventes.boutique_id', '=', 'boutiques.id')
@@ -357,13 +405,21 @@ class DashboardController extends Controller
                    ->orderBy('total_vendu', 'desc')
                    ->limit($limit)
                    ->get()
+                   ->filter(function($venteProduit) {
+                       return $venteProduit->produit !== null;
+                   })
                    ->map(function($venteProduit) {
                        return [
-                           'produit' => $venteProduit->produit,
+                           'produit' => (object)[
+                               'id' => $venteProduit->produit->id,
+                               'nom' => $venteProduit->produit ? $venteProduit->produit->nom : 'Produit supprimé',
+                               'reference' => $venteProduit->produit ? $venteProduit->produit->reference ?? 'N/A' : 'N/A'
+                           ],
                            'quantite' => $venteProduit->total_vendu,
                            'ca' => $venteProduit->total_ca
                        ];
-                   });
+                   })
+                   ->values();
     }
 
     /**
@@ -371,7 +427,7 @@ class DashboardController extends Controller
      */
     private function getTopProduitsBoutique($limit = 5, $boutiqueId)
     {
-        return VenteProduit::with(['produit', 'vente'])
+        return VenteProduit::with('produit')
                    ->select('produit_id', DB::raw('SUM(quantite) as total_vendu'), DB::raw('SUM(sous_total) as total_ca'))
                    ->join('ventes', 'vente_produits.vente_id', '=', 'ventes.id')
                    ->where('ventes.boutique_id', $boutiqueId)
@@ -379,13 +435,21 @@ class DashboardController extends Controller
                    ->orderBy('total_vendu', 'desc')
                    ->limit($limit)
                    ->get()
+                   ->filter(function($venteProduit) {
+                       return $venteProduit->produit !== null;
+                   })
                    ->map(function($venteProduit) {
                        return [
-                           'produit' => $venteProduit->produit,
+                           'produit' => (object)[
+                               'id' => $venteProduit->produit->id,
+                               'nom' => $venteProduit->produit ? $venteProduit->produit->nom : 'Produit supprimé',
+                               'reference' => $venteProduit->produit ? $venteProduit->produit->reference ?? 'N/A' : 'N/A'
+                           ],
                            'quantite' => $venteProduit->total_vendu,
                            'ca' => $venteProduit->total_ca
                        ];
-                   });
+                   })
+                   ->values();
     }
 
     /**
@@ -480,12 +544,16 @@ class DashboardController extends Controller
                    ->orderBy('total_vendu', 'desc')
                    ->limit($limit)
                    ->get()
+                   ->filter(function($venteProduit) {
+                       return $venteProduit->produit !== null;
+                   })
                    ->map(function($venteProduit) {
                        return [
-                           'nom' => $venteProduit->produit->nom,
+                           'nom' => $venteProduit->produit ? $venteProduit->produit->nom : 'Produit supprimé',
                            'quantite' => $venteProduit->total_vendu
                        ];
-                   });
+                   })
+                   ->values();
     }
 
     /**
@@ -493,7 +561,7 @@ class DashboardController extends Controller
      */
     private function getVentesParProduitMagasin($limit = 10, $magasinId)
     {
-        return VenteProduit::with(['produit', 'vente.boutique'])
+        return VenteProduit::with('produit')
                    ->select('produit_id', DB::raw('SUM(quantite) as total_vendu'))
                    ->join('ventes', 'vente_produits.vente_id', '=', 'ventes.id')
                    ->join('boutiques', 'ventes.boutique_id', '=', 'boutiques.id')
@@ -502,12 +570,16 @@ class DashboardController extends Controller
                    ->orderBy('total_vendu', 'desc')
                    ->limit($limit)
                    ->get()
+                   ->filter(function($venteProduit) {
+                       return $venteProduit->produit !== null;
+                   })
                    ->map(function($venteProduit) {
                        return [
-                           'nom' => $venteProduit->produit->nom,
+                           'nom' => $venteProduit->produit ? $venteProduit->produit->nom : 'Produit supprimé',
                            'quantite' => $venteProduit->total_vendu
                        ];
-                   });
+                   })
+                   ->values();
     }
 
     /**
@@ -515,19 +587,23 @@ class DashboardController extends Controller
      */
     private function getVentesParProduitBoutique($limit = 10, $boutiqueId)
     {
-        return VenteProduit::with(['produit', 'vente'])
-                   ->select('produit_id', DB::raw('SUM(quantite) as total_vendu'))
+        return VenteProduit::with('produit')
+                   ->select('produit_id', DB::raw('SUM(quantite) as total_vudi'))
                    ->join('ventes', 'vente_produits.vente_id', '=', 'ventes.id')
                    ->where('ventes.boutique_id', $boutiqueId)
                    ->groupBy('produit_id')
-                   ->orderBy('total_vendu', 'desc')
+                   ->orderBy('total_vudi', 'desc')
                    ->limit($limit)
                    ->get()
+                   ->filter(function($venteProduit) {
+                       return $venteProduit->produit !== null;
+                   })
                    ->map(function($venteProduit) {
                        return [
-                           'nom' => $venteProduit->produit->nom,
-                           'quantite' => $venteProduit->total_vendu
+                           'nom' => $venteProduit->produit ? $venteProduit->produit->nom : 'Produit supprimé',
+                           'quantite' => $venteProduit->total_vudi
                        ];
-                   });
+                   })
+                   ->values();
     }
 }

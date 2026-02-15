@@ -41,7 +41,9 @@ class PaymentMethodSeeder extends Seeder
         ];
 
         foreach ($paymentMethods as $method) {
-            PaymentMethod::create($method);
+            PaymentMethod::firstOrCreate([
+                'code' => $method['code'],
+            ], $method);
         }
     }
 }

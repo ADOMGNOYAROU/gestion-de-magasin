@@ -208,7 +208,7 @@ class TransfertController extends Controller
     {
         DB::beginTransaction();
         try {
-            $transfert = Transfert::findOrFail($id);
+            $transfert = Transfert::with(['produit', 'magasin', 'boutique'])->findOrFail($id);
             
             // 1. Augmenter le stock du magasin (annuler le transfert)
             $stockMagasin = StockMagasin::where('produit_id', $transfert->produit_id)

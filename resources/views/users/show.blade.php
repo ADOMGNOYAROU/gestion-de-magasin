@@ -48,7 +48,7 @@
                             <div class="mb-3">
                                 <label class="form-label fw-bold">Magasin associé:</label>
                                 <p class="form-control-plaintext">
-                                    {{ $user->magasin ? $user->magasin->nom : 'Aucun magasin' }}
+                                    {{ $user->magasinResponsable ? $user->magasinResponsable->nom : 'Aucun magasin' }}
                                 </p>
                             </div>
                         </div>

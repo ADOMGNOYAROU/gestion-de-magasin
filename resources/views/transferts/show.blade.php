@@ -32,26 +32,41 @@
                                 <tr>
                                     <td><strong>Produit :</strong></td>
                                     <td>
-                                        <strong>{{ $transfert->produit->nom }}</strong>
-                                        <br><small class="text-muted">{{ $transfert->produit->categorie }}</small>
+                                        @if($transfert->produit)
+                                            <strong>{{ $transfert->produit->nom }}</strong>
+                                            <br><small class="text-muted">{{ $transfert->produit->categorie }}</small>
+                                        @else
+                                            <strong class="text-danger">Produit supprimé</strong>
+                                            <br><small class="text-muted">Référence: {{ $transfert->produit_id }}</small>
+                                        @endif
                                     </td>
                                 </tr>
                                 <tr>
                                     <td><strong>Magasin Source :</strong></td>
                                     <td>
-                                        <span class="badge bg-warning text-dark">
-                                            <i class="fas fa-minus"></i> {{ $transfert->magasin->nom }}
-                                        </span>
-                                        <br><small class="text-muted">{{ $transfert->magasin->localisation }}</small>
+                                        @if($transfert->magasin)
+                                            <span class="badge bg-warning text-dark">
+                                                <i class="fas fa-minus"></i> {{ $transfert->magasin->nom }}
+                                            </span>
+                                            <br><small class="text-muted">{{ $transfert->magasin->localisation }}</small>
+                                        @else
+                                            <span class="badge bg-danger">Magasin supprimé</span>
+                                            <br><small class="text-muted">Référence: {{ $transfert->magasin_id }}</small>
+                                        @endif
                                     </td>
                                 </tr>
                                 <tr>
                                     <td><strong>Boutique Destination :</strong></td>
                                     <td>
-                                        <span class="badge bg-success">
-                                            <i class="fas fa-plus"></i> {{ $transfert->boutique->nom }}
-                                        </span>
-                                        <br><small class="text-muted">{{ $transfert->boutique->localisation }}</small>
+                                        @if($transfert->boutique)
+                                            <span class="badge bg-success">
+                                                <i class="fas fa-plus"></i> {{ $transfert->boutique->nom }}
+                                            </span>
+                                            <br><small class="text-muted">{{ $transfert->boutique->localisation }}</small>
+                                        @else
+                                            <span class="badge bg-danger">Boutique supprimée</span>
+                                            <br><small class="text-muted">Référence: {{ $transfert->boutique_id }}</small>
+                                        @endif
                                     </td>
                                 </tr>
                                 <tr>
@@ -89,12 +104,12 @@
                             
                             <div class="mb-2">
                                 <small class="text-muted">Stock Magasin :</small><br>
-                                <strong>{{ $transfert->produit->stockTotalMagasin ?? 0 }} unités</strong>
+                                <strong>{{ $transfert->produit ? ($transfert->produit->stockTotalMagasin ?? 0) : 'N/A' }} unités</strong>
                             </div>
                             
                             <div class="mb-2">
                                 <small class="text-muted">Stock Boutique :</small><br>
-                                <strong>{{ $transfert->produit->stockTotalBoutique ?? 0 }} unités</strong>
+                                <strong>{{ $transfert->produit ? ($transfert->produit->stockTotalBoutique ?? 0) : 'N/A' }} unités</strong>
                             </div>
                         </div>
                     </div>
@@ -133,9 +148,15 @@
                             </div>
                         </div>
                         <div>
-                            <a href="{{ route('produits.show', $transfert->produit->id) }}" class="btn btn-outline-info">
-                                <i class="fas fa-box"></i> Voir le produit
-                            </a>
+                            @if($transfert->produit)
+                                <a href="{{ route('produits.show', $transfert->produit->id) }}" class="btn btn-outline-info">
+                                    <i class="fas fa-box"></i> Voir le produit
+                                </a>
+                            @else
+                                <button class="btn btn-outline-info disabled" disabled>
+                                    <i class="fas fa-box"></i> Produit supprimé
+                                </button>
+                            @endif
                             <a href="{{ route('transferts.index') }}" class="btn btn-outline-secondary ms-2">
                                 <i class="fas fa-list"></i> Voir tous les transferts
                             </a>

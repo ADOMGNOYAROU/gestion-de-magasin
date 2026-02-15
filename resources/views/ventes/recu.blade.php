@@ -55,9 +55,17 @@
                                 @foreach($vente->venteProduits as $produit)
                                 <tr>
                                     <td>
-                                        <strong>{{ $produit->produit->nom }}</strong>
-                                        @if($produit->remise > 0)
-                                        <br><small class="text-muted">Remise: {{ number_format($produit->remise, 0) }} FCFA</small>
+                                        @if($produit->produit)
+                                            <strong>{{ $produit->produit->nom ?? 'Produit supprimé' }}</strong>
+                                            @if($produit->remise > 0)
+                                            <br><small class="text-muted">Remise: {{ number_format($produit->remise, 0) }} FCFA</small>
+                                            @endif
+                                        @else
+                                            <strong class="text-danger">Produit supprimé</strong>
+                                            <br><small class="text-muted">Réf: {{ $produit->produit_id }}</small>
+                                            @if($produit->remise > 0)
+                                            <br><small class="text-muted">Remise: {{ number_format($produit->remise, 0) }} FCFA</small>
+                                            @endif
                                         @endif
                                     </td>
                                     <td class="text-center">{{ $produit->quantite }}</td>

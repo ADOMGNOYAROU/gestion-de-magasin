@@ -10,6 +10,7 @@ class Vente extends Model
     protected $fillable = [
         'boutique_id',
         'user_id',
+        'client_id',
         'session_caisse_id',
         'payment_method_id',
         'montant_total',
@@ -46,6 +47,11 @@ class Vente extends Model
     public function boutique()
     {
         return $this->belongsTo(Boutique::class);
+    }
+
+    public function client()
+    {
+        return $this->belongsTo(Client::class);
     }
 
     public function sessionCaisse()
@@ -184,9 +190,68 @@ class Vente extends Model
         $this->status = 'terminee';
         $this->save();
 
+        // Calculer et attribuer les points de fidélité
+        if ($this->client) {
+            $this->attribuerPointsFidelite();
+        }
+
         // Mettre à jour la session de caisse
         if ($this->sessionCaisse) {
             $this->sessionCaisse->calculerMontantTheorique();
+        }
+
+        // Mettre à jour les statistiques du client
+        if ($this->client) {
+            $this->client->mettreAJourStatistiques();
+        }
+    }
+
+    private function attribuerPointsFidelite()
+    {
+        if (!$this->client || $this->montant_total <= 0) {
+            return;
+        }
+
+        // Calcul des points : 1 point par tranche de 1000 FCFA
+        $pointsGagnes = floor($this->montant_total / 1000);
+
+        if ($pointsGagnes > 0) {
+            $this->client->ajouterPoints(
+                $pointsGagnes,
+                "Achat - Ticket {$this->numero_ticket}",
+                $this
+            );
+
+            // Vérifier si le client atteint un seuil pour un coupon bonus
+            $this->verifierSeuilCouponBonus();
+        }
+    }
+
+    private function verifierSeuilCouponBonus()
+    {
+        $seuils = [
+            100 => ['type' => 'montant_fixe', 'valeur' => 5000, 'jours' => 30], // 100 points = 5000 FCFA
+            250 => ['type' => 'pourcentage', 'valeur' => 10, 'jours' => 60],    // 250 points = 10%
+            500 => ['type' => 'montant_fixe', 'valeur' => 15000, 'jours' => 90], // 500 points = 15000 FCFA
+        ];
+
+        foreach ($seuils as $seuil => $coupon) {
+            if ($this->client->solde_points >= $seuil) {
+                // Vérifier si le client a déjà reçu ce type de coupon récemment
+                $couponRecent = $this->client->coupons()
+                    ->where('valeur', $coupon['valeur'])
+                    ->where('type', $coupon['type'])
+                    ->where('date_expiration', '>', now())
+                    ->exists();
+
+                if (!$couponRecent) {
+                    $this->client->genererCoupon(
+                        $coupon['type'],
+                        $coupon['valeur'],
+                        $coupon['jours']
+                    );
+                }
+            }
         }
     }
 

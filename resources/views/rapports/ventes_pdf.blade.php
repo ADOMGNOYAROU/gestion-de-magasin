@@ -171,8 +171,8 @@
         <tbody>
             @forelse($ventesParProduit as $produitData)
                 <tr>
-                    <td><strong>{{ $produitData['produit']->nom }}</strong></td>
-                    <td>{{ $produitData['produit']->categorie }}</td>
+                    <td><strong>{{ $produitData['produit'] ? $produitData['produit']->nom : 'Produit supprimé' }}</strong></td>
+                    <td>{{ $produitData['produit'] ? $produitData['produit']->categorie : 'N/A' }}</td>
                     <td class="text-center">{{ $produitData['quantite'] }}</td>
                     <td class="text-right">{{ number_format($produitData['ca'], 0, ',', ' ') }} FCFA</td>
                     <td class="text-right">{{ number_format($produitData['benefice'], 0, ',', ' ') }} FCFA</td>
@@ -213,14 +213,14 @@
             @forelse($venteProduits as $vp)
                 <tr>
                     <td>{{ $vp->vente->date_vente->format('d/m/Y') }}</td>
-                    <td>{{ $vp->produit->nom }}</td>
-                    <td>{{ $vp->produit->categorie }}</td>
+                    <td>{{ $vp->produit ? $vp->produit->nom : 'Produit supprimé' }}</td>
+                    <td>{{ $vp->produit ? $vp->produit->categorie : 'N/A' }}</td>
                     <td>{{ $vp->vente->boutique->nom }}</td>
                     <td>{{ $vp->vente->boutique->magasin->nom }}</td>
                     <td class="text-center">{{ $vp->quantite }}</td>
                     <td class="text-right">{{ number_format($vp->prix_unitaire, 0, ',', ' ') }} FCFA</td>
                     <td class="text-right">{{ number_format($vp->sous_total, 0, ',', ' ') }} FCFA</td>
-                    <td class="text-right">{{ number_format(($vp->prix_unitaire - $vp->produit->prix_achat) * $vp->quantite, 0, ',', ' ') }} FCFA</td>
+                    <td class="text-right">{{ $vp->produit ? number_format(($vp->prix_unitaire - $vp->produit->prix_achat) * $vp->quantite, 0, ',', ' ') : 0 }} FCFA</td>
                 </tr>
             @empty
                 <tr>

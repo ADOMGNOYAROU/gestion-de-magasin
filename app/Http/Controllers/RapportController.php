@@ -26,9 +26,6 @@ class RapportController extends Controller
      */
     public function index()
     {
-        // Vérifier la permission de gérer les rapports
-        Gate::authorize('manage-rapports');
-        
         return view('rapports.index');
     }
 
@@ -97,6 +94,10 @@ class RapportController extends Controller
             $magasins = Magasin::orderBy('nom')->get();
             $boutiques = Boutique::with('magasin')->orderBy('nom')->get();
         } elseif ($user->isGestionnaire()) {
+            if (!$user->magasinResponsable) {
+                return back()->with('error', 'Aucun magasin n\'est associé à votre compte. Veuillez contacter un administrateur.');
+            }
+            
             $magasins = collect([$user->magasinResponsable]);
             $boutiques = Boutique::where('magasin_id', $user->magasinResponsable->id)->orderBy('nom')->get();
         } else {
@@ -111,6 +112,13 @@ class RapportController extends Controller
      */
     public function rapportVentesPDF(Request $request)
     {
+        $user = Auth::user();
+
+        // Vérifier si le gestionnaire a un magasin associé
+        if ($user->isGestionnaire() && !$user->magasinResponsable) {
+            return back()->with('error', 'Aucun magasin n\'est associé à votre compte. Veuillez contacter un administrateur.');
+        }
+
         $validated = $request->validate([
             'date_debut' => 'required|date',
             'date_fin' => 'required|date|after_or_equal:date_debut',
@@ -118,20 +126,23 @@ class RapportController extends Controller
             'boutique_id' => 'nullable|exists:boutiques,id',
         ]);
 
-        $user = Auth::user();
-        $data = $this->getVentesData($validated, $user);
-        $data['periode'] = [
-            'debut' => Carbon::parse($validated['date_debut'])->format('d/m/Y'),
-            'fin' => Carbon::parse($validated['date_fin'])->format('d/m/Y')
-        ];
-        $data['dateGeneration'] = now()->format('d/m/Y H:i:s');
-        $data['user'] = $user;
+        try {
+            $data = $this->getVentesData($validated, $user);
+            $data['periode'] = [
+                'debut' => Carbon::parse($validated['date_debut'])->format('d/m/Y'),
+                'fin' => Carbon::parse($validated['date_fin'])->format('d/m/Y')
+            ];
+            $data['dateGeneration'] = now()->format('d/m/Y H:i:s');
+            $data['user'] = $user;
 
-        $pdf = PDF::loadView('rapports.ventes_pdf', $data);
-        
-        $filename = 'rapport_ventes_' . $validated['date_debut'] . '_au_' . $validated['date_fin'] . '.pdf';
-        
-        return $pdf->download($filename);
+            $pdf = PDF::loadView('rapports.ventes_pdf', $data);
+            
+            $filename = 'rapport_ventes_' . $validated['date_debut'] . '_au_' . $validated['date_fin'] . '.pdf';
+            
+            return $pdf->download($filename);
+        } catch (\Exception $e) {
+            return back()->with('error', 'Erreur lors de la génération du PDF : ' . $e->getMessage());
+        }
     }
 
     /**
@@ -139,6 +150,13 @@ class RapportController extends Controller
      */
     public function rapportVentesExcel(Request $request)
     {
+        $user = Auth::user();
+
+        // Vérifier si le gestionnaire a un magasin associé
+        if ($user->isGestionnaire() && !$user->magasinResponsable) {
+            return back()->with('error', 'Aucun magasin n\'est associé à votre compte. Veuillez contacter un administrateur.');
+        }
+
         $validated = $request->validate([
             'date_debut' => 'required|date',
             'date_fin' => 'required|date|after_or_equal:date_debut',
@@ -146,12 +164,15 @@ class RapportController extends Controller
             'boutique_id' => 'nullable|exists:boutiques,id',
         ]);
 
-        $user = Auth::user();
-        $data = $this->getVentesData($validated, $user);
+        try {
+            $data = $this->getVentesData($validated, $user);
 
-        $filename = 'rapport_ventes_' . $validated['date_debut'] . '_au_' . $validated['date_fin'] . '.xlsx';
-        
-        return Excel::download(new VentesExport($data, $validated, $user), $filename);
+            $filename = 'rapport_ventes_' . $validated['date_debut'] . '_au_' . $validated['date_fin'] . '.xlsx';
+            
+            return Excel::download(new VentesExport($data, $validated, $user), $filename);
+        } catch (\Exception $e) {
+            return back()->with('error', 'Erreur lors de la génération du Excel : ' . $e->getMessage());
+        }
     }
 
     /**
@@ -159,9 +180,6 @@ class RapportController extends Controller
      */
     public function rapportPartenairesPDF()
     {
-        // Vérifier la permission de voir les rapports partenaires
-        Gate::authorize('view-rapports-partenaires');
-        
         $user = Auth::user();
         $data = [];
 
@@ -172,11 +190,16 @@ class RapportController extends Controller
                                             ->get();
         } elseif ($user->isGestionnaire()) {
             // Gestionnaire : voir les partenaires de son magasin
-            $data['partenaires'] = Partenaire::with(['entreesStock' => function($q) use ($user) {
-                                                $q->where('magasin_id', $user->magasinResponsable->id);
+            if (!$user->magasinResponsable) {
+                return back()->with('error', 'Aucun magasin n\'est associé à votre compte. Veuillez contacter un administrateur.');
+            }
+            
+            $magasinId = $user->magasinResponsable->id;
+            $data['partenaires'] = Partenaire::with(['entreesStock' => function($q) use ($magasinId) {
+                                                $q->where('magasin_id', $magasinId);
                                             }, 'entreesStock.produit', 'entreesStock.magasin'])
-                                            ->whereHas('entreesStock', function($q) use ($user) {
-                                                $q->where('magasin_id', $user->magasinResponsable->id);
+                                            ->whereHas('entreesStock', function($q) use ($magasinId) {
+                                                $q->where('magasin_id', $magasinId);
                                             })
                                             ->orderBy('nom')
                                             ->get();
@@ -272,7 +295,9 @@ class RapportController extends Controller
                 }
                 $ventesParProduit[$produitId]['quantite'] += $vp->quantite;
                 $ventesParProduit[$produitId]['ca'] += $vp->sous_total;
-                $ventesParProduit[$produitId]['benefice'] += ($vp->prix_unitaire - $vp->produit->prix_achat) * $vp->quantite;
+                if ($vp->produit) {
+                    $ventesParProduit[$produitId]['benefice'] += ($vp->prix_unitaire - $vp->produit->prix_achat) * $vp->quantite;
+                }
             }
         }
         $data['ventesParProduit'] = collect($ventesParProduit);

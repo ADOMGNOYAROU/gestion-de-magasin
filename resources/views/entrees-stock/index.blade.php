@@ -85,17 +85,27 @@
                                     <tr>
                                         <td>{{ $entree->date->format('d/m/Y') }}</td>
                                         <td>
-                                            <strong>{{ $entree->produit->nom }}</strong>
-                                            <br><small class="text-muted">{{ $entree->produit->categorie }}</small>
+                                            @if($entree->produit)
+                                                <strong>{{ $entree->produit->nom ?? 'Produit supprimé' }}</strong>
+                                                <br><small class="text-muted">{{ $entree->produit->categorie ?? '' }}</small>
+                                            @else
+                                                <span class="text-danger">Produit introuvable</span>
+                                            @endif
                                         </td>
                                         <td>
-                                            <span class="badge bg-info">{{ $entree->magasin->nom }}</span>
+                                            @if($entree->magasin)
+                                                <span class="badge bg-info">{{ $entree->magasin->nom }}</span>
+                                            @else
+                                                <span class="badge bg-danger">Magasin inconnu</span>
+                                            @endif
                                         </td>
                                         <td>
                                             @if($entree->fournisseur)
-                                                <span class="badge bg-primary">F: {{ $entree->fournisseur->nom }}</span>
+                                                <span class="badge bg-primary">F: {{ $entree->fournisseur->nom ?? 'N/A' }}</span>
+                                            @elseif($entree->partenaire)
+                                                <span class="badge bg-warning">P: {{ $entree->partenaire->nom ?? 'N/A' }}</span>
                                             @else
-                                                <span class="badge bg-warning">P: {{ $entree->partenaire->nom }}</span>
+                                                <span class="badge bg-secondary">Non spécifié</span>
                                             @endif
                                         </td>
                                         <td>

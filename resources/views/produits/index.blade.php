@@ -10,6 +10,9 @@
                     <a href="{{ route('rapports.stock.pdf') }}" class="btn btn-outline-danger me-2 {{ hideIfCannot('manage-rapports') }}">
                         <i class="fas fa-warehouse"></i> Rapport Stock
                     </a>
+                    <a href="{{ route('commandes-fournisseurs.create') }}" class="btn btn-info me-2">
+                        <i class="fas fa-shopping-cart"></i> Nouvelle Commande
+                    </a>
                     <button type="button" class="btn btn-success me-2" data-bs-toggle="modal" data-bs-target="#importModal">
                         <i class="fas fa-upload"></i> Importer Excel
                     </button>

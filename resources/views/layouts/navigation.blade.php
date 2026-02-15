@@ -29,14 +29,26 @@
                         <x-nav-link :href="route('gestionnaire.dashboard')" :active="request()->routeIs('gestionnaire.*')">
                             {{ __('Mon Magasin') }}
                         </x-nav-link>
+                        <x-nav-link :href="route('clients.index')" :active="request()->routeIs('clients.*')">
+                            <i class="fas fa-users me-1"></i>{{ __('Clients') }}
+                        </x-nav-link>
                         <x-nav-link :href="route('pos.index')" :active="request()->routeIs('pos.*')">
                             <i class="fas fa-cash-register me-1"></i>{{ __('Caisse') }}
+                        </x-nav-link>
+                        <x-nav-link :href="route('mouvements-stock.index')" :active="request()->routeIs('mouvements-stock.*')">
+                            <i class="fas fa-history me-1"></i>Historique Stock
                         </x-nav-link>
                     @endif
                     
                     @if(auth()->user()->isVendeur())
                         <x-nav-link :href="route('vendeur.dashboard')" :active="request()->routeIs('vendeur.*')">
                             {{ __('Ma Boutique') }}
+                        </x-nav-link>
+                        <x-nav-link :href="route('clients.index')" :active="request()->routeIs('clients.*')">
+                            <i class="fas fa-users me-1"></i>{{ __('Clients') }}
+                        </x-nav-link>
+                        <x-nav-link :href="route('pos.index')" :active="request()->routeIs('pos.*')">
+                            <i class="fas fa-cash-register me-1"></i>{{ __('Caisse') }}
                         </x-nav-link>
                     @endif
                 </div>
@@ -115,6 +127,9 @@
                 <x-responsive-nav-link :href="route('gestionnaire.dashboard')" :active="request()->routeIs('gestionnaire.*')">
                     {{ __('Mon Magasin') }}
                 </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('clients.index')" :active="request()->routeIs('clients.*')">
+                    <i class="fas fa-users me-1"></i>{{ __('Clients') }}
+                </x-responsive-nav-link>
                 <x-responsive-nav-link :href="route('pos.index')" :active="request()->routeIs('pos.*')">
                     <i class="fas fa-cash-register me-1"></i>{{ __('Caisse') }}
                 </x-responsive-nav-link>
@@ -123,6 +138,12 @@
             @if(auth()->user()->isVendeur())
                 <x-responsive-nav-link :href="route('vendeur.dashboard')" :active="request()->routeIs('vendeur.*')">
                     {{ __('Ma Boutique') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('clients.index')" :active="request()->routeIs('clients.*')">
+                    <i class="fas fa-users me-1"></i>{{ __('Clients') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('pos.index')" :active="request()->routeIs('pos.*')">
+                    <i class="fas fa-cash-register me-1"></i>{{ __('Caisse') }}
                 </x-responsive-nav-link>
             @endif
         </div>

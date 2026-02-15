@@ -126,4 +126,27 @@ class ProduitController extends Controller
         return redirect()->route('produits.index')
             ->with('success', 'Produits importés avec succès.');
     }
+
+    /**
+     * Recherche rapide de produits (API pour AJAX).
+     */
+    public function search(Request $request)
+    {
+        $limit = $request->get('limit', 50);
+
+        $produits = Produit::where('statut', 'actif')
+                          ->select('id', 'nom', 'categorie', 'prix_vente')
+                          ->orderBy('nom')
+                          ->limit($limit)
+                          ->get()
+                          ->map(function($produit) {
+                              return [
+                                  'id' => $produit->id,
+                                  'nom' => $produit->nom,
+                                  'categorie' => $produit->categorie,
+                              ];
+                          });
+
+        return response()->json($produits);
+    }
 }
