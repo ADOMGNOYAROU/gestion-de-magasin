@@ -89,9 +89,9 @@
 <body>
     <div class="header">
         <h1>RAPPORT DE VENTES</h1>
-        <p>Période : {{ $periode['debut'] }} au {{ $periode['fin'] }}</p>
-        <p>Généré le : {{ $dateGeneration }}</p>
-        <p>Par : {{ $user->name }} ({{ $user->role }})</p>
+        <p>Période : <?php echo e($periode['debut']); ?> au <?php echo e($periode['fin']); ?></p>
+        <p>Généré le : <?php echo e($dateGeneration); ?></p>
+        <p>Par : <?php echo e($user->name); ?> (<?php echo e($user->role); ?>)</p>
     </div>
 
     <div class="summary-box">
@@ -99,22 +99,22 @@
         <table class="table">
             <tr>
                 <td><strong>Total des ventes</strong></td>
-                <td class="text-right">{{ $totalVentes }}</td>
+                <td class="text-right"><?php echo e($totalVentes); ?></td>
             </tr>
             <tr>
                 <td><strong>Chiffre d'affaires total</strong></td>
-                <td class="text-right">{{ number_format($totalCA, 0, ',', ' ') }} FCFA</td>
+                <td class="text-right"><?php echo e(number_format($totalCA, 0, ',', ' ')); ?> FCFA</td>
             </tr>
             <tr>
                 <td><strong>Bénéfice total</strong></td>
-                <td class="text-right">{{ number_format($totalBenefice, 0, ',', ' ') }} FCFA</td>
+                <td class="text-right"><?php echo e(number_format($totalBenefice, 0, ',', ' ')); ?> FCFA</td>
             </tr>
-            @if($totalCA > 0)
+            <?php if($totalCA > 0): ?>
             <tr>
                 <td><strong>Marge bénéficiaire</strong></td>
-                <td class="text-right">{{ round(($totalBenefice / $totalCA) * 100, 1) }}%</td>
+                <td class="text-right"><?php echo e(round(($totalBenefice / $totalCA) * 100, 1)); ?>%</td>
             </tr>
-            @endif
+            <?php endif; ?>
         </table>
     </div>
 
@@ -131,26 +131,26 @@
             </tr>
         </thead>
         <tbody>
-            @forelse($ventesParBoutique as $boutiqueData)
+            <?php $__empty_1 = true; $__currentLoopData = $ventesParBoutique; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $boutiqueData): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                 <tr>
-                    <td><strong>{{ $boutiqueData['boutique']->nom }}</strong></td>
-                    <td>{{ $boutiqueData['boutique']->magasin->nom }}</td>
-                    <td class="text-center">{{ $boutiqueData['ventes'] }}</td>
-                    <td class="text-right">{{ number_format($boutiqueData['ca'], 0, ',', ' ') }} FCFA</td>
-                    <td class="text-right">{{ number_format($boutiqueData['benefice'], 0, ',', ' ') }} FCFA</td>
+                    <td><strong><?php echo e($boutiqueData['boutique']->nom); ?></strong></td>
+                    <td><?php echo e($boutiqueData['boutique']->magasin->nom); ?></td>
+                    <td class="text-center"><?php echo e($boutiqueData['ventes']); ?></td>
+                    <td class="text-right"><?php echo e(number_format($boutiqueData['ca'], 0, ',', ' ')); ?> FCFA</td>
+                    <td class="text-right"><?php echo e(number_format($boutiqueData['benefice'], 0, ',', ' ')); ?> FCFA</td>
                     <td class="text-right">
-                        @if($boutiqueData['ca'] > 0)
-                            {{ round(($boutiqueData['benefice'] / $boutiqueData['ca']) * 100, 1) }}%
-                        @else
+                        <?php if($boutiqueData['ca'] > 0): ?>
+                            <?php echo e(round(($boutiqueData['benefice'] / $boutiqueData['ca']) * 100, 1)); ?>%
+                        <?php else: ?>
                             0%
-                        @endif
+                        <?php endif; ?>
                     </td>
                 </tr>
-            @empty
+            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                 <tr>
                     <td colspan="6" class="text-center">Aucune vente trouvée</td>
                 </tr>
-            @endforelse
+            <?php endif; ?>
         </tbody>
     </table>
 
@@ -169,38 +169,26 @@
             </tr>
         </thead>
         <tbody>
-            @forelse($ventesParProduit as $produitData)
+            <?php $__empty_1 = true; $__currentLoopData = $ventesParProduit; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $produitData): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                 <tr>
-                    <td>
-                        @if($produitData['produit'])
-                            <strong>{{ $produitData['produit']->nom }}</strong>
-                        @else
-                            <strong class="text-danger">Produit inconnu</strong>
-                        @endif
-                    </td>
-                    <td>
-                        @if($produitData['produit'] && $produitData['produit']->categorie)
-                            {{ $produitData['produit']->categorie }}
-                        @else
-                            N/A
-                        @endif
-                    </td>
-                    <td class="text-center">{{ $produitData['quantite'] }}</td>
-                    <td class="text-right">{{ number_format($produitData['ca'], 0, ',', ' ') }} FCFA</td>
-                    <td class="text-right">{{ number_format($produitData['benefice'], 0, ',', ' ') }} FCFA</td>
+                    <td><strong><?php echo e($produitData['produit']->nom); ?></strong></td>
+                    <td><?php echo e($produitData['produit']->categorie); ?></td>
+                    <td class="text-center"><?php echo e($produitData['quantite']); ?></td>
+                    <td class="text-right"><?php echo e(number_format($produitData['ca'], 0, ',', ' ')); ?> FCFA</td>
+                    <td class="text-right"><?php echo e(number_format($produitData['benefice'], 0, ',', ' ')); ?> FCFA</td>
                     <td class="text-right">
-                        @if($produitData['ca'] > 0)
-                            {{ round(($produitData['benefice'] / $produitData['ca']) * 100, 1) }}%
-                        @else
+                        <?php if($produitData['ca'] > 0): ?>
+                            <?php echo e(round(($produitData['benefice'] / $produitData['ca']) * 100, 1)); ?>%
+                        <?php else: ?>
                             0%
-                        @endif
+                        <?php endif; ?>
                     </td>
                 </tr>
-            @empty
+            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                 <tr>
                     <td colspan="6" class="text-center">Aucune vente trouvée</td>
                 </tr>
-            @endforelse
+            <?php endif; ?>
         </tbody>
     </table>
 
@@ -222,43 +210,44 @@
             </tr>
         </thead>
         <tbody>
-            @forelse($venteProduits as $vp)
+            <?php $__empty_1 = true; $__currentLoopData = $venteProduits; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $vp): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                 <tr>
-                    <td>{{ $vp->vente->date_vente->format('d/m/Y') }}</td>
-                    <td>{{ $vp->produit->nom }}</td>
-                    <td>{{ $vp->produit->categorie }}</td>
-                    <td>{{ $vp->vente->boutique->nom }}</td>
-                    <td>{{ $vp->vente->boutique->magasin->nom }}</td>
-                    <td class="text-center">{{ $vp->quantite }}</td>
-                    <td class="text-right">{{ number_format($vp->prix_unitaire, 0, ',', ' ') }} FCFA</td>
-                    <td class="text-right">{{ number_format($vp->sous_total, 0, ',', ' ') }} FCFA</td>
-                    <td class="text-right">{{ number_format(($vp->prix_unitaire - $vp->produit->prix_achat) * $vp->quantite, 0, ',', ' ') }} FCFA</td>
+                    <td><?php echo e($vp->vente->date_vente->format('d/m/Y')); ?></td>
+                    <td><?php echo e($vp->produit->nom); ?></td>
+                    <td><?php echo e($vp->produit->categorie); ?></td>
+                    <td><?php echo e($vp->vente->boutique->nom); ?></td>
+                    <td><?php echo e($vp->vente->boutique->magasin->nom); ?></td>
+                    <td class="text-center"><?php echo e($vp->quantite); ?></td>
+                    <td class="text-right"><?php echo e(number_format($vp->prix_unitaire, 0, ',', ' ')); ?> FCFA</td>
+                    <td class="text-right"><?php echo e(number_format($vp->sous_total, 0, ',', ' ')); ?> FCFA</td>
+                    <td class="text-right"><?php echo e(number_format(($vp->prix_unitaire - $vp->produit->prix_achat) * $vp->quantite, 0, ',', ' ')); ?> FCFA</td>
                 </tr>
-            @empty
+            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                 <tr>
                     <td colspan="9" class="text-center">Aucune vente trouvée</td>
                 </tr>
-            @endforelse
+            <?php endif; ?>
         </tbody>
     </table>
 
-    @if($ventes->count() > 0)
+    <?php if($ventes->count() > 0): ?>
         <!-- Totaux du détail -->
         <table class="table">
             <tfoot>
                 <tr style="background-color: #f2f2f2; font-weight: bold;">
                     <td colspan="6" class="text-right"><strong>TOTAUX</strong></td>
-                    <td class="text-right">{{ number_format($ventes->sum('prix_unitaire') * $ventes->sum('quantite') / $ventes->count(), 0, ',', ' ') }} FCFA</td>
-                    <td class="text-right">{{ number_format($totalCA, 0, ',', ' ') }} FCFA</td>
-                    <td class="text-right">{{ number_format($totalBenefice, 0, ',', ' ') }} FCFA</td>
+                    <td class="text-right"><?php echo e(number_format($ventes->sum('prix_unitaire') * $ventes->sum('quantite') / $ventes->count(), 0, ',', ' ')); ?> FCFA</td>
+                    <td class="text-right"><?php echo e(number_format($totalCA, 0, ',', ' ')); ?> FCFA</td>
+                    <td class="text-right"><?php echo e(number_format($totalBenefice, 0, ',', ' ')); ?> FCFA</td>
                 </tr>
             </tfoot>
         </table>
-    @endif
+    <?php endif; ?>
 
     <div class="footer">
         <p>Rapport généré automatiquement par le système de gestion de stock</p>
-        <p>{{ $dateGeneration }}</p>
+        <p><?php echo e($dateGeneration); ?></p>
     </div>
 </body>
 </html>
+<?php /**PATH C:\xampp\htdocs\gestion-magasin\resources\views/rapports/ventes_pdf.blade.php ENDPATH**/ ?>
