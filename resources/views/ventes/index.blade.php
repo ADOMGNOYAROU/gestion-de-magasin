@@ -88,14 +88,29 @@
                                             <td>{{ $vente->date_vente->format('d/m/Y') }}</td>
                                             <td>
                                                 @foreach($vente->venteProduits as $vp)
-                                                    <strong>{{ $vp->produit->nom }}</strong> ({{ $vp->quantite }})
-                                                    @if(!$loop->last)<br>@endif
-                                                    <br><small class="text-muted">{{ $vp->produit->categorie }}</small>
+                                                    @if($vp->produit)
+                                                        <strong>{{ $vp->produit->nom }}</strong> ({{ $vp->quantite }})
+                                                        @if(!$loop->last)<br>@endif
+                                                        @if($vp->produit->categorie)
+                                                            <br><small class="text-muted">{{ $vp->produit->categorie }}</small>
+                                                        @endif
+                                                    @else
+                                                        <span class="text-danger">Produit inconnu</span> ({{ $vp->quantite }})
+                                                        @if(!$loop->last)<br>@endif
+                                                    @endif
                                                 @endforeach
                                             </td>
                                             <td>
-                                                <span class="badge bg-info">{{ $vente->boutique->nom }}</span>
-                                                <br><small class="text-muted">{{ $vente->boutique->magasin->nom }}</small>
+                                                @if($vente->boutique)
+                                                    <span class="badge bg-info">{{ $vente->boutique->nom }}</span>
+                                                    @if($vente->boutique->magasin)
+                                                        <br><small class="text-muted">{{ $vente->boutique->magasin->nom }}</small>
+                                                    @else
+                                                        <br><small class="text-muted">Magasin inconnu</small>
+                                                    @endif
+                                                @else
+                                                    <span class="badge bg-secondary">Boutique inconnue</span>
+                                                @endif
                                             </td>
                                             <td>
                                                 <span class="badge bg-warning">{{ $vente->total_produits }}</span>
@@ -159,8 +174,14 @@
                                             @foreach($vente->venteProduits as $vp)
                                                 <div class="d-flex justify-content-between align-items-center py-1 border-bottom">
                                                     <div>
-                                                        <strong class="text-sm">{{ $vp->produit->nom }}</strong>
-                                                        <br><small class="text-muted">{{ $vp->produit->categorie }}</small>
+                                                        @if($vp->produit)
+                                                            <strong class="text-sm">{{ $vp->produit->nom }}</strong>
+                                                            @if($vp->produit->categorie)
+                                                                <br><small class="text-muted">{{ $vp->produit->categorie }}</small>
+                                                            @endif
+                                                        @else
+                                                            <strong class="text-sm text-danger">Produit inconnu</strong>
+                                                        @endif
                                                     </div>
                                                     <div class="text-end">
                                                         <span class="badge bg-warning">{{ $vp->quantite }}</span>
