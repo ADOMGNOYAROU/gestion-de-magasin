@@ -262,7 +262,7 @@ class RapportController extends Controller
                 }
                 $ventesParProduit[$produitId]['quantite'] += $vp->quantite;
                 $ventesParProduit[$produitId]['ca'] += $vp->sous_total;
-                $ventesParProduit[$produitId]['benefice'] += ($vp->prix_unitaire - $vp->produit->prix_achat) * $vp->quantite;
+                $ventesParProduit[$produitId]['benefice'] += $vp->produit ? (($vp->prix_unitaire - ($vp->produit->prix_achat ?? 0)) * $vp->quantite) : 0;
             }
         }
         $data['ventesParProduit'] = collect($ventesParProduit);

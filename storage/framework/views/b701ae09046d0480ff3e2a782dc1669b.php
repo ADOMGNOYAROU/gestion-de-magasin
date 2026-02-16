@@ -174,8 +174,14 @@
                                             <?php $__currentLoopData = $vente->venteProduits; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $vp): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                                 <div class="d-flex justify-content-between align-items-center py-1 border-bottom">
                                                     <div>
-                                                        <strong class="text-sm"><?php echo e($vp->produit->nom); ?></strong>
-                                                        <br><small class="text-muted"><?php echo e($vp->produit->categorie); ?></small>
+                                                        <?php if($vp->produit): ?>
+                                                            <strong class="text-sm"><?php echo e($vp->produit->nom); ?></strong>
+                                                            <?php if($vp->produit->categorie): ?>
+                                                                <br><small class="text-muted"><?php echo e($vp->produit->categorie); ?></small>
+                                                            <?php endif; ?>
+                                                        <?php else: ?>
+                                                            <strong class="text-sm text-danger">Produit inconnu</strong>
+                                                        <?php endif; ?>
                                                     </div>
                                                     <div class="text-end">
                                                         <span class="badge bg-warning"><?php echo e($vp->quantite); ?></span>
