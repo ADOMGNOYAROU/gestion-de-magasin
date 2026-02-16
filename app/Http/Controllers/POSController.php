@@ -274,7 +274,7 @@ class POSController extends Controller
     /**
      * Fermer une session de caisse
      */
-    public function close(Request $request = null)
+    public function close(Request $request)
     {
         $user = Auth::user();
 
@@ -296,7 +296,7 @@ class POSController extends Controller
 
         // Pour admin/gestionnaire : fermer caisse pour un vendeur
         } elseif ($user->isAdmin() || $user->isGestionnaire()) {
-            $vendeurId = $request->get('vendeur_id');
+            $vendeurId = $request->query('vendeur_id', $request->vendeur_id);
 
             if (!$vendeurId) {
                 // Afficher la liste des sessions actives pour sélection

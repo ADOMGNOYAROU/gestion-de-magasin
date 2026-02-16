@@ -230,6 +230,7 @@ class DashboardController extends Controller
         $seuilAlerte = 10; // Seuil d'alerte fixe, vous pouvez ajuster cette valeur
         
         $rupturesMagasin = StockMagasin::with('produit', 'magasin')
+                                      ->whereHas('produit')
                                       ->where('quantite', '<=', $seuilAlerte)
                                       ->get()
                                       ->map(function($stock) use ($seuilAlerte) {
@@ -243,6 +244,7 @@ class DashboardController extends Controller
                                       });
 
         $rupturesBoutique = StockBoutique::with('produit', 'boutique')
+                                        ->whereHas('produit')
                                         ->where('quantite', '<=', $seuilAlerte)
                                         ->get()
                                         ->map(function($stock) use ($seuilAlerte) {
@@ -255,7 +257,7 @@ class DashboardController extends Controller
                                             ];
                                         });
 
-        return $rupturesMagasin->merge($rupturesBoutique)->sortBy('quantite')->take(10);
+        return collect(array_merge($rupturesMagasin->all(), $rupturesBoutique->all()))->sortBy('quantite')->take(10);
     }
 
     /**
@@ -266,6 +268,7 @@ class DashboardController extends Controller
         $seuilAlerte = 10; // Seuil d'alerte fixe
         
         $rupturesMagasin = StockMagasin::with('produit', 'magasin')
+                                      ->whereHas('produit')
                                       ->where('magasin_id', $magasinId)
                                       ->where('quantite', '<=', $seuilAlerte)
                                       ->get()
@@ -280,6 +283,7 @@ class DashboardController extends Controller
                                       });
 
         $rupturesBoutique = StockBoutique::with(['produit', 'boutique'])
+                                        ->whereHas('produit')
                                         ->whereHas('boutique', function($q) use ($magasinId) {
                                             $q->where('magasin_id', $magasinId);
                                         })
@@ -295,7 +299,7 @@ class DashboardController extends Controller
                                             ];
                                         });
 
-        return $rupturesMagasin->merge($rupturesBoutique)->sortBy('quantite')->take(10);
+        return collect(array_merge($rupturesMagasin->all(), $rupturesBoutique->all()))->sortBy('quantite')->take(10);
     }
 
     /**
@@ -306,6 +310,7 @@ class DashboardController extends Controller
         $seuilAlerte = 10; // Seuil d'alerte fixe
         
         return StockBoutique::with('produit', 'boutique')
+                           ->whereHas('produit')
                            ->where('boutique_id', $boutiqueId)
                            ->where('quantite', '<=', $seuilAlerte)
                            ->get()
@@ -328,6 +333,7 @@ class DashboardController extends Controller
     private function getTopProduits($limit = 5)
     {
         return VenteProduit::with(['produit', 'vente'])
+                   ->whereHas('produit')
                    ->select('produit_id', DB::raw('SUM(quantite) as total_vendu'), DB::raw('SUM(sous_total) as total_ca'))
                    ->join('ventes', 'vente_produits.vente_id', '=', 'ventes.id')
                    ->groupBy('produit_id')
@@ -349,6 +355,7 @@ class DashboardController extends Controller
     private function getTopProduitsMagasin($limit = 5, $magasinId)
     {
         return VenteProduit::with(['produit', 'vente.boutique'])
+                   ->whereHas('produit')
                    ->select('produit_id', DB::raw('SUM(quantite) as total_vendu'), DB::raw('SUM(sous_total) as total_ca'))
                    ->join('ventes', 'vente_produits.vente_id', '=', 'ventes.id')
                    ->join('boutiques', 'ventes.boutique_id', '=', 'boutiques.id')
@@ -372,6 +379,7 @@ class DashboardController extends Controller
     private function getTopProduitsBoutique($limit = 5, $boutiqueId)
     {
         return VenteProduit::with(['produit', 'vente'])
+                   ->whereHas('produit')
                    ->select('produit_id', DB::raw('SUM(quantite) as total_vendu'), DB::raw('SUM(sous_total) as total_ca'))
                    ->join('ventes', 'vente_produits.vente_id', '=', 'ventes.id')
                    ->where('ventes.boutique_id', $boutiqueId)
@@ -474,6 +482,7 @@ class DashboardController extends Controller
     private function getVentesParProduit($limit = 10)
     {
         return VenteProduit::with('produit')
+                   ->whereHas('produit')
                    ->select('produit_id', DB::raw('SUM(quantite) as total_vendu'))
                    ->join('ventes', 'vente_produits.vente_id', '=', 'ventes.id')
                    ->groupBy('produit_id')
@@ -494,6 +503,7 @@ class DashboardController extends Controller
     private function getVentesParProduitMagasin($limit = 10, $magasinId)
     {
         return VenteProduit::with(['produit', 'vente.boutique'])
+                   ->whereHas('produit')
                    ->select('produit_id', DB::raw('SUM(quantite) as total_vendu'))
                    ->join('ventes', 'vente_produits.vente_id', '=', 'ventes.id')
                    ->join('boutiques', 'ventes.boutique_id', '=', 'boutiques.id')
@@ -516,6 +526,7 @@ class DashboardController extends Controller
     private function getVentesParProduitBoutique($limit = 10, $boutiqueId)
     {
         return VenteProduit::with(['produit', 'vente'])
+                   ->whereHas('produit')
                    ->select('produit_id', DB::raw('SUM(quantite) as total_vendu'))
                    ->join('ventes', 'vente_produits.vente_id', '=', 'ventes.id')
                    ->where('ventes.boutique_id', $boutiqueId)

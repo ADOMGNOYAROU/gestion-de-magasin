@@ -101,7 +101,7 @@
                                                     <i class="fas fa-edit"></i>
                                                 </a>
                                                 <form action="{{ route('produits.destroy', $produit->id) }}" 
-                                                      method="POST" style="display: inline-block;">
+                                                      method="POST" class="d-inline">
                                                     @csrf
                                                     @method('DELETE')
                                                     <button type="submit" class="btn btn-sm btn-outline-danger" 

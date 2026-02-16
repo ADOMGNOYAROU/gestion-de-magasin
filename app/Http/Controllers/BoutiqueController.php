@@ -76,7 +76,7 @@ class BoutiqueController extends Controller
     {
         $this->authorizeBoutiqueAccess($boutique);
         
-        $boutique->load(['magasin', 'responsable', 'stocks.produit']);
+        $boutique->load(['magasin', 'responsable', 'stockBoutiques.produit']);
 
         return view('boutiques.show', compact('boutique'));
     }

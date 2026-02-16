@@ -203,12 +203,8 @@ class EntreeStockController extends Controller
 
             if ($stockMagasin) {
                 $nouvelleQuantite = $stockMagasin->quantite - $entree->quantite;
-                if ($nouvelleQuantite >= 0) {
-                    $stockMagasin->quantite = $nouvelleQuantite;
-                    $stockMagasin->save();
-                } else {
-                    throw new \Exception('Impossible de supprimer cette entrée : stock insuffisant');
-                }
+                $stockMagasin->quantite = $nouvelleQuantite;
+                $stockMagasin->save();
             }
 
             // 2. Supprimer l'entrée

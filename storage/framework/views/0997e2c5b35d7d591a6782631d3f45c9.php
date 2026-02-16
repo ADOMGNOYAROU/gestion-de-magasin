@@ -1,5 +1,3 @@
-
-
 <?php $__env->startSection('content'); ?>
 <div class="container-fluid">
     <div class="row">
@@ -87,17 +85,29 @@
                                     <tr>
                                         <td><?php echo e($entree->date->format('d/m/Y')); ?></td>
                                         <td>
-                                            <strong><?php echo e($entree->produit->nom); ?></strong>
-                                            <br><small class="text-muted"><?php echo e($entree->produit->categorie); ?></small>
-                                        </td>
-                                        <td>
-                                            <span class="badge bg-info"><?php echo e($entree->magasin->nom); ?></span>
-                                        </td>
-                                        <td>
-                                            <?php if($entree->fournisseur): ?>
-                                                <span class="badge bg-primary">F: <?php echo e($entree->fournisseur->nom); ?></span>
+                                            <?php if($entree->produit): ?>
+                                                <strong><?php echo e($entree->produit?->nom ?? 'Produit inconnu'); ?></strong>
+                                                <?php if($entree->produit?->categorie): ?>
+                                                    <br><small class="text-muted"><?php echo e($entree->produit->categorie); ?></small>
+                                                <?php endif; ?>
                                             <?php else: ?>
-                                                <span class="badge bg-warning">P: <?php echo e($entree->partenaire->nom); ?></span>
+                                                <span class="text-danger">Produit introuvable</span>
+                                            <?php endif; ?>
+                                        </td>
+                                        <td>
+                                            <?php if($entree->magasin): ?>
+                                                <span class="badge bg-info"><?php echo e($entree->magasin->nom); ?></span>
+                                            <?php else: ?>
+                                                <span class="badge bg-secondary">Magasin inconnu</span>
+                                            <?php endif; ?>
+                                        </td>
+                                        <td>
+                                            <?php if($entree->fournisseur_id): ?>
+                                                <span class="badge bg-primary">F: <?php echo e($entree->fournisseur?->nom ?? 'Non spécifié'); ?></span>
+                                            <?php elseif($entree->partenaire_id): ?>
+                                                <span class="badge bg-warning">P: <?php echo e($entree->partenaire?->nom ?? 'Non spécifié'); ?></span>
+                                            <?php else: ?>
+                                                <span class="badge bg-secondary">Non spécifié</span>
                                             <?php endif; ?>
                                         </td>
                                         <td>

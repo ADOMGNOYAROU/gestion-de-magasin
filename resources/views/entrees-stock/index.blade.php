@@ -85,17 +85,29 @@
                                     <tr>
                                         <td>{{ $entree->date->format('d/m/Y') }}</td>
                                         <td>
-                                            <strong>{{ $entree->produit->nom }}</strong>
-                                            <br><small class="text-muted">{{ $entree->produit->categorie }}</small>
-                                        </td>
-                                        <td>
-                                            <span class="badge bg-info">{{ $entree->magasin->nom }}</span>
-                                        </td>
-                                        <td>
-                                            @if($entree->fournisseur)
-                                                <span class="badge bg-primary">F: {{ $entree->fournisseur->nom }}</span>
+                                            @if($entree->produit)
+                                                <strong>{{ $entree->produit?->nom ?? 'Produit inconnu' }}</strong>
+                                                @if($entree->produit?->categorie)
+                                                    <br><small class="text-muted">{{ $entree->produit->categorie }}</small>
+                                                @endif
                                             @else
-                                                <span class="badge bg-warning">P: {{ $entree->partenaire->nom }}</span>
+                                                <span class="text-danger">Produit introuvable</span>
+                                            @endif
+                                        </td>
+                                        <td>
+                                            @if($entree->magasin)
+                                                <span class="badge bg-info">{{ $entree->magasin->nom }}</span>
+                                            @else
+                                                <span class="badge bg-secondary">Magasin inconnu</span>
+                                            @endif
+                                        </td>
+                                        <td>
+                                            @if($entree->fournisseur_id)
+                                                <span class="badge bg-primary">F: {{ $entree->fournisseur?->nom ?? 'Non spécifié' }}</span>
+                                            @elseif($entree->partenaire_id)
+                                                <span class="badge bg-warning">P: {{ $entree->partenaire?->nom ?? 'Non spécifié' }}</span>
+                                            @else
+                                                <span class="badge bg-secondary">Non spécifié</span>
                                             @endif
                                         </td>
                                         <td>

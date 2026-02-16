@@ -50,19 +50,21 @@
                                     <td><?php echo e($magasin->boutiques->count()); ?></td>
                                     <td><?php echo e($magasin->created_at->format('d/m/Y')); ?></td>
                                     <td>
-                                        <a href="<?php echo e(route('magasins.show', $magasin)); ?>" class="btn btn-sm btn-info">
-                                            <i class="fas fa-eye"></i>
-                                        </a>
-                                        <a href="<?php echo e(route('magasins.edit', $magasin)); ?>" class="btn btn-sm btn-warning">
-                                            <i class="fas fa-edit"></i>
-                                        </a>
-                                        <form method="POST" action="<?php echo e(route('magasins.destroy', $magasin)); ?>" class="d-inline" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce magasin ?')">
-                                            <?php echo csrf_field(); ?>
-                                            <?php echo method_field('DELETE'); ?>
-                                            <button type="submit" class="btn btn-sm btn-danger">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
-                                        </form>
+                                        <div class="btn-group" role="group">
+                                            <a href="<?php echo e(route('magasins.show', $magasin)); ?>" class="btn btn-sm btn-outline-info" title="Voir">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <a href="<?php echo e(route('magasins.edit', $magasin)); ?>" class="btn btn-sm btn-outline-warning" title="Modifier">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <form method="POST" action="<?php echo e(route('magasins.destroy', $magasin)); ?>" class="d-inline" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce magasin ?')">
+                                                <?php echo csrf_field(); ?>
+                                                <?php echo method_field('DELETE'); ?>
+                                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Supprimer">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </form>
+                                        </div>
                                     </td>
                                 </tr>
                                 <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>

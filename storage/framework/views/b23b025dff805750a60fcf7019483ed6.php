@@ -1,5 +1,3 @@
-
-
 <?php $__env->startSection('content'); ?>
 <div class="container-fluid">
     <div class="row">
@@ -103,7 +101,7 @@
                                                     <i class="fas fa-edit"></i>
                                                 </a>
                                                 <form action="<?php echo e(route('produits.destroy', $produit->id)); ?>" 
-                                                      method="POST" style="display: inline-block;">
+                                                      method="POST" class="d-inline">
                                                     <?php echo csrf_field(); ?>
                                                     <?php echo method_field('DELETE'); ?>
                                                     <button type="submit" class="btn btn-sm btn-outline-danger" 
