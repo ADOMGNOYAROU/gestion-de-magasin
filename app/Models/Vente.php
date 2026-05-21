@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
+use App\Models\Client;
 
 class Vente extends Model
 {
@@ -12,6 +13,7 @@ class Vente extends Model
         'user_id',
         'session_caisse_id',
         'payment_method_id',
+        'client_id',
         'montant_total',
         'montant_recu',
         'monnaie',
@@ -58,9 +60,19 @@ class Vente extends Model
         return $this->belongsTo(PaymentMethod::class);
     }
 
+    public function client()
+    {
+        return $this->belongsTo(Client::class);
+    }
+
     public function venteProduits()
     {
         return $this->hasMany(VenteProduit::class);
+    }
+
+    public function credit()
+    {
+        return $this->hasOne(Credit::class);
     }
 
     // Scopes

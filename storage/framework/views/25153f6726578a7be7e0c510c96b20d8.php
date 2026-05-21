@@ -72,6 +72,28 @@
                     </div>
                 </div>
 
+                <!-- Rapport de crédits -->
+                <div class="col-xl-4 col-lg-6 mb-4">
+                    <div class="card shadow h-100">
+                        <div class="card-body">
+                            <div class="text-center">
+                                <div class="icon-circle bg-warning mb-3">
+                                    <i class="fas fa-credit-card text-white fa-2x"></i>
+                                </div>
+                                <h5 class="card-title">Rapport de Crédits</h5>
+                                <p class="card-text text-muted">
+                                    Exportez les crédits impayés, en retard, par client ou période
+                                </p>
+                                <div class="d-grid">
+                                    <a href="<?php echo e(route('rapports.credits.form')); ?>" class="btn btn-warning">
+                                        <i class="fas fa-calendar-alt"></i> Personnaliser
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Rapport partenaires -->
                 <?php if(Auth::user()->isAdmin() || Auth::user()->isGestionnaire()): ?>
                     <div class="col-xl-4 col-lg-6 mb-4">
@@ -164,7 +186,8 @@
                                 <div class="col-md-3">
                                     <div class="d-grid">
                                         <a href="<?php echo e(route('dashboard')); ?>" class="btn btn-outline-primary">
-                                            <i class="fas fa-tachometer-alt"></i> Dashboard
+                                            <i class="fas fa-tachometer-alt"></i> <?php echo e(__('messages.dashboard')); ?>
+
                                         </a>
                                     </div>
                                 </div>

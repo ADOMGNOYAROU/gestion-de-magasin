@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Connexion - Gestion</title>
+    <title>{{ __('messages.connexion') }} - {{ __('messages.gestion') }}</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -64,7 +64,7 @@
 </head>
 <body>
     <div class="container">
-        <h2 class="text-center">Connexion</h2>
+        <h2 class="text-center">{{ __('messages.connexion') }}</h2>
         
         @if (session('status'))
             <div class="mb-4" style="background: #e3f2fd; padding: 10px; border-radius: 4px;">
@@ -82,7 +82,7 @@
             @csrf
 
             <div class="form-group">
-                <label for="email">Email</label>
+                <label for="email">{{ __('messages.email') }}</label>
                 <input id="email" type="email" name="email" value="{{ old('email') }}" required autofocus>
                 @error('email')
                     <div class="text-red-500">{{ $message }}</div>
@@ -90,7 +90,7 @@
             </div>
 
             <div class="form-group">
-                <label for="password">Mot de passe</label>
+                <label for="password">{{ __('messages.mot_de_passe') }}</label>
                 <input id="password" type="password" name="password" required>
                 @error('password')
                     <div class="text-red-500">{{ $message }}</div>
@@ -99,22 +99,18 @@
 
             <div class="form-group">
                 <label>
-                    <input type="checkbox" name="remember"> Se souvenir de moi
+                    <input type="checkbox" name="remember"> {{ __('messages.se_souvenir_de_moi') }}
                 </label>
             </div>
 
             <div class="text-center">
                 @if (Route::has('password.request'))
-                    <a href="{{ route('password.request') }}">Mot de passe oublié?</a>
+                    <a href="{{ route('password.request') }}">{{ __('messages.mot_de_passe_oublie') }}?</a>
                 @endif
                 
-                <button type="submit" class="btn">Se connecter</button>
+                <button type="submit" class="btn">{{ __('messages.se_connecter') }}</button>
             </div>
         </form>
-        
-        <div class="text-center mt-4">
-            Pas encore de compte? <a href="{{ route('register') }}">S'inscrire</a>
-        </div>
     </div>
 </body>
 </html>

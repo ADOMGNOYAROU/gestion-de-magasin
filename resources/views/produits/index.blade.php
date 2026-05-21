@@ -5,13 +5,13 @@
     <div class="row">
         <div class="col-12">
             <div class="d-flex justify-content-between align-items-center mb-4">
-                <h1 class="h3 mb-0 text-gray-800">Gestion des Produits</h1>
+                <h1 class="h3 mb-0 text-gray-800">{{ __('messages.product_list') }}</h1>
                 <div>
                     <a href="{{ route('rapports.stock.pdf') }}" class="btn btn-outline-danger me-2 {{ hideIfCannot('manage-rapports') }}">
-                        <i class="fas fa-warehouse"></i> Rapport Stock
+                        <i class="fas fa-warehouse"></i> {{ __('messages.stock_report') }}
                     </a>
                     <a href="{{ route('produits.create') }}" class="btn btn-primary">
-                        <i class="fas fa-plus"></i> Nouveau Produit
+                        <i class="fas fa-plus"></i> {{ __('messages.add_product') }}
                     </a>
                 </div>
             </div>
@@ -30,16 +30,16 @@
                         <div class="row">
                             <div class="col-md-8">
                                 <input type="text" name="search" class="form-control" 
-                                       placeholder="Rechercher par nom ou catégorie..." 
+                                       placeholder="{{ __('messages.search') }} {{ __('messages.product_name') }} {{ __('messages.category') }}..." 
                                        value="{{ $search ?? '' }}">
                             </div>
                             <div class="col-md-4">
                                 <button type="submit" class="btn btn-outline-primary">
-                                    <i class="fas fa-search"></i> Rechercher
+                                    <i class="fas fa-search"></i> {{ __('messages.search') }}
                                 </button>
                                 @if($search ?? null)
                                     <a href="{{ route('produits.index') }}" class="btn btn-outline-secondary">
-                                        <i class="fas fa-times"></i> Effacer
+                                        <i class="fas fa-times"></i> {{ __('messages.cancel') }}
                                     </a>
                                 @endif
                             </div>
@@ -56,13 +56,13 @@
                             <thead class="table-dark">
                                 <tr>
                                     <th>ID</th>
-                                    <th>Nom</th>
-                                    <th>Catégorie</th>
-                                    <th>Prix Achat</th>
-                                    <th>Prix Vente</th>
-                                    <th>Marge</th>
-                                    <th>Statut</th>
-                                    <th>Actions</th>
+                                    <th>{{ __('messages.name') }}</th>
+                                    <th>{{ __('messages.category') }}</th>
+                                    <th>{{ __('messages.purchase_price') }}</th>
+                                    <th>{{ __('messages.selling_price') }}</th>
+                                    <th>{{ __('messages.price') }} %</th>
+                                    <th>{{ __('messages.status') }}</th>
+                                    <th>{{ __('messages.actions') }}</th>
                                 </tr>
                             </thead>
                             <tbody>

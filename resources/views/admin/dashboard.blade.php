@@ -2,11 +2,11 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <!-- En-tête avec onglets -->
         <div class="mb-6">
-            <h1 class="text-2xl font-bold text-gray-900 mb-2">Tableau de bord Administrateur</h1>
+            <h1 class="text-2xl font-bold text-gray-900 mb-2">{{ __('messages.admin_dashboard') }}</h1>
             <div class="nav-tabs">
-                <a href="#" class="nav-tab active">Vue d'ensemble</a>
-                <a href="#" class="nav-tab">Utilisateurs</a>
-                <a href="#" class="nav-tab">Système</a>
+                <a href="#" class="nav-tab active">{{ __('messages.overview') }}</a>
+                <a href="#" class="nav-tab">{{ __('messages.users') }}</a>
+                <a href="#" class="nav-tab">{{ __('messages.system') }}</a>
             </div>
             <div class="text-sm text-gray-500 mt-2">{{ now()->format('d/m/Y H:i') }}</div>
         </div>
@@ -18,7 +18,7 @@
                 <div class="p-5">
                     <div class="flex justify-between items-start">
                         <div>
-                            <p class="dashboard-stat-label">Utilisateurs</p>
+                            <p class="dashboard-stat-label">{{ __('messages.users') }}</p>
                             <p class="dashboard-stat counter">{{ $stats['utilisateurs'] ?? 0 }}</p>
                         </div>
                         <div class="bg-blue-100 p-3 rounded-full">
@@ -33,7 +33,7 @@
                 <div class="p-5">
                     <div class="flex justify-between items-start">
                         <div>
-                            <p class="dashboard-stat-label">Magasins</p>
+                            <p class="dashboard-stat-label">{{ __('messages.stores') }}</p>
                             <p class="dashboard-stat counter">{{ $stats['magasins'] ?? 0 }}</p>
                         </div>
                         <div class="bg-yellow-100 p-3 rounded-full">
@@ -48,7 +48,7 @@
                 <div class="p-5">
                     <div class="flex justify-between items-start">
                         <div>
-                            <p class="dashboard-stat-label">Boutiques</p>
+                            <p class="dashboard-stat-label">{{ __('messages.shops') }}</p>
                             <p class="dashboard-stat counter">{{ $stats['boutiques'] ?? 0 }}</p>
                         </div>
                         <div class="bg-green-100 p-3 rounded-full">

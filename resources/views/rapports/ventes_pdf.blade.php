@@ -225,14 +225,44 @@
             @forelse($venteProduits as $vp)
                 <tr>
                     <td>{{ $vp->vente->date_vente->format('d/m/Y') }}</td>
-                    <td>{{ $vp->produit->nom }}</td>
-                    <td>{{ $vp->produit->categorie }}</td>
-                    <td>{{ $vp->vente->boutique->nom }}</td>
-                    <td>{{ $vp->vente->boutique->magasin->nom }}</td>
+                    <td>
+                        @if($vp->produit)
+                            {{ $vp->produit->nom }}
+                        @else
+                            Produit inconnu
+                        @endif
+                    </td>
+                    <td>
+                        @if($vp->produit && $vp->produit->categorie)
+                            {{ $vp->produit->categorie }}
+                        @else
+                            N/A
+                        @endif
+                    </td>
+                    <td>
+                        @if($vp->vente->boutique)
+                            {{ $vp->vente->boutique->nom }}
+                        @else
+                            Boutique inconnue
+                        @endif
+                    </td>
+                    <td>
+                        @if($vp->vente->boutique && $vp->vente->boutique->magasin)
+                            {{ $vp->vente->boutique->magasin->nom }}
+                        @else
+                            Magasin inconnu
+                        @endif
+                    </td>
                     <td class="text-center">{{ $vp->quantite }}</td>
                     <td class="text-right">{{ number_format($vp->prix_unitaire, 0, ',', ' ') }} FCFA</td>
                     <td class="text-right">{{ number_format($vp->sous_total, 0, ',', ' ') }} FCFA</td>
-                    <td class="text-right">{{ number_format(($vp->prix_unitaire - $vp->produit->prix_achat) * $vp->quantite, 0, ',', ' ') }} FCFA</td>
+                    <td class="text-right">
+                        @php
+                            $prixAchat = $vp->produit ? ($vp->produit->prix_achat ?? 0) : 0;
+                            $benefice = ($vp->prix_unitaire - $prixAchat) * $vp->quantite;
+                        @endphp
+                        {{ number_format($benefice, 0, ',', ' ') }} FCFA
+                    </td>
                 </tr>
             @empty
                 <tr>

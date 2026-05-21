@@ -6,7 +6,7 @@
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
         <h1 class="h3 mb-0 text-gray-800">
             <i class="fas fa-tachometer-alt"></i> 
-            Tableau de Bord
+            {{ __('messages.dashboard') }}
             @if(isset($magasin))
                 <small class="text-muted">- {{ $magasin->nom }}</small>
             @elseif(isset($boutique))
@@ -15,7 +15,7 @@
         </h1>
         <div>
             <a href="{{ route('rapports.index') }}" class="btn btn-primary me-2 {{ hideIfCannot('manage-rapports') }}">
-                <i class="fas fa-file-alt"></i> Rapports
+                <i class="fas fa-file-alt"></i> {{ __('messages.reports') }}
             </a>
             <div class="text-muted d-inline-block">
                 <i class="fas fa-clock"></i> {{ now()->format('d/m/Y H:i') }}
@@ -40,7 +40,7 @@
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                                Produits Actifs
+                                {{ __('messages.active_products') }}
                             </div>
                             <div class="h5 mb-0 font-weight-bold text-gray-800">
                                 {{ number_format($totalProduits, 0, ',', ' ') }}
@@ -61,7 +61,7 @@
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
-                                Stock Magasin
+                                {{ __('messages.store_stock') }}
                             </div>
                             <div class="h5 mb-0 font-weight-bold text-gray-800">
                                 {{ number_format($stockTotalMagasin, 0, ',', ' ') }}
@@ -82,7 +82,7 @@
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
-                                Stock Boutiques
+                                {{ __('messages.shops_stock') }}
                             </div>
                             <div class="h5 mb-0 font-weight-bold text-gray-800">
                                 {{ number_format($stockTotalBoutiques, 0, ',', ' ') }}
@@ -103,7 +103,7 @@
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
-                                Ventes du jour
+                                {{ __('messages.today_sales') }}
                             </div>
                             <div class="h5 mb-0 font-weight-bold text-gray-800">
                                 {{ $ventesJour }}
@@ -127,7 +127,7 @@
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                                CA du jour
+                                {{ __('messages.today_revenue') }}
                             </div>
                             <div class="h5 mb-0 font-weight-bold text-gray-800">
                                 {{ number_format($caJour, 0, ',', ' ') }} FCFA
@@ -148,7 +148,7 @@
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
-                                CA du mois
+                                {{ __('messages.monthly_revenue') }}
                             </div>
                             <div class="h5 mb-0 font-weight-bold text-gray-800">
                                 {{ number_format($caMois, 0, ',', ' ') }} FCFA
@@ -169,7 +169,7 @@
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
-                                Bénéfice du mois
+                                {{ __('messages.monthly_profit') }}
                             </div>
                             <div class="h5 mb-0 font-weight-bold text-gray-800">
                                 {{ number_format($beneficeMois, 0, ',', ' ') }} FCFA
@@ -191,7 +191,7 @@
             <div class="card shadow mb-4">
                 <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
                     <h6 class="m-0 font-weight-bold text-primary">
-                        <i class="fas fa-chart-area"></i> Ventes des 7 derniers jours
+                        <i class="fas fa-chart-area"></i> {{ __('messages.sales_last_7_days') }}
                     </h6>
                 </div>
                 <div class="card-body">
@@ -207,7 +207,7 @@
             <div class="card shadow mb-4">
                 <div class="card-header py-3">
                     <h6 class="m-0 font-weight-bold text-primary">
-                        <i class="fas fa-trophy"></i> Top 5 Produits
+                        <i class="fas fa-trophy"></i> {{ __('messages.top_5_products') }}
                     </h6>
                 </div>
                 <div class="card-body">
@@ -253,7 +253,7 @@
             <div class="card shadow mb-4">
                 <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
                     <h6 class="m-0 font-weight-bold text-primary">
-                        <i class="fas fa-chart-bar"></i> Ventes par produit (Top 10)
+                        <i class="fas fa-chart-bar"></i> {{ __('messages.sales_by_product_top_10') }}
                     </h6>
                 </div>
                 <div class="card-body">
@@ -269,7 +269,7 @@
             <div class="card shadow mb-4">
                 <div class="card-header py-3">
                     <h6 class="m-0 font-weight-bold text-warning">
-                        <i class="fas fa-exclamation-triangle"></i> Alertes Stock
+                        <i class="fas fa-exclamation-triangle"></i> {{ __('messages.stock_alerts') }}
                     </h6>
                 </div>
                 <div class="card-body">
@@ -287,7 +287,7 @@
                     @empty
                         <div class="text-center text-muted">
                             <i class="fas fa-check-circle fa-3x mb-2"></i>
-                            <p>Aucune alerte de stock</p>
+                            <p>{{ __('messages.no_stock_alerts') }}</p>
                         </div>
                     @endforelse
                 </div>

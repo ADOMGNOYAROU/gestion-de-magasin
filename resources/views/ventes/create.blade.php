@@ -6,10 +6,10 @@
         <div class="col-12">
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h1 class="h3 mb-0 text-gray-800">
-                    <i class="fas fa-cash-register"></i> Caisse - Point de Vente
+                    <i class="fas fa-cash-register"></i> {{ __('messages.new_sale') }} - {{ __('messages.pos_system') }}
                 </h1>
                 <a href="{{ route('ventes.index') }}" class="btn btn-secondary">
-                    <i class="fas fa-arrow-left"></i> Retour
+                    <i class="fas fa-arrow-left"></i> {{ __('messages.back') }}
                 </a>
             </div>
 
@@ -135,12 +135,51 @@
                                            value="{{ now()->format('Y-m-d') }}">
                                 </div>
 
+                                <div class="mb-3">
+                                    <label for="client_id" class="form-label">Client (optionnel pour paiement immédiat)</label>
+                                    <select class="form-select" id="client_id" name="client_id">
+                                        <option value="">-- Aucun client --</option>
+                                        @foreach($clients as $client)
+                                        <option value="{{ $client->id }}">{{ $client->nom }} {{ $client->prenom ? '(' . $client->prenom . ')' : '' }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label">Type de paiement</label>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="payment_type" id="payment_immediate" value="immediate" checked>
+                                        <label class="form-check-label" for="payment_immediate">
+                                            {{ __('messages.immediate_payment') }}
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="payment_type" id="payment_credit" value="credit">
+                                        <label class="form-check-label" for="payment_credit">
+                                            {{ __('messages.credit_payment') }} ({{ __('messages.client') }} {{ __('messages.required') }})
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="payment_type" id="payment_mixed" value="mixed">
+                                        <label class="form-check-label" for="payment_mixed">
+                                            {{ __('messages.mixed_payment') }} ({{ __('messages.partially') }} {{ __('messages.immediate_payment') }}, {{ __('messages.remaining_balance') }} {{ __('messages.to') }} {{ __('messages.credit') }} - {{ __('messages.client') }} {{ __('messages.required') }})
+                                        </label>
+                                    </div>
+
+                                    <!-- Montant reçu pour paiement mixte -->
+                                    <div id="montant_recu_container" class="mt-3" style="display: none;">
+                                        <label for="montant_recu" class="form-label">{{ __('messages.amount_received') }} (FCFA)</label>
+                                        <input type="number" class="form-control" id="montant_recu" name="montant_recu" min="0" step="0.01">
+                                        <small class="text-muted">{{ __('messages.remaining_balance') }} {{ __('messages.will_be') }} {{ __('messages.registered') }} {{ __('messages.as') }} {{ __('messages.client') }} {{ __('messages.credit') }}.</small>
+                                    </div>
+                                </div>
+
                                 <div class="d-grid gap-2">
                                     <button type="button" class="btn btn-warning" id="btn_vider_panier">
-                                        <i class="fas fa-trash"></i> Vider le panier
+                                        <i class="fas fa-trash"></i> {{ __('messages.empty_cart') }}
                                     </button>
                                     <button type="button" class="btn btn-success" id="btn_valider_vente">
-                                        <i class="fas fa-check"></i> Valider la vente
+                                        <i class="fas fa-check"></i> {{ __('messages.validate_sale') }}
                                     </button>
                                 </div>
                             </div>
@@ -196,6 +235,18 @@ document.addEventListener('DOMContentLoaded', function() {
     const panierTotal = document.getElementById('panier_total');
     const panierBenefice = document.getElementById('panier_benefice');
     const dateVente = document.getElementById('date_vente');
+    const montantRecuContainer = document.getElementById('montant_recu_container');
+
+    // Toggle montant_recu field
+    document.querySelectorAll('input[name="payment_type"]').forEach(radio => {
+        radio.addEventListener('change', function() {
+            if (this.value === 'mixed') {
+                montantRecuContainer.style.display = 'block';
+            } else {
+                montantRecuContainer.style.display = 'none';
+            }
+        });
+    });
 
     // Recherche de produits
     produitSearch.addEventListener('input', function() {
@@ -399,9 +450,45 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Valider la vente
     document.getElementById('btn_valider_vente').addEventListener('click', function() {
+        console.log('Validate button clicked');
+        console.log('Panier:', panier);
+        
         if (panier.length === 0) {
+            console.log('Panier is empty');
             afficherMessage('error', 'Le panier est vide');
             return;
+        }
+
+        // Validation pour paiement à crédit et mixte
+        const paymentType = document.querySelector('input[name="payment_type"]:checked').value;
+        const clientId = document.getElementById('client_id').value;
+        console.log('Payment type:', paymentType, 'Client ID:', clientId);
+        
+        if ((paymentType === 'credit' || paymentType === 'mixed') && !clientId) {
+            console.log('Client required but not selected');
+            afficherMessage('error', 'Un client doit être sélectionné pour un paiement à crédit ou mixte');
+            return;
+        }
+
+        // Validation pour paiement mixte
+        if (paymentType === 'mixed') {
+            const montantRecu = parseFloat(document.getElementById('montant_recu').value);
+            let total = 0;
+            panier.forEach(item => {
+                total += item.quantite * item.prix_vente;
+            });
+            
+            console.log('Mixed payment - Montant reçu:', montantRecu, 'Total:', total);
+            
+            if (isNaN(montantRecu) || montantRecu <= 0) {
+                afficherMessage('error', 'Le montant reçu doit être supérieur à 0 pour un paiement mixte');
+                return;
+            }
+            
+            if (montantRecu > total) {
+                afficherMessage('error', 'Le montant reçu ne peut pas dépasser le total de la vente');
+                return;
+            }
         }
 
         // Afficher le récapitulatif
@@ -425,12 +512,26 @@ document.addEventListener('DOMContentLoaded', function() {
         </div>`;
         
         document.getElementById('recap_vente').innerHTML = recap;
-        new bootstrap.Modal(document.getElementById('confirmationModal')).show();
+        console.log('About to show modal');
+        const modal = new bootstrap.Modal(document.getElementById('confirmationModal'));
+        modal.show();
+        console.log('Modal should be visible now');
+        console.log('Modal is displayed:', modal._isShown);
     });
 
     // Confirmer la vente
     document.getElementById('btn_confirmer_vente').addEventListener('click', function() {
+        console.log('Confirmation clicked');
         const boutiqueId = boutiqueSelect.value || document.querySelector('#boutique_id').value;
+        const paymentType = document.querySelector('input[name="payment_type"]:checked').value;
+        
+        console.log('Sending request:', {
+            boutique_id: boutiqueId,
+            date: dateVente.value,
+            client_id: document.getElementById('client_id').value || null,
+            payment_type: paymentType,
+            montant_recu: paymentType === 'mixed' ? parseFloat(document.getElementById('montant_recu').value) : null
+        });
         
         fetch('{{ route("ventes.store") }}', {
             method: 'POST',
@@ -441,14 +542,22 @@ document.addEventListener('DOMContentLoaded', function() {
             },
             body: JSON.stringify({
                 boutique_id: boutiqueId,
-                date: dateVente.value
+                date: dateVente.value,
+                client_id: document.getElementById('client_id').value || null,
+                payment_type: paymentType,
+                montant_recu: paymentType === 'mixed' ? parseFloat(document.getElementById('montant_recu').value) : null
             })
         })
         .then(async (response) => {
+            console.log('Response status:', response.status);
+            console.log('Response headers:', response.headers);
+            
             let data = null;
             try {
                 data = await response.json();
+                console.log('Response data:', data);
             } catch (e) {
+                console.error('Error parsing JSON:', e);
                 data = null;
             }
 
@@ -456,24 +565,28 @@ document.addEventListener('DOMContentLoaded', function() {
                 const message = (data && (data.message || data.error))
                     ? (data.message || data.error)
                     : 'Erreur lors de la validation de la vente';
-                $('#confirmationModal').modal('hide');
+                const modal = bootstrap.Modal.getInstance(document.getElementById('confirmationModal'));
+                if (modal) modal.hide();
                 afficherMessage('error', message);
                 return;
             }
 
             if (data && data.success && data.redirect_url) {
-                $('#confirmationModal').modal('hide');
+                const modal = bootstrap.Modal.getInstance(document.getElementById('confirmationModal'));
+                if (modal) modal.hide();
                 window.location.href = data.redirect_url;
                 return;
             }
 
             if (data && data.success) {
-                $('#confirmationModal').modal('hide');
+                const modal = bootstrap.Modal.getInstance(document.getElementById('confirmationModal'));
+                if (modal) modal.hide();
                 afficherMessage('success', data.message || 'Vente enregistrée avec succès');
                 return;
             }
 
-            $('#confirmationModal').modal('hide');
+            const modal = bootstrap.Modal.getInstance(document.getElementById('confirmationModal'));
+            if (modal) modal.hide();
             afficherMessage('error', (data && (data.message || data.error)) ? (data.message || data.error) : 'Erreur lors de la validation de la vente');
         })
         .catch(error => {

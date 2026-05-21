@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="<?php echo e(str_replace('_', '-', app()->getLocale())); ?>">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="<?php echo e(csrf_token()); ?>">
-    <title>Connexion - Gestion</title>
+    <title><?php echo e(__('messages.connexion')); ?> - <?php echo e(__('messages.gestion')); ?></title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -64,7 +64,7 @@
 </head>
 <body>
     <div class="container">
-        <h2 class="text-center">Connexion</h2>
+        <h2 class="text-center"><?php echo e(__('messages.connexion')); ?></h2>
         
         <?php if(session('status')): ?>
             <div class="mb-4" style="background: #e3f2fd; padding: 10px; border-radius: 4px;">
@@ -84,7 +84,7 @@
             <?php echo csrf_field(); ?>
 
             <div class="form-group">
-                <label for="email">Email</label>
+                <label for="email"><?php echo e(__('messages.email')); ?></label>
                 <input id="email" type="email" name="email" value="<?php echo e(old('email')); ?>" required autofocus>
                 <?php $__errorArgs = ['email'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
@@ -99,7 +99,7 @@ unset($__errorArgs, $__bag); ?>
             </div>
 
             <div class="form-group">
-                <label for="password">Mot de passe</label>
+                <label for="password"><?php echo e(__('messages.mot_de_passe')); ?></label>
                 <input id="password" type="password" name="password" required>
                 <?php $__errorArgs = ['password'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
@@ -115,22 +115,19 @@ unset($__errorArgs, $__bag); ?>
 
             <div class="form-group">
                 <label>
-                    <input type="checkbox" name="remember"> Se souvenir de moi
+                    <input type="checkbox" name="remember"> <?php echo e(__('messages.se_souvenir_de_moi')); ?>
+
                 </label>
             </div>
 
             <div class="text-center">
                 <?php if(Route::has('password.request')): ?>
-                    <a href="<?php echo e(route('password.request')); ?>">Mot de passe oublié?</a>
+                    <a href="<?php echo e(route('password.request')); ?>"><?php echo e(__('messages.mot_de_passe_oublie')); ?>?</a>
                 <?php endif; ?>
                 
-                <button type="submit" class="btn">Se connecter</button>
+                <button type="submit" class="btn"><?php echo e(__('messages.se_connecter')); ?></button>
             </div>
         </form>
-        
-        <div class="text-center mt-4">
-            Pas encore de compte? <a href="<?php echo e(route('register')); ?>">S'inscrire</a>
-        </div>
     </div>
 </body>
 </html>

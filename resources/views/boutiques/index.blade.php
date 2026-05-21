@@ -5,9 +5,9 @@
     <div class="row">
         <div class="col-12">
             <div class="d-flex justify-content-between align-items-center mb-4">
-                <h1 class="h3 mb-0 text-gray-800">Gestion des Boutiques</h1>
+                <h1 class="h3 mb-0 text-gray-800">{{ __('messages.store_management') }}</h1>
                 <a href="{{ route('boutiques.create') }}" class="btn btn-primary">
-                    <i class="fas fa-plus"></i> Nouvelle Boutique
+                    <i class="fas fa-plus"></i> {{ __('messages.add_store') }}
                 </a>
             </div>
 
@@ -32,12 +32,12 @@
                             <thead>
                                 <tr>
                                     <th>ID</th>
-                                    <th>Nom</th>
-                                    <th>Adresse</th>
-                                    <th>Magasin</th>
-                                    <th>Vendeur</th>
-                                    <th>Date de création</th>
-                                    <th>Actions</th>
+                                    <th>{{ __('messages.name') }}</th>
+                                    <th>{{ __('messages.store_address') }}</th>
+                                    <th>{{ __('messages.associated_store') }}</th>
+                                    <th>{{ __('messages.responsible_seller') }}</th>
+                                    <th>{{ __('messages.creation_date') }}</th>
+                                    <th>{{ __('messages.actions') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -56,7 +56,7 @@
                                         <a href="{{ route('boutiques.edit', $boutique) }}" class="btn btn-sm btn-warning">
                                             <i class="fas fa-edit"></i>
                                         </a>
-                                        <form method="POST" action="{{ route('boutiques.destroy', $boutique) }}" class="d-inline" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette boutique ?')">
+                                        <form method="POST" action="{{ route('boutiques.destroy', $boutique) }}" class="d-inline" onsubmit="return confirm('{{ __('messages.confirm_delete') }}')">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="btn btn-sm btn-danger">

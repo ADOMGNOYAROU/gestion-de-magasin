@@ -5,13 +5,13 @@
     <div class="row">
         <div class="col-12">
             <div class="d-flex justify-content-between align-items-center mb-4">
-                <h1 class="h3 mb-0 text-gray-800">Historique des Ventes</h1>
+                <h1 class="h3 mb-0 text-gray-800">{{ __('messages.sales_list') }}</h1>
                 <div>
                     <a href="{{ route('rapports.ventes.form') }}" class="btn btn-outline-primary me-2 {{ hideIfCannot('manage-rapports') }}">
-                        <i class="fas fa-chart-line"></i> Rapport Ventes
+                        <i class="fas fa-chart-line"></i> {{ __('messages.sales_report') }}
                     </a>
                     <a href="{{ route('ventes.create') }}" class="btn btn-success">
-                        <i class="fas fa-cash-register"></i> Nouvelle Vente
+                        <i class="fas fa-cash-register"></i> {{ __('messages.new_sale') }}
                     </a>
                 </div>
             </div>
@@ -72,14 +72,14 @@
                             <table class="table table-striped table-hover">
                                 <thead class="table-dark">
                                     <tr>
-                                        <th>Date</th>
-                                        <th>Produit</th>
-                                        <th>Boutique</th>
-                                        <th>Quantité</th>
-                                        <th>Prix Unitaire</th>
-                                        <th>Total</th>
-                                        <th>Bénéfice</th>
-                                        <th>Actions</th>
+                                        <th>{{ __('messages.date') }}</th>
+                                        <th>{{ __('messages.produit') }}</th>
+                                        <th>{{ __('messages.boutique') }}</th>
+                                        <th>{{ __('messages.quantite') }}</th>
+                                        <th>{{ __('messages.prix_unitaire') }}</th>
+                                        <th>{{ __('messages.total') }}</th>
+                                        <th>{{ __('messages.benefice') }}</th>
+                                        <th>{{ __('messages.actions') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -109,31 +109,31 @@
                                                         <br><small class="text-muted">Magasin inconnu</small>
                                                     @endif
                                                 @else
-                                                    <span class="badge bg-secondary">Boutique inconnue</span>
+                                                    <span class="badge bg-secondary">{{ __('messages.boutique_inconnue') }}</span>
                                                 @endif
                                             </td>
                                             <td>
                                                 <span class="badge bg-warning">{{ $vente->total_produits }}</span>
                                             </td>
-                                            <td>{{ $vente->total_produits > 0 ? number_format($vente->montant_total / $vente->total_produits, 0, ',', ' ') : 0 }} FCFA</td>
+                                            <td>{{ $vente->total_produits > 0 ? number_format($vente->montant_total / $vente->total_produits, 0, ',', ' ') : '0' }} {{ __('messages.fcfa') }}</td>
                                             <td>
-                                                <strong class="text-primary">{{ number_format($vente->montant_total, 0, ',', ' ') }} FCFA</strong>
+                                                <strong class="text-primary">{{ number_format($vente->montant_total, 0, ',', ' ') }} {{ __('messages.fcfa') }}</strong>
                                             </td>
                                             <td>
-                                                <span class="badge bg-success">{{ number_format($vente->benefice_total, 0, ',', ' ') }} FCFA</span>
+                                                <span class="badge bg-success">{{ number_format($vente->benefice_total, 0, ',', ' ') }} {{ __('messages.fcfa') }}</span>
                                             </td>
                                             <td>
                                                 <div class="btn-group" role="group">
                                                     <a href="{{ route('ventes.show', $vente->id) }}"
-                                                       class="btn btn-sm btn-outline-info" title="Voir">
+                                                       class="btn btn-sm btn-outline-info" title="{{ __('messages.voir') }}">
                                                         <i class="fas fa-eye"></i>
                                                     </a>
                                                     <form action="{{ route('ventes.destroy', $vente->id) }}"
                                                           method="POST" class="d-inline"
-                                                          onsubmit="return confirm('Êtes-vous sûr de vouloir annuler cette vente ?')">
+                                                          onsubmit="return confirm('{{ __('messages.confirmer_suppression') }}')">
                                                         @csrf
                                                         @method('DELETE')
-                                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Annuler">
+                                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="{{ __('messages.annuler') }}">
                                                             <i class="fas fa-trash"></i>
                                                         </button>
                                                     </form>
@@ -144,7 +144,7 @@
                                         <tr>
                                             <td colspan="8" class="text-center py-4">
                                                 <i class="fas fa-shopping-cart fa-3x text-muted mb-3"></i>
-                                                <p class="text-muted">Aucune vente trouvée</p>
+                                                <p class="text-muted">{{ __('messages.aucune_vente_trouvee') }}</p>
                                             </td>
                                         </tr>
                                     @endforelse

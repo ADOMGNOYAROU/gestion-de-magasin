@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class EntreeStock extends Model
 {
+    protected $table = 'entrees_stock';
+
     protected $fillable = [
         'produit_id', 
         'magasin_id', 
@@ -14,8 +16,11 @@ class EntreeStock extends Model
         'user_id',
         'quantite', 
         'prix_unitaire', 
+        'prix_achat',
         'montant_total',
-        'date_entree'
+        'date_entree',
+        'order_id',
+        'order_item_id'
     ];
 
     protected $casts = [

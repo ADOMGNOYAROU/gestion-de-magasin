@@ -9,6 +9,8 @@ use App\Models\StockMagasin;
 use App\Models\Fournisseur;
 use App\Models\Partenaire;
 use App\Models\Magasin;
+use App\Models\Order;
+use App\Models\OrderItem;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 
@@ -59,6 +61,7 @@ class EntreeStockController extends Controller
         $produits = Produit::where('statut', 'actif')->orderBy('nom')->get();
         $fournisseurs = Fournisseur::orderBy('nom')->get();
         $partenaires = Partenaire::orderBy('nom')->get();
+        $orders = Order::with('orderItems')->where('status', 'en_cours')->get();
         
         // Récupérer le magasin de l'utilisateur connecté
         $magasin = null;
@@ -72,7 +75,7 @@ class EntreeStockController extends Controller
             $magasins = Magasin::orderBy('nom')->get();
         }
         
-        return view('entrees-stock.create', compact('produits', 'fournisseurs', 'partenaires', 'magasin', 'magasins'));
+        return view('entrees-stock.create', compact('produits', 'fournisseurs', 'partenaires', 'magasin', 'magasins', 'orders'));
     }
 
     /**
@@ -85,6 +88,7 @@ class EntreeStockController extends Controller
             'magasin_id' => 'required|exists:magasins,id',
             'fournisseur_id' => 'nullable|exists:fournisseurs,id',
             'partenaire_id' => 'nullable|exists:partenaires,id',
+            'order_id' => 'nullable|exists:orders,id',
             'quantite' => 'required|integer|min:1|max:2147483647',
             'prix_unitaire' => 'required|numeric|min:0',
             'date' => 'required|date',
@@ -118,6 +122,7 @@ class EntreeStockController extends Controller
                 'user_id' => Auth::id(),
                 'quantite' => $validated['quantite'],
                 'prix_unitaire' => $validated['prix_unitaire'],
+                'prix_achat' => $validated['prix_unitaire'],
                 'montant_total' => $montantTotal,
                 'date_entree' => $validated['date'],
             ]);
@@ -143,6 +148,32 @@ class EntreeStockController extends Controller
                     'prix_vente' => $produit->prix_vente,
                     'seuil_alerte' => 10, // Valeur par défaut
                 ]);
+            }
+
+            // 3. Lier à la commande si spécifiée et vérifier si la commande est entièrement livrée
+            if ($validated['order_id']) {
+                $orderItem = OrderItem::where('order_id', $validated['order_id'])
+                                      ->where('produit_id', $validated['produit_id'])
+                                      ->first();
+                if ($orderItem) {
+                    $entree->order_item_id = $orderItem->id;
+                    $entree->save();
+
+                    // Vérifier si la commande est entièrement reçue
+                    $order = Order::find($validated['order_id']);
+                    $fullyReceived = true;
+                    foreach ($order->orderItems as $item) {
+                        $received = EntreeStock::where('order_item_id', $item->id)->sum('quantite');
+                        if ($received < $item->quantite) {
+                            $fullyReceived = false;
+                            break;
+                        }
+                    }
+                    if ($fullyReceived) {
+                        $order->status = 'livree';
+                        $order->save();
+                    }
+                }
             }
 
             DB::commit();

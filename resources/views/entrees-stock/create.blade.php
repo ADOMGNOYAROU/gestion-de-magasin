@@ -107,6 +107,28 @@
                             </div>
                             <div class="col-md-6">
                                 <div class="mb-3">
+                                    <label for="order_id" class="form-label">Commande (optionnel)</label>
+                                    <select class="form-select @error('order_id') is-invalid @enderror" 
+                                            id="order_id" name="order_id">
+                                        <option value="">Sélectionner une commande (optionnel)</option>
+                                        @foreach($orders as $order)
+                                            <option value="{{ $order->id }}" 
+                                                    {{ old('order_id') == $order->id ? 'selected' : '' }}>
+                                                {{ $order->numero_commande }} - {{ $order->fournisseur->nom }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    @error('order_id')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                    <small class="text-muted">Si lié à une commande, l'ordre sera automatiquement marqué comme livré si les quantités correspondent.</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
                                     <label for="date" class="form-label">Date <span class="text-danger">*</span></label>
                                     <input type="date" class="form-control @error('date') is-invalid @enderror" 
                                            id="date" name="date" value="{{ old('date', now()->format('Y-m-d')) }}" required>

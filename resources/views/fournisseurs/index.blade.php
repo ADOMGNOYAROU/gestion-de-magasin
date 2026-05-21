@@ -5,15 +5,15 @@
     <div class="row">
         <div class="col-12">
             <div class="d-flex justify-content-between align-items-center mb-4">
-                <h1 class="h3 mb-0 text-gray-800">Gestion des Fournisseurs</h1>
+                <h1 class="h3 mb-0 text-gray-800">{{ __('messages.supplier_list') }}</h1>
                 <a href="{{ route('fournisseurs.create') }}" class="btn btn-primary">
-                    <i class="fas fa-plus"></i> Ajouter un Fournisseur
+                    <i class="fas fa-plus"></i> {{ __('messages.add_supplier') }}
                 </a>
             </div>
 
             @if($errors->any())
                 <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                    <strong>Erreurs :</strong>
+                    <strong>{{ __('messages.error') }} :</strong>
                     <ul class="mb-0">
                         @foreach($errors->all() as $error)
                             <li>{{ $error }}</li>

@@ -11,13 +11,17 @@ use App\Models\EntreeStock;
 use App\Models\Partenaire;
 use App\Models\Magasin;
 use App\Models\Boutique;
+use App\Models\Credit;
+use App\Models\Client;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Carbon\Carbon;
 use PDF;
+use TCPDF;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\VentesExport;
+use App\Exports\CreditsExport;
 
 class RapportController extends Controller
 {
@@ -77,11 +81,29 @@ class RapportController extends Controller
         $data['dateGeneration'] = now()->format('d/m/Y H:i:s');
         $data['user'] = $user;
 
-        $pdf = PDF::loadView('rapports.stock_pdf', $data);
+        // Solution finale : créer DomPDF manuellement sans ServiceProvider
+        $options = new \Dompdf\Options();
+        $options->set('isRemoteEnabled', false);
+        $options->set('isHtml5ParserEnabled', true);
+        $options->set('isPhpEnabled', false);
+        $options->set('defaultFont', 'Arial');
+        $options->set('chroot', null);
+        $options->set('publicPath', null);
+        
+        $dompdf = new \Dompdf\Dompdf($options);
+        
+        // Charger la vue
+        $html = view('rapports.stock_pdf', $data)->render();
+        $dompdf->loadHtml($html);
+        
+        // Rendre le PDF
+        $dompdf->render();
         
         $filename = 'rapport_stock_' . now()->format('Y-m-d_H-i-s') . '.pdf';
         
-        return $pdf->download($filename);
+        return response($dompdf->output(), 200)
+            ->header('Content-Type', 'application/pdf')
+            ->header('Content-Disposition', 'attachment; filename="' . $filename . '"');
     }
 
     /**
@@ -127,11 +149,29 @@ class RapportController extends Controller
         $data['dateGeneration'] = now()->format('d/m/Y H:i:s');
         $data['user'] = $user;
 
-        $pdf = PDF::loadView('rapports.ventes_pdf', $data);
+        // Solution finale : créer DomPDF manuellement sans ServiceProvider
+        $options = new \Dompdf\Options();
+        $options->set('isRemoteEnabled', false);
+        $options->set('isHtml5ParserEnabled', true);
+        $options->set('isPhpEnabled', false);
+        $options->set('defaultFont', 'Arial');
+        $options->set('chroot', null);
+        $options->set('publicPath', null);
+        
+        $dompdf = new \Dompdf\Dompdf($options);
+        
+        // Charger la vue
+        $html = view('rapports.ventes_pdf', $data)->render();
+        $dompdf->loadHtml($html);
+        
+        // Rendre le PDF
+        $dompdf->render();
         
         $filename = 'rapport_ventes_' . $validated['date_debut'] . '_au_' . $validated['date_fin'] . '.pdf';
         
-        return $pdf->download($filename);
+        return response($dompdf->output(), 200)
+            ->header('Content-Type', 'application/pdf')
+            ->header('Content-Disposition', 'attachment; filename="' . $filename . '"');
     }
 
     /**
@@ -189,11 +229,160 @@ class RapportController extends Controller
         $data['dateGeneration'] = now()->format('d/m/Y H:i:s');
         $data['user'] = $user;
 
-        $pdf = PDF::loadView('rapports.partenaires_pdf', $data);
+        // Solution finale : créer DomPDF manuellement sans ServiceProvider
+        $options = new \Dompdf\Options();
+        $options->set('isRemoteEnabled', false);
+        $options->set('isHtml5ParserEnabled', true);
+        $options->set('isPhpEnabled', false);
+        $options->set('defaultFont', 'Arial');
+        $options->set('chroot', null);
+        $options->set('publicPath', null);
+        
+        $dompdf = new \Dompdf\Dompdf($options);
+        
+        // Charger la vue
+        $html = view('rapports.partenaires_pdf', $data)->render();
+        $dompdf->loadHtml($html);
+        
+        // Rendre le PDF
+        $dompdf->render();
         
         $filename = 'rapport_partenaires_' . now()->format('Y-m-d_H-i-s') . '.pdf';
         
-        return $pdf->download($filename);
+        return response($dompdf->output(), 200)
+            ->header('Content-Type', 'application/pdf')
+            ->header('Content-Disposition', 'attachment; filename="' . $filename . '"');
+    }
+
+    /**
+     * Affiche le formulaire de rapport de crédits
+     */
+    public function rapportCreditsForm()
+    {
+        Gate::authorize('manage-rapports');
+
+        $clients = Client::orderBy('nom')->get();
+
+        return view('rapports.credits_form', compact('clients'));
+    }
+
+    /**
+     * Génère le rapport de crédits en PDF
+     */
+    public function rapportCreditsPDF(Request $request)
+    {
+        $validated = $request->validate([
+            'status' => 'nullable|string|in:unpaid,overdue',
+            'client_id' => 'nullable|exists:clients,id',
+            'date_debut' => 'nullable|date',
+            'date_fin' => 'nullable|date',
+        ]);
+
+        if (!empty($validated['date_debut']) && !empty($validated['date_fin']) && $validated['date_fin'] < $validated['date_debut']) {
+            return back()->withErrors(['date_fin' => 'La date de fin doit être après la date de début.']);
+        }
+
+        $user = Auth::user();
+        $data = $this->getCreditsData($validated, $user);
+        $data['filters'] = $validated;
+        $data['dateGeneration'] = now()->format('d/m/Y H:i:s');
+        $data['user'] = $user;
+
+        // Solution finale : créer DomPDF manuellement sans ServiceProvider
+        $options = new \Dompdf\Options();
+        $options->set('isRemoteEnabled', false);
+        $options->set('isHtml5ParserEnabled', true);
+        $options->set('isPhpEnabled', false);
+        $options->set('defaultFont', 'Arial');
+        $options->set('chroot', null);
+        $options->set('publicPath', null);
+        
+        $dompdf = new \Dompdf\Dompdf($options);
+        
+        // Charger la vue
+        $html = view('rapports.credits_pdf', $data)->render();
+        $dompdf->loadHtml($html);
+        
+        // Rendre le PDF
+        $dompdf->render();
+        
+        $filename = 'rapport_credits_' . now()->format('Y-m-d_H-i-s') . '.pdf';
+        
+        return response($dompdf->output(), 200)
+            ->header('Content-Type', 'application/pdf')
+            ->header('Content-Disposition', 'attachment; filename="' . $filename . '"');
+    }
+
+    /**
+     * Génère le rapport de crédits en Excel
+     */
+    public function rapportCreditsExcel(Request $request)
+    {
+        $validated = $request->validate([
+            'status' => 'nullable|string|in:unpaid,overdue',
+            'client_id' => 'nullable|exists:clients,id',
+            'date_debut' => 'nullable|date',
+            'date_fin' => 'nullable|date',
+        ]);
+
+        if (!empty($validated['date_debut']) && !empty($validated['date_fin']) && $validated['date_fin'] < $validated['date_debut']) {
+            return back()->withErrors(['date_fin' => 'La date de fin doit être après la date de début.']);
+        }
+
+        $user = Auth::user();
+        $data = $this->getCreditsData($validated, $user);
+
+        $filename = 'rapport_credits_' . now()->format('Y-m-d_H-i-s') . '.xlsx';
+        
+        return Excel::download(new CreditsExport($data, $validated, $user), $filename);
+    }
+
+    /**
+     * Récupère les données de crédits selon les filtres
+     */
+    private function getCreditsData($validated, $user)
+    {
+        $query = Credit::with(['client', 'vente.boutique.magasin']);
+
+        if (!empty($validated['status'])) {
+            if ($validated['status'] == 'unpaid') {
+                $query->where('status', 'active');
+            } elseif ($validated['status'] == 'overdue') {
+                $query->where('status', 'active')->where('due_date', '<', now());
+            }
+        }
+
+        if (!empty($validated['client_id'])) {
+            $query->where('client_id', $validated['client_id']);
+        }
+
+        if (!empty($validated['date_debut'])) {
+            $query->whereDate('created_at', '>=', $validated['date_debut']);
+        }
+
+        if (!empty($validated['date_fin'])) {
+            $query->whereDate('created_at', '<=', $validated['date_fin']);
+        }
+
+        // Filtrer selon le rôle
+        if ($user->isVendeur()) {
+            $query->whereHas('vente', function($q) use ($user) {
+                $q->where('boutique_id', $user->boutique_id);
+            });
+        } elseif ($user->isGestionnaire()) {
+            $query->whereHas('vente.boutique', function($q) use ($user) {
+                $q->where('magasin_id', $user->magasinResponsable->id);
+            });
+        }
+
+        $credits = $query->orderBy('created_at')->get();
+
+        $data['credits'] = $credits;
+        $data['totalCredits'] = $credits->count();
+        $data['totalAmount'] = $credits->sum('total_amount');
+        $data['totalRemaining'] = $credits->sum('remaining_balance');
+
+        return $data;
     }
 
     /**

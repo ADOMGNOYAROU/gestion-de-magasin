@@ -5,9 +5,9 @@
     <div class="row">
         <div class="col-12">
             <div class="d-flex justify-content-between align-items-center mb-4">
-                <h1 class="h3 mb-0 text-gray-800">Créer un Nouveau Produit</h1>
+                <h1 class="h3 mb-0 text-gray-800">{{ __('messages.add_product') }}</h1>
                 <a href="{{ route('produits.index') }}" class="btn btn-secondary">
-                    <i class="fas fa-arrow-left"></i> Retour
+                    <i class="fas fa-arrow-left"></i> {{ __('messages.back') }}
                 </a>
             </div>
 
@@ -19,7 +19,7 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="mb-3">
-                                    <label for="nom" class="form-label">Nom du produit <span class="text-danger">*</span></label>
+                                    <label for="nom" class="form-label">{{ __('messages.product_name') }} <span class="text-danger">*</span></label>
                                     <input type="text" class="form-control @error('nom') is-invalid @enderror" 
                                            id="nom" name="nom" value="{{ old('nom') }}" required>
                                     @error('nom')
@@ -29,7 +29,7 @@
                             </div>
                             <div class="col-md-6">
                                 <div class="mb-3">
-                                    <label for="categorie" class="form-label">Catégorie <span class="text-danger">*</span></label>
+                                    <label for="categorie" class="form-label">{{ __('messages.category') }} <span class="text-danger">*</span></label>
                                     <select class="form-select @error('categorie') is-invalid @enderror" 
                                             id="categorie" name="categorie" required>
                                         <option value="">Sélectionner une catégorie</option>

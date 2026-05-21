@@ -1,21 +1,21 @@
 @extends('layouts.app')
 
-@section('title', 'Gestion des Caisses')
+@section('title', __('messages.gestion_caisses'))
 
 @section('breadcrumb')
-    <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Accueil</a></li>
-    <li class="breadcrumb-item active">Gestion des Caisses</li>
+    <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">{{ __('messages.home') }}</a></li>
+    <li class="breadcrumb-item active">{{ __('messages.gestion_caisses') }}</li>
 @endsection
 
 @section('header')
 <div class="d-flex justify-content-between align-items-center">
     <div>
-        <h1 class="h3 mb-0">Gestion des Caisses</h1>
-        <p class="text-muted mb-0">Ouvrir et fermer les sessions de caisse des vendeurs</p>
+        <h1 class="h3 mb-0">{{ __('messages.gestion_caisses') }}</h1>
+        <p class="text-muted mb-0">{{ __('messages.gestion_caisses_description') }}</p>
     </div>
     <div>
         <a href="{{ route('pos.open') }}" class="btn btn-success">
-            <i class="fas fa-plus me-2"></i>Ouvrir une caisse
+            <i class="fas fa-plus me-2"></i>{{ __('messages.ouvrir_caisse') }}
         </a>
     </div>
 </div>
@@ -26,11 +26,11 @@
     <!-- Test simple -->
     <div class="col-12">
         <div class="alert alert-info">
-            <h5>Test de fonctionnement</h5>
-            <p>Interface de gestion des caisses chargée avec succès !</p>
+            <h5>{{ __('messages.test_fonctionnement') }}</h5>
+            <p>{{ __('messages.interface_chargee') }}</p>
             <ul>
-                <li>Utilisateur: {{ Auth::user()->name }}</li>
-                <li>Rôle: {{ Auth::user()->role }}</li>
+                <li>{{ __('messages.utilisateur') }}: {{ Auth::user()->name }}</li>
+                <li>{{ __('messages.role') }}: {{ Auth::user()->role }}</li>
                 <li>Boutiques disponibles: {{ $boutiques->count() ?? 0 }}</li>
                 <li>Sessions actives: {{ $sessionsActives->count() ?? 0 }}</li>
             </ul>
@@ -67,9 +67,9 @@
     <div class="col-lg-8">
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">Sessions de caisse actives</h5>
+                <h5 class="mb-0">{{ __('messages.sessions_actives') }}</h5>
                 <a href="{{ route('pos.close') }}" class="btn btn-warning btn-sm">
-                    <i class="fas fa-sign-out-alt me-1"></i>Fermer une caisse
+                    <i class="fas fa-sign-out-alt me-1"></i>{{ __('messages.fermer_caisse') }}
                 </a>
             </div>
             <div class="card-body">
@@ -113,8 +113,8 @@
                 @else
                 <div class="text-center py-5">
                     <i class="fas fa-cash-register fa-3x text-muted mb-3"></i>
-                    <h5 class="text-muted">Aucune session de caisse active</h5>
-                    <p class="text-muted">Toutes les caisses sont fermées</p>
+                    <h5 class="text-muted">{{ __('messages.aucune_session_active') }}</h5>
+                    <p class="text-muted">{{ __('messages.toutes_caisses_fermees') }}</p>
                 </div>
                 @endif
             </div>

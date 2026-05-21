@@ -36,7 +36,15 @@
                             <h6>N° Ticket: <strong>{{ $vente->numero_ticket }}</strong></h6>
                             <p class="mb-1">Date: {{ $vente->date_vente->format('d/m/Y H:i') }}</p>
                             <p class="mb-1">Vendeur: {{ $vente->user->name }}</p>
+                            @if($vente->client)
+                            <p class="mb-1">Client: {{ $vente->client->nom }} {{ $vente->client->prenom ?: '' }}</p>
+                            @endif
+                            @if($vente->credit)
+                            <p class="mb-1">Paiement: À crédit</p>
+                            <p class="mb-1">Restant à payer: {{ number_format($vente->credit->remaining_balance, 0) }} FCFA</p>
+                            @else
                             <p class="mb-1">Paiement: {{ $vente->paymentMethod->nom }}</p>
+                            @endif
                         </div>
                     </div>
 
@@ -45,10 +53,10 @@
                         <table class="table table-borderless">
                             <thead class="border-bottom">
                                 <tr>
-                                    <th>Produit</th>
-                                    <th class="text-center">Qté</th>
-                                    <th class="text-end">Prix Unit.</th>
-                                    <th class="text-end">Total</th>
+                                    <th>{{ __('messages.produit') }}</th>
+                                    <th class="text-center">{{ __('messages.quantite') }}</th>
+                                    <th class="text-end">{{ __('messages.prix_unite') }}</th>
+                                    <th class="text-end">{{ __('messages.total') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -57,28 +65,28 @@
                                     <td>
                                         <strong>{{ $produit->produit->nom }}</strong>
                                         @if($produit->remise > 0)
-                                        <br><small class="text-muted">Remise: {{ number_format($produit->remise, 0) }} FCFA</small>
+                                        <br><small class="text-muted">{{ __('messages.remise') }}: {{ number_format($produit->remise, 0) }} {{ __('messages.fcfa') }}</small>
                                         @endif
                                     </td>
                                     <td class="text-center">{{ $produit->quantite }}</td>
-                                    <td class="text-end">{{ number_format($produit->prix_unitaire, 0) }} FCFA</td>
-                                    <td class="text-end"><strong>{{ number_format($produit->sous_total, 0) }} FCFA</strong></td>
+                                    <td class="text-end">{{ number_format($produit->prix_unitaire, 0) }} {{ __('messages.fcfa') }}</td>
+                                    <td class="text-end"><strong>{{ number_format($produit->sous_total, 0) }} {{ __('messages.fcfa') }}</strong></td>
                                 </tr>
                                 @endforeach
                             </tbody>
                             <tfoot class="border-top">
                                 <tr>
-                                    <th colspan="3" class="text-end">Total:</th>
-                                    <th class="text-end">{{ number_format($vente->montant_total, 0) }} FCFA</th>
+                                    <th colspan="3" class="text-end">{{ __('messages.total') }}:</th>
+                                    <th class="text-end">{{ number_format($vente->montant_total, 0) }} {{ __('messages.fcfa') }}</th>
                                 </tr>
                                 @if($vente->montant_recu > 0)
                                 <tr>
-                                    <th colspan="3" class="text-end">Montant reçu:</th>
-                                    <th class="text-end">{{ number_format($vente->montant_recu, 0) }} FCFA</th>
+                                    <th colspan="3" class="text-end">{{ __('messages.montant_recu') }}:</th>
+                                    <th class="text-end">{{ number_format($vente->montant_recu, 0) }} {{ __('messages.fcfa') }}</th>
                                 </tr>
                                 <tr>
-                                    <th colspan="3" class="text-end">Monnaie:</th>
-                                    <th class="text-end">{{ number_format($vente->monnaie, 0) }} FCFA</th>
+                                    <th colspan="3" class="text-end">{{ __('messages.monnaie') }}:</th>
+                                    <th class="text-end">{{ number_format($vente->monnaie, 0) }} {{ __('messages.fcfa') }}</th>
                                 </tr>
                                 @endif
                             </tfoot>

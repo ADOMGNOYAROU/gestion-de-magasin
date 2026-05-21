@@ -5,13 +5,13 @@
     <div class="row">
         <div class="col-12">
             <div class="d-flex justify-content-between align-items-center mb-4">
-                <h1 class="h3 mb-0 text-gray-800">Détails de l'Utilisateur</h1>
+                <h1 class="h3 mb-0 text-gray-800">{{ __('messages.details_utilisateur') }}</h1>
                 <div>
                     <a href="{{ route('users.edit', $user) }}" class="btn btn-warning me-2">
-                        <i class="fas fa-edit"></i> Modifier
+                        <i class="fas fa-edit"></i> {{ __('messages.modifier') }}
                     </a>
                     <a href="{{ route('users.index') }}" class="btn btn-secondary">
-                        <i class="fas fa-arrow-left"></i> Retour
+                        <i class="fas fa-arrow-left"></i> {{ __('messages.retour') }}
                     </a>
                 </div>
             </div>
@@ -20,7 +20,7 @@
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-6">
-                            <h5 class="card-title mb-4">Informations personnelles</h5>
+                            <h5 class="card-title mb-4">{{ __('messages.informations_personnelles') }}</h5>
 
                             <div class="mb-3">
                                 <label class="form-label fw-bold">Nom complet:</label>

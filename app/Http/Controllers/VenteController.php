@@ -3,12 +3,14 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Vente;
+use App\Models\Client;
+use App\Models\Credit;
 use App\Models\Produit;
 use App\Models\StockBoutique;
 use App\Models\Boutique;
 use App\Models\Magasin;
 use App\Models\PaymentMethod;
+use App\Models\Vente;
 use App\Models\VenteProduit;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
@@ -82,6 +84,9 @@ class VenteController extends Controller
         
         $produits = Produit::where('statut', 'actif')->orderBy('nom')->get();
         
+        // Récupérer les clients
+        $clients = Client::orderBy('nom')->get();
+        
         // Récupérer les boutiques selon le rôle
         if (Auth::user()->isVendeur()) {
             $boutique = Auth::user()->boutique;
@@ -104,7 +109,7 @@ class VenteController extends Controller
                 ->with('error', 'Vous n\'avez pas les permissions pour effectuer des ventes.');
         }
         
-        return view('ventes.create', compact('produits', 'boutiques'));
+        return view('ventes.create', compact('produits', 'boutiques', 'clients'));
     }
 
     /**
@@ -128,7 +133,17 @@ class VenteController extends Controller
         $validated = $request->validate([
             'boutique_id' => 'required|exists:boutiques,id',
             'date' => 'required|date',
+            'client_id' => 'nullable|exists:clients,id',
+            'payment_type' => 'required|in:immediate,credit,mixed',
+            'montant_recu' => 'nullable|numeric|min:0',
         ]);
+
+        // Si paiement à crédit ou mixte, client est obligatoire
+        if ($request->payment_type === 'credit' || $request->payment_type === 'mixed') {
+            $request->validate([
+                'client_id' => 'required|exists:clients,id',
+            ]);
+        }
 
         DB::beginTransaction();
         try {
@@ -147,6 +162,15 @@ class VenteController extends Controller
                 $totalBenefice += $benefice;
             }
 
+            // Validation pour paiement mixte
+            if ($validated['payment_type'] === 'mixed') {
+                $request->validate([
+                    'montant_recu' => 'required|numeric|min:0|max:' . $totalVente,
+                ], [
+                    'montant_recu.max' => 'Le montant reçu ne peut pas dépasser le total de la vente.',
+                ]);
+            }
+
             // Trouver une méthode de paiement active (par défaut Espèces)
             $paymentMethod = PaymentMethod::active()->first();
             if (!$paymentMethod) {
@@ -154,13 +178,17 @@ class VenteController extends Controller
             }
 
             // Créer la vente (header)
+            $montantRecu = $validated['payment_type'] === 'immediate' ? $totalVente : ($validated['payment_type'] === 'mixed' ? $validated['montant_recu'] : 0);
+            $monnaie = 0; // Pas de monnaie pour crédit
+
             $vente = Vente::create([
                 'boutique_id' => $validated['boutique_id'],
                 'user_id' => Auth::id(),
                 'payment_method_id' => $paymentMethod->id,
+                'client_id' => $validated['client_id'] ?? null,
                 'montant_total' => $totalVente,
-                'montant_recu' => $totalVente,
-                'monnaie' => 0,
+                'montant_recu' => $montantRecu,
+                'monnaie' => $monnaie,
                 'date_vente' => $validated['date'],
                 'status' => 'terminee',
             ]);
@@ -197,6 +225,18 @@ class VenteController extends Controller
             }
 
             DB::commit();
+
+            // Créer le crédit si paiement à crédit ou mixte avec reste dû
+            if ($validated['payment_type'] === 'credit' || ($validated['payment_type'] === 'mixed' && $montantRecu < $totalVente)) {
+                $remainingBalance = $validated['payment_type'] === 'credit' ? $totalVente : ($totalVente - $montantRecu);
+                Credit::create([
+                    'vente_id' => $vente->id,
+                    'client_id' => $validated['client_id'],
+                    'total_amount' => $totalVente,
+                    'remaining_balance' => $remainingBalance,
+                    'status' => 'active',
+                ]);
+            }
 
             // Vider le panier
             Session::forget('panier');
@@ -235,7 +275,7 @@ class VenteController extends Controller
      */
     public function show(string $id)
     {
-        $vente = Vente::with(['venteProduits.produit', 'boutique.magasin'])->findOrFail($id);
+        $vente = Vente::with(['venteProduits.produit', 'boutique.magasin', 'client', 'credit'])->findOrFail($id);
         
         // Vérifier les permissions
         if (Auth::user()->isVendeur() && $vente->boutique_id != Auth::user()->boutique_id) {
@@ -446,7 +486,7 @@ class VenteController extends Controller
         }
 
         // Charger les relations nécessaires
-        $vente->load(['venteProduits.produit', 'boutique.magasin', 'user', 'paymentMethod']);
+        $vente->load(['venteProduits.produit', 'boutique.magasin', 'user', 'paymentMethod', 'client', 'credit']);
 
         return view('ventes.recu', compact('vente'));
     }

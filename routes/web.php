@@ -13,6 +13,7 @@ use App\Http\Controllers\RapportController;
 use App\Http\Controllers\POSController;
 use App\Http\Controllers\FournisseurController;
 use App\Http\Controllers\PartenaireController;
+use App\Http\Controllers\LanguageController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -26,6 +27,9 @@ Route::post('/logout', function () {
     \Auth::logout();
     return redirect('/login');
 })->name('logout');
+
+// Language switch route
+Route::get('/language/{locale}', [LanguageController::class, 'switch'])->name('language.switch');
 
 Route::get('/dashboard', [DashboardController::class, 'index'])->middleware(['auth', 'vendeur'])->name('dashboard');
 
@@ -69,6 +73,21 @@ Route::middleware('auth')->group(function () {
     // Routes CRUD pour les fournisseurs (admin et gestionnaire uniquement)
     Route::resource('fournisseurs', FournisseurController::class)->middleware('gestionnaire');
     
+    // Routes CRUD pour les commandes fournisseurs (admin et gestionnaire uniquement)
+    Route::resource('orders', \App\Http\Controllers\OrderController::class)->middleware('gestionnaire')->names([
+        'index' => 'orders.index',
+        'create' => 'orders.create',
+        'store' => 'orders.store',
+        'show' => 'orders.show',
+        'edit' => 'orders.edit',
+        'update' => 'orders.update',
+        'destroy' => 'orders.destroy'
+    ]);
+    Route::post('orders/{id}/livrer', [\App\Http\Controllers\OrderController::class, 'livrer'])->middleware('gestionnaire')->name('orders.livrer');
+    Route::get('orders/price-comparison', [\App\Http\Controllers\OrderController::class, 'priceComparison'])->middleware('gestionnaire')->name('orders.price_comparison');
+    Route::get('orders/auto-replenishment', [\App\Http\Controllers\OrderController::class, 'autoReplenishment'])->middleware('gestionnaire')->name('orders.auto_replenishment');
+    Route::post('orders/generate-replenishment', [\App\Http\Controllers\OrderController::class, 'generateReplenishmentOrders'])->middleware('gestionnaire')->name('orders.generate_replenishment');
+    
     // Routes CRUD pour les partenaires (admin et gestionnaire uniquement)
     Route::resource('partenaires', PartenaireController::class)->middleware('gestionnaire');
     
@@ -105,6 +124,30 @@ Route::middleware('auth')->group(function () {
         'destroy' => 'ventes.destroy'
     ]);
     
+    // Routes CRUD pour les clients (tous les rôles)
+    Route::resource('clients', \App\Http\Controllers\ClientController::class)->middleware('vendeur')->names([
+        'index' => 'clients.index',
+        'create' => 'clients.create',
+        'store' => 'clients.store',
+        'show' => 'clients.show',
+        'edit' => 'clients.edit',
+        'update' => 'clients.update',
+        'destroy' => 'clients.destroy'
+    ]);
+    
+    // Routes CRUD pour les crédits (tous les rôles avec manage-ventes)
+    Route::resource('credits', \App\Http\Controllers\CreditController::class)->middleware('vendeur')->names([
+        'index' => 'credits.index',
+        'create' => 'credits.create',
+        'store' => 'credits.store',
+        'show' => 'credits.show',
+        'edit' => 'credits.edit',
+        'update' => 'credits.update',
+        'destroy' => 'credits.destroy'
+    ]);
+    Route::get('credits/{id}/add-payment', [\App\Http\Controllers\CreditController::class, 'createPayment'])->middleware('vendeur')->name('credits.add_payment');
+    Route::post('credits/{id}/add-payment', [\App\Http\Controllers\CreditController::class, 'storePayment'])->middleware('vendeur')->name('credits.store_payment');
+    
     // Route pour le reçu de vente
     Route::get('/ventes/{vente}/recu', [VenteController::class, 'recu'])->middleware('vendeur')->name('ventes.recu');
     
@@ -115,6 +158,9 @@ Route::middleware('auth')->group(function () {
     Route::post('/rapports/ventes/pdf', [RapportController::class, 'rapportVentesPDF'])->middleware('gestionnaire')->name('rapports.ventes.pdf');
     Route::post('/rapports/ventes/excel', [RapportController::class, 'rapportVentesExcel'])->middleware('gestionnaire')->name('rapports.ventes.excel');
     Route::get('/rapports/partenaires/pdf', [RapportController::class, 'rapportPartenairesPDF'])->middleware('gestionnaire')->name('rapports.partenaires.pdf');
+    Route::get('/rapports/credits/form', [RapportController::class, 'rapportCreditsForm'])->middleware('gestionnaire')->name('rapports.credits.form');
+    Route::post('/rapports/credits/pdf', [RapportController::class, 'rapportCreditsPDF'])->middleware('gestionnaire')->name('rapports.credits.pdf');
+    Route::post('/rapports/credits/excel', [RapportController::class, 'rapportCreditsExcel'])->middleware('gestionnaire')->name('rapports.credits.excel');
     
     // Routes API pour les transferts
     Route::get('/api/stock-disponible', [TransfertController::class, 'getStockDisponible'])->middleware('gestionnaire');

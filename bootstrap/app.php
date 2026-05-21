@@ -16,6 +16,12 @@ return Application::configure(basePath: dirname(__DIR__))
             'admin' => \App\Http\Middleware\AdminMiddleware::class,
             'gestionnaire' => \App\Http\Middleware\GestionnaireMiddleware::class,
             'vendeur' => \App\Http\Middleware\VendeurMiddleware::class,
+            'locale' => \App\Http\Middleware\SetLocale::class,
+        ]);
+        
+        // Add SetLocale middleware to web middleware group
+        $middleware->web(append: [
+            \App\Http\Middleware\SetLocale::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

@@ -2,9 +2,9 @@
 
 @section('breadcrumb')
     <li class="breadcrumb-item">
-        <a href="{{ route('admin.dashboard') }}">Dashboard Admin</a>
+        <a href="{{ route('admin.dashboard') }}">{{ __('messages.dashboard_admin') }}</a>
     </li>
-    <li class="breadcrumb-item active">Utilisateurs</li>
+    <li class="breadcrumb-item active">{{ __('messages.users') }}</li>
 @endsection
 
 @section('content')

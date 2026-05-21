@@ -171,8 +171,21 @@
         <tbody>
             <?php $__empty_1 = true; $__currentLoopData = $ventesParProduit; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $produitData): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                 <tr>
-                    <td><strong><?php echo e($produitData['produit']->nom); ?></strong></td>
-                    <td><?php echo e($produitData['produit']->categorie); ?></td>
+                    <td>
+                        <?php if($produitData['produit']): ?>
+                            <strong><?php echo e($produitData['produit']->nom); ?></strong>
+                        <?php else: ?>
+                            <strong class="text-danger">Produit inconnu</strong>
+                        <?php endif; ?>
+                    </td>
+                    <td>
+                        <?php if($produitData['produit'] && $produitData['produit']->categorie): ?>
+                            <?php echo e($produitData['produit']->categorie); ?>
+
+                        <?php else: ?>
+                            N/A
+                        <?php endif; ?>
+                    </td>
                     <td class="text-center"><?php echo e($produitData['quantite']); ?></td>
                     <td class="text-right"><?php echo e(number_format($produitData['ca'], 0, ',', ' ')); ?> FCFA</td>
                     <td class="text-right"><?php echo e(number_format($produitData['benefice'], 0, ',', ' ')); ?> FCFA</td>
@@ -213,14 +226,48 @@
             <?php $__empty_1 = true; $__currentLoopData = $venteProduits; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $vp): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                 <tr>
                     <td><?php echo e($vp->vente->date_vente->format('d/m/Y')); ?></td>
-                    <td><?php echo e($vp->produit->nom); ?></td>
-                    <td><?php echo e($vp->produit->categorie); ?></td>
-                    <td><?php echo e($vp->vente->boutique->nom); ?></td>
-                    <td><?php echo e($vp->vente->boutique->magasin->nom); ?></td>
+                    <td>
+                        <?php if($vp->produit): ?>
+                            <?php echo e($vp->produit->nom); ?>
+
+                        <?php else: ?>
+                            Produit inconnu
+                        <?php endif; ?>
+                    </td>
+                    <td>
+                        <?php if($vp->produit && $vp->produit->categorie): ?>
+                            <?php echo e($vp->produit->categorie); ?>
+
+                        <?php else: ?>
+                            N/A
+                        <?php endif; ?>
+                    </td>
+                    <td>
+                        <?php if($vp->vente->boutique): ?>
+                            <?php echo e($vp->vente->boutique->nom); ?>
+
+                        <?php else: ?>
+                            Boutique inconnue
+                        <?php endif; ?>
+                    </td>
+                    <td>
+                        <?php if($vp->vente->boutique && $vp->vente->boutique->magasin): ?>
+                            <?php echo e($vp->vente->boutique->magasin->nom); ?>
+
+                        <?php else: ?>
+                            Magasin inconnu
+                        <?php endif; ?>
+                    </td>
                     <td class="text-center"><?php echo e($vp->quantite); ?></td>
                     <td class="text-right"><?php echo e(number_format($vp->prix_unitaire, 0, ',', ' ')); ?> FCFA</td>
                     <td class="text-right"><?php echo e(number_format($vp->sous_total, 0, ',', ' ')); ?> FCFA</td>
-                    <td class="text-right"><?php echo e(number_format(($vp->prix_unitaire - $vp->produit->prix_achat) * $vp->quantite, 0, ',', ' ')); ?> FCFA</td>
+                    <td class="text-right">
+                        <?php
+                            $prixAchat = $vp->produit ? ($vp->produit->prix_achat ?? 0) : 0;
+                            $benefice = ($vp->prix_unitaire - $prixAchat) * $vp->quantite;
+                        ?>
+                        <?php echo e(number_format($benefice, 0, ',', ' ')); ?> FCFA
+                    </td>
                 </tr>
             <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                 <tr>

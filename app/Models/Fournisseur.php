@@ -12,4 +12,9 @@ class Fournisseur extends Model
     {
         return $this->hasMany(EntreeStock::class);
     }
+
+    public function orders()
+    {
+        return $this->hasMany(Order::class);
+    }
 }

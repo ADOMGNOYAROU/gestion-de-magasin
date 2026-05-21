@@ -6,7 +6,8 @@
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
         <h1 class="h3 mb-0 text-gray-800">
             <i class="fas fa-tachometer-alt"></i> 
-            Tableau de Bord
+            <?php echo e(__('messages.dashboard')); ?>
+
             <?php if(isset($magasin)): ?>
                 <small class="text-muted">- <?php echo e($magasin->nom); ?></small>
             <?php elseif(isset($boutique)): ?>
@@ -15,7 +16,8 @@
         </h1>
         <div>
             <a href="<?php echo e(route('rapports.index')); ?>" class="btn btn-primary me-2 <?php echo e(hideIfCannot('manage-rapports')); ?>">
-                <i class="fas fa-file-alt"></i> Rapports
+                <i class="fas fa-file-alt"></i> <?php echo e(__('messages.reports')); ?>
+
             </a>
             <div class="text-muted d-inline-block">
                 <i class="fas fa-clock"></i> <?php echo e(now()->format('d/m/Y H:i')); ?>
@@ -42,7 +44,8 @@
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                                Produits Actifs
+                                <?php echo e(__('messages.active_products')); ?>
+
                             </div>
                             <div class="h5 mb-0 font-weight-bold text-gray-800">
                                 <?php echo e(number_format($totalProduits, 0, ',', ' ')); ?>
@@ -64,7 +67,8 @@
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
-                                Stock Magasin
+                                <?php echo e(__('messages.store_stock')); ?>
+
                             </div>
                             <div class="h5 mb-0 font-weight-bold text-gray-800">
                                 <?php echo e(number_format($stockTotalMagasin, 0, ',', ' ')); ?>
@@ -86,7 +90,8 @@
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
-                                Stock Boutiques
+                                <?php echo e(__('messages.shops_stock')); ?>
+
                             </div>
                             <div class="h5 mb-0 font-weight-bold text-gray-800">
                                 <?php echo e(number_format($stockTotalBoutiques, 0, ',', ' ')); ?>
@@ -108,7 +113,8 @@
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
-                                Ventes du jour
+                                <?php echo e(__('messages.today_sales')); ?>
+
                             </div>
                             <div class="h5 mb-0 font-weight-bold text-gray-800">
                                 <?php echo e($ventesJour); ?>
@@ -133,7 +139,8 @@
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                                CA du jour
+                                <?php echo e(__('messages.today_revenue')); ?>
+
                             </div>
                             <div class="h5 mb-0 font-weight-bold text-gray-800">
                                 <?php echo e(number_format($caJour, 0, ',', ' ')); ?> FCFA
@@ -154,7 +161,8 @@
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
-                                CA du mois
+                                <?php echo e(__('messages.monthly_revenue')); ?>
+
                             </div>
                             <div class="h5 mb-0 font-weight-bold text-gray-800">
                                 <?php echo e(number_format($caMois, 0, ',', ' ')); ?> FCFA
@@ -175,7 +183,8 @@
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
-                                Bénéfice du mois
+                                <?php echo e(__('messages.monthly_profit')); ?>
+
                             </div>
                             <div class="h5 mb-0 font-weight-bold text-gray-800">
                                 <?php echo e(number_format($beneficeMois, 0, ',', ' ')); ?> FCFA
@@ -197,7 +206,8 @@
             <div class="card shadow mb-4">
                 <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
                     <h6 class="m-0 font-weight-bold text-primary">
-                        <i class="fas fa-chart-area"></i> Ventes des 7 derniers jours
+                        <i class="fas fa-chart-area"></i> <?php echo e(__('messages.sales_last_7_days')); ?>
+
                     </h6>
                 </div>
                 <div class="card-body">
@@ -213,7 +223,8 @@
             <div class="card shadow mb-4">
                 <div class="card-header py-3">
                     <h6 class="m-0 font-weight-bold text-primary">
-                        <i class="fas fa-trophy"></i> Top 5 Produits
+                        <i class="fas fa-trophy"></i> <?php echo e(__('messages.top_5_products')); ?>
+
                     </h6>
                 </div>
                 <div class="card-body">
@@ -261,7 +272,8 @@
             <div class="card shadow mb-4">
                 <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
                     <h6 class="m-0 font-weight-bold text-primary">
-                        <i class="fas fa-chart-bar"></i> Ventes par produit (Top 10)
+                        <i class="fas fa-chart-bar"></i> <?php echo e(__('messages.sales_by_product_top_10')); ?>
+
                     </h6>
                 </div>
                 <div class="card-body">
@@ -277,7 +289,8 @@
             <div class="card shadow mb-4">
                 <div class="card-header py-3">
                     <h6 class="m-0 font-weight-bold text-warning">
-                        <i class="fas fa-exclamation-triangle"></i> Alertes Stock
+                        <i class="fas fa-exclamation-triangle"></i> <?php echo e(__('messages.stock_alerts')); ?>
+
                     </h6>
                 </div>
                 <div class="card-body">
@@ -296,7 +309,7 @@
                     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                         <div class="text-center text-muted">
                             <i class="fas fa-check-circle fa-3x mb-2"></i>
-                            <p>Aucune alerte de stock</p>
+                            <p><?php echo e(__('messages.no_stock_alerts')); ?></p>
                         </div>
                     <?php endif; ?>
                 </div>

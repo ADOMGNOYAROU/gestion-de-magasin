@@ -52,6 +52,25 @@ class Produit extends Model
         return $this->prix_vente - $this->prix_achat;
     }
 
+    public function getStockCreditAttribute()
+    {
+        $stockCredit = 0;
+        $credits = \DB::table('credits')
+            ->join('ventes', 'credits.vente_id', '=', 'ventes.id')
+            ->join('vente_produits', 'ventes.id', '=', 'vente_produits.vente_id')
+            ->where('vente_produits.produit_id', $this->id)
+            ->where('credits.remaining_balance', '>', 0)
+            ->select('credits.total_amount', 'credits.remaining_balance', 'vente_produits.quantite')
+            ->get();
+
+        foreach ($credits as $credit) {
+            $fraction = $credit->remaining_balance / $credit->total_amount;
+            $stockCredit += $fraction * $credit->quantite;
+        }
+
+        return round($stockCredit);
+    }
+
     public function getMargePercentageAttribute()
     {
         if ($this->prix_achat > 0) {

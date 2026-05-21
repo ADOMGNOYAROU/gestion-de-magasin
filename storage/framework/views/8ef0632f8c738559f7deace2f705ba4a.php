@@ -2,9 +2,14 @@
 <html lang="fr">
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="csrf-token" content="<?php echo e(csrf_token()); ?>">
     <meta name="description" content="Système de Gestion de Stock et Ventes">
+    <meta name="theme-color" content="#4e73df">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
     
     <title><?php echo e(config('app.name', 'Gestion Stock')); ?> - <?php echo $__env->yieldContent('title', 'Tableau de Bord'); ?></title>
 
@@ -185,11 +190,18 @@
             background: none;
             border: none;
             color: var(--secondary-color);
-            font-size: 1.25rem;
+            font-size: 1.5rem;
             cursor: pointer;
-            padding: 0.5rem;
+            padding: 0.75rem;
             border-radius: 0.25rem;
             transition: all 0.3s ease;
+            z-index: 1001;
+            position: relative;
+            min-height: 44px;
+            min-width: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .sidebar-toggle:hover {
@@ -496,6 +508,7 @@
             .sidebar {
                 transform: translateX(-100%);
                 transition: transform 0.3s ease;
+                width: 280px;
             }
 
             .sidebar.show {
@@ -503,6 +516,10 @@
             }
 
             .main-content {
+                margin-left: 0 !important;
+            }
+
+            .main-content.expanded {
                 margin-left: 0 !important;
             }
 
@@ -528,6 +545,8 @@
 
             .breadcrumb {
                 font-size: 0.875rem;
+                overflow-x: auto;
+                white-space: nowrap;
             }
 
             /* Mobile buttons */
@@ -535,6 +554,7 @@
                 min-height: 44px;
                 padding: 0.75rem 1rem;
                 font-size: 0.9rem;
+                touch-action: manipulation;
             }
 
             .btn-sm {
@@ -556,6 +576,7 @@
                 font-size: 0.85rem;
                 border-radius: 0.5rem;
                 transition: all 0.2s ease;
+                touch-action: manipulation;
             }
 
             .product-btn-mobile:hover:not(:disabled) {
@@ -579,11 +600,13 @@
             .card {
                 margin-bottom: 1rem;
                 border-radius: 0.5rem;
+                box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
             }
 
             .card-header {
                 padding: 1rem;
                 font-size: 1rem;
+                border-bottom: 1px solid #e3e6f0;
             }
 
             .card-body {
@@ -595,21 +618,38 @@
                 border: none;
                 margin: -1rem;
                 margin-top: 0;
+                border-radius: 0.5rem;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
             }
 
             .table-responsive .table {
                 margin-bottom: 0;
+                font-size: 0.875rem;
+            }
+
+            .table th {
+                font-size: 0.75rem;
+                padding: 0.5rem;
+                white-space: nowrap;
+            }
+
+            .table td {
+                padding: 0.5rem;
+                vertical-align: middle;
             }
 
             /* Mobile forms */
             .form-control, .form-select {
                 min-height: 44px;
                 font-size: 1rem;
+                border-radius: 0.5rem;
             }
 
             .form-label {
                 font-weight: 600;
                 margin-bottom: 0.5rem;
+                font-size: 0.875rem;
             }
 
             /* Mobile alerts */
@@ -617,6 +657,7 @@
                 margin-bottom: 1rem;
                 border-radius: 0.5rem;
                 padding: 1rem;
+                font-size: 0.875rem;
             }
 
             /* Mobile dropdowns */
@@ -625,23 +666,48 @@
                 box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
                 border-radius: 0.5rem;
                 margin-top: 0.5rem;
+                font-size: 0.875rem;
             }
 
             /* Mobile modals */
             .modal-dialog {
                 margin: 0.5rem;
                 max-width: none;
+                width: calc(100% - 1rem);
+            }
+
+            .modal-content {
+                border-radius: 0.5rem;
+                border: none;
             }
 
             /* Mobile pagination */
             .pagination {
                 justify-content: center;
                 margin-top: 1rem;
+                flex-wrap: wrap;
             }
 
             .pagination .page-link {
                 padding: 0.5rem 0.75rem;
                 min-width: 44px;
+                min-height: 44px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            /* Mobile dashboard stats */
+            .dashboard-card {
+                margin-bottom: 1rem;
+            }
+
+            .dashboard-stat {
+                font-size: 2rem;
+            }
+
+            .dashboard-stat-label {
+                font-size: 0.75rem;
             }
         }
 
@@ -670,6 +736,139 @@
 
             .breadcrumb-item:first-child span:not(.fa) {
                 display: none;
+            }
+
+            /* Very small screen adjustments */
+            .sidebar {
+                width: 100%;
+                max-width: 300px;
+            }
+
+            .product-btn-mobile {
+                min-height: 70px;
+                font-size: 0.8rem;
+            }
+
+            .dashboard-stat {
+                font-size: 1.5rem;
+            }
+
+            .card-header {
+                padding: 0.75rem;
+                font-size: 0.875rem;
+            }
+
+            .card-body {
+                padding: 0.75rem;
+            }
+
+            .table th, .table td {
+                padding: 0.25rem 0.5rem;
+                font-size: 0.75rem;
+            }
+
+            .btn {
+                padding: 0.5rem 0.75rem;
+                font-size: 0.875rem;
+            }
+
+            .form-control, .form-select {
+                font-size: 16px; /* Prevents zoom on iOS */
+                padding: 0.5rem;
+            }
+        }
+
+        /* Extra small screens (iPhone SE, etc.) */
+        @media (max-width: 375px) {
+            .sidebar {
+                width: 100%;
+            }
+
+            .topbar {
+                padding: 0.5rem;
+            }
+
+            .sidebar-toggle {
+                padding: 0.5rem;
+                font-size: 1.25rem;
+            }
+
+            .page-content {
+                padding: 0.5rem;
+            }
+
+            .card {
+                margin-bottom: 0.5rem;
+            }
+
+            .card-header, .card-body {
+                padding: 0.5rem;
+            }
+
+            .btn {
+                min-height: 40px;
+                padding: 0.5rem;
+                font-size: 0.75rem;
+            }
+
+            .table th, .table td {
+                padding: 0.25rem;
+                font-size: 0.7rem;
+            }
+        }
+
+        /* Landscape mobile adjustments */
+        @media (max-width: 768px) and (orientation: landscape) {
+            .sidebar {
+                width: 320px;
+            }
+
+            .topbar {
+                padding: 0.5rem 1rem;
+            }
+
+            .page-content {
+                padding: 0.5rem;
+            }
+
+            .dashboard-stat {
+                font-size: 1.75rem;
+            }
+        }
+
+        /* Touch device optimizations */
+        @media (hover: none) and (pointer: coarse) {
+            .btn, .sidebar-toggle, .nav-link {
+                min-height: 48px;
+                min-width: 48px;
+            }
+
+            .form-control, .form-select {
+                min-height: 48px;
+                font-size: 16px;
+            }
+
+            .pagination .page-link {
+                min-height: 48px;
+                min-width: 48px;
+            }
+
+            .dropdown-item {
+                padding: 0.75rem 1rem;
+                min-height: 48px;
+                display: flex;
+                align-items: center;
+            }
+        }
+
+        /* High DPI displays */
+        @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+            .sidebar {
+                border-right: 0.5px solid rgba(0, 0, 0, 0.1);
+            }
+
+            .card {
+                border: 0.5px solid rgba(0, 0, 0, 0.1);
             }
         }
             padding: 1.5rem;
@@ -760,7 +959,7 @@
             <div class="sidebar-item">
                 <a href="<?php echo e(route('dashboard')); ?>" class="sidebar-link <?php echo e(request()->is('dashboard') ? 'active' : ''); ?>">
                     <i class="fas fa-tachometer-alt"></i>
-                    <span class="sidebar-link-text">Tableau de Bord</span>
+                    <span class="sidebar-link-text"><?php echo e(__('messages.dashboard')); ?></span>
                 </a>
             </div>
 
@@ -769,7 +968,7 @@
             <div class="sidebar-item">
                 <a href="<?php echo e(route('produits.index')); ?>" class="sidebar-link <?php echo e(request()->is('produits*') ? 'active' : ''); ?>">
                     <i class="fas fa-box"></i>
-                    <span class="sidebar-link-text">Produits</span>
+                    <span class="sidebar-link-text"><?php echo e(__('messages.products')); ?></span>
                 </a>
             </div>
             <?php endif; ?>
@@ -779,7 +978,7 @@
             <div class="sidebar-item">
                 <a href="<?php echo e(route('entrees-stock.index')); ?>" class="sidebar-link <?php echo e(request()->is('entrees-stock*') ? 'active' : ''); ?>">
                     <i class="fas fa-plus-circle"></i>
-                    <span class="sidebar-link-text">Entrées Stock</span>
+                    <span class="sidebar-link-text"><?php echo e(__('messages.stock_entries')); ?></span>
                 </a>
             </div>
             <?php endif; ?>
@@ -789,7 +988,17 @@
             <div class="sidebar-item">
                 <a href="<?php echo e(route('fournisseurs.index')); ?>" class="sidebar-link <?php echo e(request()->is('fournisseurs*') ? 'active' : ''); ?>">
                     <i class="fas fa-truck"></i>
-                    <span class="sidebar-link-text">Fournisseurs</span>
+                    <span class="sidebar-link-text"><?php echo e(__('messages.suppliers')); ?></span>
+                </a>
+            </div>
+            <?php endif; ?>
+
+            <!-- Commandes -->
+            <?php if(auth()->user()->isAdmin() || auth()->user()->isGestionnaire()): ?>
+            <div class="sidebar-item">
+                <a href="<?php echo e(route('orders.index')); ?>" class="sidebar-link <?php echo e(request()->is('orders*') ? 'active' : ''); ?>">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span class="sidebar-link-text"><?php echo e(__('messages.orders')); ?></span>
                 </a>
             </div>
             <?php endif; ?>
@@ -799,7 +1008,7 @@
             <div class="sidebar-item">
                 <a href="<?php echo e(route('partenaires.index')); ?>" class="sidebar-link <?php echo e(request()->is('partenaires*') ? 'active' : ''); ?>">
                     <i class="fas fa-handshake"></i>
-                    <span class="sidebar-link-text">Partenaires</span>
+                    <span class="sidebar-link-text"><?php echo e(__('messages.partners')); ?></span>
                 </a>
             </div>
             <?php endif; ?>
@@ -809,7 +1018,7 @@
             <div class="sidebar-item">
                 <a href="<?php echo e(route('transferts.index')); ?>" class="sidebar-link <?php echo e(request()->is('transferts*') ? 'active' : ''); ?>">
                     <i class="fas fa-exchange-alt"></i>
-                    <span class="sidebar-link-text">Transferts Stock</span>
+                    <span class="sidebar-link-text"><?php echo e(__('messages.transfers')); ?></span>
                 </a>
             </div>
             <?php endif; ?>
@@ -819,7 +1028,27 @@
             <div class="sidebar-item">
                 <a href="<?php echo e(route('ventes.index')); ?>" class="sidebar-link <?php echo e(request()->is('ventes*') ? 'active' : ''); ?>">
                     <i class="fas fa-shopping-cart"></i>
-                    <span class="sidebar-link-text">Ventes</span>
+                    <span class="sidebar-link-text"><?php echo e(__('messages.sales')); ?></span>
+                </a>
+            </div>
+            <?php endif; ?>
+
+            <!-- Clients -->
+            <?php if(canManageVentes()): ?>
+            <div class="sidebar-item">
+                <a href="<?php echo e(route('clients.index')); ?>" class="sidebar-link <?php echo e(request()->is('clients*') ? 'active' : ''); ?>">
+                    <i class="fas fa-users"></i>
+                    <span class="sidebar-link-text"><?php echo e(__('messages.clients')); ?></span>
+                </a>
+            </div>
+            <?php endif; ?>
+
+            <!-- Crédits -->
+            <?php if(canManageVentes()): ?>
+            <div class="sidebar-item">
+                <a href="<?php echo e(route('credits.index')); ?>" class="sidebar-link <?php echo e(request()->is('credits*') ? 'active' : ''); ?>">
+                    <i class="fas fa-credit-card"></i>
+                    <span class="sidebar-link-text"><?php echo e(__('messages.credits')); ?></span>
                 </a>
             </div>
             <?php endif; ?>
@@ -829,7 +1058,7 @@
             <div class="sidebar-item">
                 <a href="<?php echo e(route('pos.index')); ?>" class="sidebar-link <?php echo e(request()->is('pos*') ? 'active' : ''); ?>">
                     <i class="fas fa-cash-register"></i>
-                    <span class="sidebar-link-text">Caisse</span>
+                    <span class="sidebar-link-text"><?php echo e(__('messages.pos')); ?></span>
                 </a>
             </div>
             <?php endif; ?>
@@ -839,7 +1068,7 @@
             <div class="sidebar-item">
                 <a href="<?php echo e(route('pos.index')); ?>" class="sidebar-link <?php echo e(request()->is('pos*') ? 'active' : ''); ?>">
                     <i class="fas fa-cash-register"></i>
-                    <span class="sidebar-link-text">Gestion des Caisses</span>
+                    <span class="sidebar-link-text"><?php echo e(__('messages.pos')); ?> <?php echo e(__('messages.management')); ?></span>
                 </a>
             </div>
             <?php endif; ?>
@@ -849,7 +1078,7 @@
             <div class="sidebar-item">
                 <a href="<?php echo e(route('rapports.index')); ?>" class="sidebar-link <?php echo e(request()->is('rapports*') ? 'active' : ''); ?>">
                     <i class="fas fa-file-alt"></i>
-                    <span class="sidebar-link-text">Rapports</span>
+                    <span class="sidebar-link-text"><?php echo e(__('messages.reports')); ?></span>
                 </a>
             </div>
             <?php endif; ?>
@@ -900,7 +1129,7 @@
         <!-- Top Navigation -->
         <header class="topbar">
             <div class="topbar-left">
-                <button class="sidebar-toggle" id="sidebarToggle">
+                <button class="sidebar-toggle" id="sidebarToggle" onclick="toggleSidebar();">
                     <i class="fas fa-bars"></i>
                 </button>
                 
@@ -918,6 +1147,31 @@
             </div>
 
             <div class="topbar-right">
+                <!-- Language Switcher -->
+                <div class="dropdown">
+                    <button class="btn btn-link text-muted" type="button" data-bs-toggle="dropdown" title="<?php echo e(__('messages.language')); ?>">
+                        <i class="fas fa-globe"></i>
+                        <span class="ms-1"><?php echo e(strtoupper(app()->getLocale())); ?></span>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><h6 class="dropdown-header"><?php echo e(__('messages.language')); ?></h6></li>
+                        <li>
+                            <a class="dropdown-item <?php echo e(app()->getLocale() === 'fr' ? 'active' : ''); ?>" 
+                               href="<?php echo e(route('language.switch', 'fr')); ?>">
+                                <i class="fas fa-flag me-2"></i> <?php echo e(__('messages.french')); ?>
+
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item <?php echo e(app()->getLocale() === 'tr' ? 'active' : ''); ?>" 
+                               href="<?php echo e(route('language.switch', 'tr')); ?>">
+                                <i class="fas fa-flag me-2"></i> <?php echo e(__('messages.turkish')); ?>
+
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
                 <!-- Notifications -->
                 <div class="dropdown">
                     <button class="btn btn-link text-muted position-relative" type="button" data-bs-toggle="dropdown">
@@ -1040,44 +1294,150 @@
     <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
     
     <script>
-        // Sidebar Toggle
-        const sidebar = document.getElementById('sidebar');
-        const mainContent = document.getElementById('mainContent');
-        const sidebarToggle = document.getElementById('sidebarToggle');
-        const sidebarOverlay = document.getElementById('sidebarOverlay');
-
-        function toggleSidebar() {
-            sidebar.classList.toggle('collapsed');
-            mainContent.classList.toggle('expanded');
+        // Mobile and touch optimizations
+        document.addEventListener('DOMContentLoaded', function() {
+            // Detect mobile device
+            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
             
-            // Mobile handling
-            if (window.innerWidth <= 768) {
+            if (isMobile || isTouch) {
+                document.body.classList.add('mobile-device');
+                document.body.classList.add('touch-device');
+            }
+            
+            // Prevent double-tap zoom on iOS
+            let lastTouchEnd = 0;
+            document.addEventListener('touchend', function (event) {
+                const now = (new Date()).getTime();
+                if (now - lastTouchEnd <= 300) {
+                    event.preventDefault();
+                }
+                lastTouchEnd = now;
+            }, false);
+            
+            // Handle orientation change
+            window.addEventListener('orientationchange', function() {
+                setTimeout(function() {
+                    // Recalculate layouts after orientation change
+                    const sidebar = document.getElementById('sidebar');
+                    const sidebarOverlay = document.getElementById('sidebarOverlay');
+                    
+                    if (window.innerWidth > 768) {
+                        sidebar.classList.remove('show');
+                        sidebarOverlay.classList.remove('show');
+                        document.body.style.overflow = '';
+                    }
+                }, 100);
+            });
+            
+            // Optimize scrolling for mobile
+            if (isTouch) {
+                document.body.style.touchAction = 'pan-y';
+                
+                // Disable hover effects on touch devices
+                let touchTimer;
+                document.addEventListener('touchstart', function() {
+                    clearTimeout(touchTimer);
+                    document.body.classList.add('touching');
+                });
+                
+                document.addEventListener('touchend', function() {
+                    touchTimer = setTimeout(function() {
+                        document.body.classList.remove('touching');
+                    }, 500);
+                });
+            }
+            
+            // Improve button feedback on mobile
+            if (isMobile) {
+                document.querySelectorAll('.btn, .sidebar-toggle, .nav-link').forEach(button => {
+                    button.addEventListener('touchstart', function() {
+                        this.style.transform = 'scale(0.95)';
+                    });
+                    
+                    button.addEventListener('touchend', function() {
+                        this.style.transform = 'scale(1)';
+                    });
+                });
+            }
+            
+            // Handle safe area for notched screens
+            if (CSS.supports('padding-top', 'env(safe-area-inset-top)')) {
+                const safeArea = getComputedStyle(document.body);
+                document.documentElement.style.setProperty('--safe-area-inset-top', safeArea.getPropertyValue('env(safe-area-inset-top)'));
+                document.documentElement.style.setProperty('--safe-area-inset-bottom', safeArea.getPropertyValue('env(safe-area-inset-bottom)'));
+            }
+        });
+
+        // Translation helper
+        window.t = function(key, params = {}) {
+            const translations = <?php echo json_encode(__('messages'), 15, 512) ?>;
+            let text = key.split('.').reduce((obj, i) => obj && obj[i], translations) || key;
+            
+            // Replace parameters in text
+            Object.keys(params).forEach(param => {
+                text = text.replace(new RegExp(`_${param}_`, 'g'), params[param]);
+            });
+            
+            return text;
+        }
+
+        // Simple mobile menu toggle
+        function toggleSidebar() {
+            console.log('toggleSidebar called');
+            const sidebar = document.getElementById('sidebar');
+            const sidebarOverlay = document.getElementById('sidebarOverlay');
+            
+            if (sidebar && sidebarOverlay) {
                 sidebar.classList.toggle('show');
                 sidebarOverlay.classList.toggle('show');
+                document.body.style.overflow = sidebar.classList.contains('show') ? 'hidden' : '';
+                console.log('Sidebar toggled, show:', sidebar.classList.contains('show'));
+            } else {
+                console.error('Sidebar elements not found');
             }
         }
 
-        sidebarToggle.addEventListener('click', toggleSidebar);
-        sidebarOverlay.addEventListener('click', () => {
-            sidebar.classList.remove('show');
-            sidebarOverlay.classList.remove('show');
-        });
+        // Initialize when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            const toggleBtn = document.getElementById('sidebarToggle');
+            if (toggleBtn) {
+                toggleBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    console.log('Click event triggered');
+                    toggleSidebar();
+                });
+                console.log('Event listener attached to sidebar toggle');
+            } else {
+                console.error('Sidebar toggle button not found');
+            }
 
-        // Auto-hide sidebar on mobile when clicking links
-        document.querySelectorAll('.sidebar-link').forEach(link => {
-            link.addEventListener('click', () => {
-                if (window.innerWidth <= 768) {
-                    sidebar.classList.remove('show');
-                    sidebarOverlay.classList.remove('show');
-                }
-            });
-        });
+            // Close sidebar when clicking overlay
+            const sidebarOverlay = document.getElementById('sidebarOverlay');
+            if (sidebarOverlay) {
+                sidebarOverlay.addEventListener('click', function() {
+                    console.log('Overlay clicked');
+                    const sidebar = document.getElementById('sidebar');
+                    if (sidebar) {
+                        sidebar.classList.remove('show');
+                        sidebarOverlay.classList.remove('show');
+                        document.body.style.overflow = '';
+                    }
+                });
+            }
 
-        // Handle window resize
-        window.addEventListener('resize', () => {
-            if (window.innerWidth > 768) {
-                sidebar.classList.remove('show');
-                sidebarOverlay.classList.remove('show');
+            // Close sidebar when clicking links (mobile)
+            const sidebar = document.getElementById('sidebar');
+            if (sidebar) {
+                sidebar.querySelectorAll('.sidebar-link').forEach(link => {
+                    link.addEventListener('click', function() {
+                        if (window.innerWidth <= 768) {
+                            sidebar.classList.remove('show');
+                            sidebarOverlay.classList.remove('show');
+                            document.body.style.overflow = '';
+                        }
+                    });
+                });
             }
         });
 
@@ -1094,14 +1454,24 @@
             $('.datatable').DataTable({
                 language: {
                     url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/fr-FR.json',
-                    search: "Rechercher:",
-                    lengthMenu: "Afficher _MENU_ éléments",
-                    info: "Affichage de _START_ à _END_ sur _TOTAL_ éléments",
+                    search: "<?php echo e(__('messages.rechercher')); ?>:",
+                    lengthMenu: "<?php echo e(__('messages.afficher')); ?> _MENU_ <?php echo e(__('messages.elements')); ?>",
+                    info: "<?php echo e(__('messages.affichage_de_a_sur')); ?>",
                     paginate: {
-                        first: "Premier",
-                        last: "Dernier",
-                        next: "Suivant",
-                        previous: "Précédent"
+                        first: "<?php echo e(__('messages.premier')); ?>",
+                        last: "<?php echo e(__('messages.dernier')); ?>",
+                        next: "<?php echo e(__('messages.suivant')); ?>",
+                        previous: "<?php echo e(__('messages.precedent')); ?>"
+                    },
+                    emptyTable: "<?php echo e(__('messages.aucune_donnee')); ?>",
+                    zeroRecords: "<?php echo e(__('messages.aucune_donnee')); ?>",
+                    infoEmpty: "<?php echo e(__('messages.aucune_donnee')); ?>",
+                    infoFiltered: "(<?php echo e(__('messages.filtrer_sur')); ?>)",
+                    loadingRecords: "<?php echo e(__('messages.chargement_en_cours')); ?>",
+                    processing: "<?php echo e(__('messages.traitement_en_cours')); ?>...",
+                    aria: {
+                        sortAscending: ": <?php echo e(__('messages.ordonner')); ?> <?php echo e(__('messages.par_ordre_croissant')); ?>",
+                        sortDescending: ": <?php echo e(__('messages.ordonner')); ?> <?php echo e(__('messages.par_ordre_decroissant')); ?>"
                     }
                 },
                 pageLength: 10,
@@ -1116,14 +1486,14 @@
                 const submitBtn = form.querySelector('button[type="submit"]');
                 if (submitBtn) {
                     submitBtn.disabled = true;
-                    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Chargement...';
+                    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span><?php echo e(__("messages.traitement_en_cours")); ?>...';
                 }
             });
         });
 
         // Confirm modals
         function confirmAction(message, callback) {
-            if (confirm(message)) {
+            if (confirm(message || "<?php echo e(__('messages.confirmer_action')); ?>")) {
                 callback();
             }
         }
@@ -1149,9 +1519,19 @@
             const sidebarOverlay = document.getElementById('sidebarOverlay');
             const mainContent = document.getElementById('mainContent');
 
+            console.log('Mobile menu initialization:', {
+                sidebarToggle: !!sidebarToggle,
+                sidebar: !!sidebar,
+                sidebarOverlay: !!sidebarOverlay,
+                mainContent: !!mainContent
+            });
+
             // Toggle sidebar on mobile
             if (sidebarToggle && sidebar && sidebarOverlay) {
-                sidebarToggle.addEventListener('click', function() {
+                sidebarToggle.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    console.log('Toggle clicked');
+                    
                     sidebar.classList.toggle('show');
                     sidebarOverlay.classList.toggle('show');
 
@@ -1161,6 +1541,7 @@
 
                 // Close sidebar when clicking overlay
                 sidebarOverlay.addEventListener('click', function() {
+                    console.log('Overlay clicked');
                     sidebar.classList.remove('show');
                     sidebarOverlay.classList.remove('show');
                     document.body.style.overflow = '';
@@ -1176,6 +1557,8 @@
                         }
                     });
                 });
+            } else {
+                console.error('Mobile menu elements not found');
             }
 
             // Close sidebar on window resize if desktop
