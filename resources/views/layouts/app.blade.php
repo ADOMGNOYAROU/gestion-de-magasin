@@ -157,6 +157,30 @@
             visibility: hidden;
         }
 
+        /* Groupes de la sidebar (menus déroulants) */
+        .sidebar-caret {
+            font-size: 0.75rem;
+            transition: transform 0.25s ease;
+        }
+
+        .sidebar-group-toggle[aria-expanded="true"] .sidebar-caret {
+            transform: rotate(180deg);
+        }
+
+        .sidebar-submenu {
+            padding: 0.25rem 0;
+        }
+
+        .sidebar-submenu .sidebar-link {
+            padding-left: 3rem;
+            font-size: 0.9rem;
+        }
+
+        .sidebar.collapsed .sidebar-caret,
+        .sidebar.collapsed .sidebar-submenu {
+            display: none;
+        }
+
         /* Main Content */
         .main-content {
             margin-left: var(--sidebar-width);
@@ -954,6 +978,11 @@
             <span class="sidebar-brand-text">Gestion Stock</span>
         </a>
         
+        @php
+            $stockActive = request()->is('produits*', 'entrees-stock*', 'transferts*', 'fournisseurs*', 'orders*', 'partenaires*');
+            $ventesActive = request()->is('ventes*', 'clients*', 'credits*', 'pos*');
+            $adminActive = request()->is('admin*', 'users*', 'magasins*', 'boutiques*');
+        @endphp
         <nav class="sidebar-menu">
             <!-- Dashboard -->
             <div class="sidebar-item">
@@ -963,113 +992,95 @@
                 </a>
             </div>
 
-            <!-- Produits -->
-            @if(canManageProduits())
+            <!-- Groupe Stock -->
+            @if(canManageProduits() || canManageEntreesStock() || canManageTransferts() || auth()->user()->isAdmin() || auth()->user()->isGestionnaire())
             <div class="sidebar-item">
-                <a href="{{ route('produits.index') }}" class="sidebar-link {{ request()->is('produits*') ? 'active' : '' }}">
-                    <i class="fas fa-box"></i>
+                <a href="#sidebarGroupStock" class="sidebar-link sidebar-group-toggle {{ $stockActive ? 'active' : '' }}"
+                   data-bs-toggle="collapse" role="button"
+                   aria-expanded="{{ $stockActive ? 'true' : 'false' }}" aria-controls="sidebarGroupStock">
+                    <i class="fas fa-boxes"></i>
                     <span class="sidebar-link-text">{{ __('messages.products') }}</span>
+                    <i class="fas fa-chevron-down ms-auto sidebar-caret"></i>
                 </a>
+                <div class="collapse {{ $stockActive ? 'show' : '' }}" id="sidebarGroupStock">
+                    <div class="sidebar-submenu">
+                        @if(canManageProduits())
+                            <a href="{{ route('produits.index') }}" class="sidebar-link {{ request()->is('produits*') ? 'active' : '' }}">
+                                <i class="fas fa-box"></i>
+                                <span class="sidebar-link-text">{{ __('messages.products') }}</span>
+                            </a>
+                        @endif
+                        @if(canManageEntreesStock())
+                            <a href="{{ route('entrees-stock.index') }}" class="sidebar-link {{ request()->is('entrees-stock*') ? 'active' : '' }}">
+                                <i class="fas fa-plus-circle"></i>
+                                <span class="sidebar-link-text">{{ __('messages.stock_entries') }}</span>
+                            </a>
+                        @endif
+                        @if(canManageTransferts())
+                            <a href="{{ route('transferts.index') }}" class="sidebar-link {{ request()->is('transferts*') ? 'active' : '' }}">
+                                <i class="fas fa-exchange-alt"></i>
+                                <span class="sidebar-link-text">{{ __('messages.transfers') }}</span>
+                            </a>
+                        @endif
+                        @if(auth()->user()->isAdmin() || auth()->user()->isGestionnaire())
+                            <a href="{{ route('fournisseurs.index') }}" class="sidebar-link {{ request()->is('fournisseurs*') ? 'active' : '' }}">
+                                <i class="fas fa-truck"></i>
+                                <span class="sidebar-link-text">{{ __('messages.suppliers') }}</span>
+                            </a>
+                            <a href="{{ route('orders.index') }}" class="sidebar-link {{ request()->is('orders*') ? 'active' : '' }}">
+                                <i class="fas fa-shopping-cart"></i>
+                                <span class="sidebar-link-text">{{ __('messages.orders') }}</span>
+                            </a>
+                            <a href="{{ route('partenaires.index') }}" class="sidebar-link {{ request()->is('partenaires*') ? 'active' : '' }}">
+                                <i class="fas fa-handshake"></i>
+                                <span class="sidebar-link-text">{{ __('messages.partners') }}</span>
+                            </a>
+                        @endif
+                    </div>
+                </div>
             </div>
             @endif
 
-            <!-- Gestion Stock -->
-            @if(canManageEntreesStock())
+            <!-- Groupe Ventes -->
+            @if(canManageVentes() || auth()->user()->isVendeur() || auth()->user()->isAdmin() || auth()->user()->isGestionnaire())
             <div class="sidebar-item">
-                <a href="{{ route('entrees-stock.index') }}" class="sidebar-link {{ request()->is('entrees-stock*') ? 'active' : '' }}">
-                    <i class="fas fa-plus-circle"></i>
-                    <span class="sidebar-link-text">{{ __('messages.stock_entries') }}</span>
-                </a>
-            </div>
-            @endif
-
-            <!-- Fournisseurs -->
-            @if(auth()->user()->isAdmin() || auth()->user()->isGestionnaire())
-            <div class="sidebar-item">
-                <a href="{{ route('fournisseurs.index') }}" class="sidebar-link {{ request()->is('fournisseurs*') ? 'active' : '' }}">
-                    <i class="fas fa-truck"></i>
-                    <span class="sidebar-link-text">{{ __('messages.suppliers') }}</span>
-                </a>
-            </div>
-            @endif
-
-            <!-- Commandes -->
-            @if(auth()->user()->isAdmin() || auth()->user()->isGestionnaire())
-            <div class="sidebar-item">
-                <a href="{{ route('orders.index') }}" class="sidebar-link {{ request()->is('orders*') ? 'active' : '' }}">
-                    <i class="fas fa-shopping-cart"></i>
-                    <span class="sidebar-link-text">{{ __('messages.orders') }}</span>
-                </a>
-            </div>
-            @endif
-
-            <!-- Partenaires -->
-            @if(auth()->user()->isAdmin() || auth()->user()->isGestionnaire())
-            <div class="sidebar-item">
-                <a href="{{ route('partenaires.index') }}" class="sidebar-link {{ request()->is('partenaires*') ? 'active' : '' }}">
-                    <i class="fas fa-handshake"></i>
-                    <span class="sidebar-link-text">{{ __('messages.partners') }}</span>
-                </a>
-            </div>
-            @endif
-
-            <!-- Transferts -->
-            @if(canManageTransferts())
-            <div class="sidebar-item">
-                <a href="{{ route('transferts.index') }}" class="sidebar-link {{ request()->is('transferts*') ? 'active' : '' }}">
-                    <i class="fas fa-exchange-alt"></i>
-                    <span class="sidebar-link-text">{{ __('messages.transfers') }}</span>
-                </a>
-            </div>
-            @endif
-
-            <!-- Ventes -->
-            @if(canManageVentes())
-            <div class="sidebar-item">
-                <a href="{{ route('ventes.index') }}" class="sidebar-link {{ request()->is('ventes*') ? 'active' : '' }}">
+                <a href="#sidebarGroupVentes" class="sidebar-link sidebar-group-toggle {{ $ventesActive ? 'active' : '' }}"
+                   data-bs-toggle="collapse" role="button"
+                   aria-expanded="{{ $ventesActive ? 'true' : 'false' }}" aria-controls="sidebarGroupVentes">
                     <i class="fas fa-shopping-cart"></i>
                     <span class="sidebar-link-text">{{ __('messages.sales') }}</span>
+                    <i class="fas fa-chevron-down ms-auto sidebar-caret"></i>
                 </a>
-            </div>
-            @endif
-
-            <!-- Clients -->
-            @if(canManageVentes())
-            <div class="sidebar-item">
-                <a href="{{ route('clients.index') }}" class="sidebar-link {{ request()->is('clients*') ? 'active' : '' }}">
-                    <i class="fas fa-users"></i>
-                    <span class="sidebar-link-text">{{ __('messages.clients') }}</span>
-                </a>
-            </div>
-            @endif
-
-            <!-- Crédits -->
-            @if(canManageVentes())
-            <div class="sidebar-item">
-                <a href="{{ route('credits.index') }}" class="sidebar-link {{ request()->is('credits*') ? 'active' : '' }}">
-                    <i class="fas fa-credit-card"></i>
-                    <span class="sidebar-link-text">{{ __('messages.credits') }}</span>
-                </a>
-            </div>
-            @endif
-
-            <!-- Caisse (POS) -->
-            @if(auth()->user()->isVendeur())
-            <div class="sidebar-item">
-                <a href="{{ route('pos.index') }}" class="sidebar-link {{ request()->is('pos*') ? 'active' : '' }}">
-                    <i class="fas fa-cash-register"></i>
-                    <span class="sidebar-link-text">{{ __('messages.pos') }}</span>
-                </a>
-            </div>
-            @endif
-
-            <!-- Gestion des Caisses (Admin/Gestionnaire) -->
-            @if(auth()->user()->isAdmin() || auth()->user()->isGestionnaire())
-            <div class="sidebar-item">
-                <a href="{{ route('pos.index') }}" class="sidebar-link {{ request()->is('pos*') ? 'active' : '' }}">
-                    <i class="fas fa-cash-register"></i>
-                    <span class="sidebar-link-text">{{ __('messages.pos') }} {{ __('messages.management') }}</span>
-                </a>
+                <div class="collapse {{ $ventesActive ? 'show' : '' }}" id="sidebarGroupVentes">
+                    <div class="sidebar-submenu">
+                        @if(canManageVentes())
+                            <a href="{{ route('ventes.index') }}" class="sidebar-link {{ request()->is('ventes*') ? 'active' : '' }}">
+                                <i class="fas fa-receipt"></i>
+                                <span class="sidebar-link-text">{{ __('messages.sales') }}</span>
+                            </a>
+                            <a href="{{ route('clients.index') }}" class="sidebar-link {{ request()->is('clients*') ? 'active' : '' }}">
+                                <i class="fas fa-users"></i>
+                                <span class="sidebar-link-text">{{ __('messages.clients') }}</span>
+                            </a>
+                            <a href="{{ route('credits.index') }}" class="sidebar-link {{ request()->is('credits*') ? 'active' : '' }}">
+                                <i class="fas fa-credit-card"></i>
+                                <span class="sidebar-link-text">{{ __('messages.credits') }}</span>
+                            </a>
+                        @endif
+                        @if(auth()->user()->isVendeur())
+                            <a href="{{ route('pos.index') }}" class="sidebar-link {{ request()->is('pos*') ? 'active' : '' }}">
+                                <i class="fas fa-cash-register"></i>
+                                <span class="sidebar-link-text">{{ __('messages.pos') }}</span>
+                            </a>
+                        @endif
+                        @if(auth()->user()->isAdmin() || auth()->user()->isGestionnaire())
+                            <a href="{{ route('pos.index') }}" class="sidebar-link {{ request()->is('pos*') ? 'active' : '' }}">
+                                <i class="fas fa-cash-register"></i>
+                                <span class="sidebar-link-text">{{ __('messages.pos') }} {{ __('messages.management') }}</span>
+                            </a>
+                        @endif
+                    </div>
+                </div>
             </div>
             @endif
 
@@ -1084,41 +1095,41 @@
             @endif
 
             <!-- Séparateur -->
+            @if(auth()->user()->isAdmin())
             <hr class="text-white-50 mx-3 my-2">
 
-            <!-- Administration -->
-            @if(auth()->user()->isAdmin())
+            <!-- Groupe Administration -->
             <div class="sidebar-item">
-                <a href="{{ route('admin.dashboard') }}" class="sidebar-link {{ request()->is('admin*') ? 'active' : '' }}">
-                    <i class="fas fa-tachometer-alt"></i>
-                    <span class="sidebar-link-text">Dashboard Admin</span>
+                <a href="#sidebarGroupAdmin" class="sidebar-link sidebar-group-toggle {{ $adminActive ? 'active' : '' }}"
+                   data-bs-toggle="collapse" role="button"
+                   aria-expanded="{{ $adminActive ? 'true' : 'false' }}" aria-controls="sidebarGroupAdmin">
+                    <i class="fas fa-user-shield"></i>
+                    <span class="sidebar-link-text">Administration</span>
+                    <i class="fas fa-chevron-down ms-auto sidebar-caret"></i>
                 </a>
-            </div>
-            
-            <!-- Gestion des utilisateurs -->
-            <div class="sidebar-item">
-                <a href="{{ route('users.index') }}" class="sidebar-link {{ request()->is('users*') ? 'active' : '' }}">
-                    <i class="fas fa-users-cog"></i>
-                    <span class="sidebar-link-text">Gestion Utilisateurs</span>
-                </a>
-            </div>
-            
-            <!-- Gestion des magasins -->
-            <div class="sidebar-item">
-                <a href="{{ route('magasins.index') }}" class="sidebar-link {{ request()->is('magasins*') ? 'active' : '' }}">
-                    <i class="fas fa-building"></i>
-                    <span class="sidebar-link-text">Gestion Magasins</span>
-                </a>
-            </div>
-            
-            <!-- Gestion des boutiques -->
-            <div class="sidebar-item">
-                <a href="{{ route('boutiques.index') }}" class="sidebar-link {{ request()->is('boutiques*') ? 'active' : '' }}">
-                    <i class="fas fa-store-alt"></i>
-                    <span class="sidebar-link-text">Gestion Boutiques</span>
-                </a>
+                <div class="collapse {{ $adminActive ? 'show' : '' }}" id="sidebarGroupAdmin">
+                    <div class="sidebar-submenu">
+                        <a href="{{ route('admin.dashboard') }}" class="sidebar-link {{ request()->is('admin*') ? 'active' : '' }}">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span class="sidebar-link-text">Dashboard Admin</span>
+                        </a>
+                        <a href="{{ route('users.index') }}" class="sidebar-link {{ request()->is('users*') ? 'active' : '' }}">
+                            <i class="fas fa-users-cog"></i>
+                            <span class="sidebar-link-text">Gestion Utilisateurs</span>
+                        </a>
+                        <a href="{{ route('magasins.index') }}" class="sidebar-link {{ request()->is('magasins*') ? 'active' : '' }}">
+                            <i class="fas fa-building"></i>
+                            <span class="sidebar-link-text">Gestion Magasins</span>
+                        </a>
+                        <a href="{{ route('boutiques.index') }}" class="sidebar-link {{ request()->is('boutiques*') ? 'active' : '' }}">
+                            <i class="fas fa-store-alt"></i>
+                            <span class="sidebar-link-text">Gestion Boutiques</span>
+                        </a>
+                    </div>
+                </div>
             </div>
             @endif
+        </nav>
     </aside>
 
     <!-- Mobile Sidebar Overlay -->
@@ -1171,20 +1182,34 @@
                 </div>
 
                 <!-- Notifications -->
+                @php
+                    $unreadNotifications = auth()->user()->unreadNotifications()->limit(5)->get();
+                    $unreadCount = auth()->user()->unreadNotifications()->count();
+                @endphp
                 <div class="dropdown">
                     <button class="btn btn-link text-muted position-relative" type="button" data-bs-toggle="dropdown">
                         <i class="fas fa-bell"></i>
-                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                            3
+                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger {{ $unreadCount === 0 ? 'd-none' : '' }}" id="notifBadge">
+                            {{ $unreadCount }}
                         </span>
                     </button>
-                    <ul class="dropdown-menu dropdown-menu-end">
+                    <ul class="dropdown-menu dropdown-menu-end" style="min-width: 320px;" id="notifDropdownList">
                         <li><h6 class="dropdown-header">Notifications</h6></li>
-                        <li><a class="dropdown-item" href="#">Stock faible pour Produit A</a></li>
-                        <li><a class="dropdown-item" href="#">Nouvelle vente enregistrée</a></li>
-                        <li><a class="dropdown-item" href="#">Rapport mensuel disponible</a></li>
+                        @forelse($unreadNotifications as $notification)
+                            <li>
+                                <form method="POST" action="{{ route('notifications.read', $notification->id) }}">
+                                    @csrf
+                                    <button type="submit" class="dropdown-item text-start">
+                                        <div class="fw-semibold small">{{ $notification->data['title'] ?? 'Notification' }}</div>
+                                        <div class="text-muted small">{{ $notification->data['message'] ?? '' }}</div>
+                                    </button>
+                                </form>
+                            </li>
+                        @empty
+                            <li><span class="dropdown-item-text text-muted small" id="notifEmptyItem">Aucune notification</span></li>
+                        @endforelse
                         <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="#">Voir toutes les notifications</a></li>
+                        <li><a class="dropdown-item text-center" href="{{ route('notifications.index') }}">Voir toutes les notifications</a></li>
                     </ul>
                 </div>
 
@@ -1565,6 +1590,61 @@
                 }
             });
         });
+    </script>
+
+    <!-- Notifications temps réel (Laravel Reverb) -->
+    <script src="https://js.pusher.com/8.4.0/pusher.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/laravel-echo@1/dist/echo.iife.js"></script>
+    <script>
+        window.Pusher = Pusher;
+
+        const echo = new Echo({
+            broadcaster: 'reverb',
+            key: '{{ config('broadcasting.connections.reverb.key') }}',
+            wsHost: '{{ config('broadcasting.connections.reverb.options.host') }}',
+            wsPort: {{ config('broadcasting.connections.reverb.options.port', 80) }},
+            wssPort: {{ config('broadcasting.connections.reverb.options.port', 443) }},
+            forceTLS: {{ config('broadcasting.connections.reverb.options.useTLS') ? 'true' : 'false' }},
+            enabledTransports: ['ws', 'wss'],
+            authEndpoint: '{{ url('/broadcasting/auth') }}',
+            auth: {
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                },
+            },
+        });
+
+        echo.private('App.Models.User.{{ auth()->id() }}')
+            .notification((notification) => {
+                const badge = document.getElementById('notifBadge');
+                const list = document.getElementById('notifDropdownList');
+                const emptyItem = document.getElementById('notifEmptyItem');
+
+                if (badge) {
+                    const current = parseInt(badge.textContent.trim() || '0', 10);
+                    badge.textContent = current + 1;
+                    badge.classList.remove('d-none');
+                }
+
+                if (emptyItem) {
+                    emptyItem.closest('li').remove();
+                }
+
+                if (list) {
+                    const header = list.querySelector('.dropdown-header');
+                    const li = document.createElement('li');
+                    li.innerHTML = `
+                        <form method="POST" action="/notifications/${notification.id}/read">
+                            <input type="hidden" name="_token" value="${document.querySelector('meta[name="csrf-token"]').getAttribute('content')}">
+                            <button type="submit" class="dropdown-item text-start">
+                                <div class="fw-semibold small">${notification.title ?? 'Notification'}</div>
+                                <div class="text-muted small">${notification.message ?? ''}</div>
+                            </button>
+                        </form>
+                    `;
+                    header.parentElement.insertAdjacentElement('afterend', li);
+                }
+            });
     </script>
 
     @stack('scripts')

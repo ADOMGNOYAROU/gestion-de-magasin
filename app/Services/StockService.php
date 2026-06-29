@@ -5,6 +5,9 @@ namespace App\Services;
 use App\Models\Produit;
 use App\Models\StockBoutique;
 use App\Models\StockMagasin;
+use App\Models\User;
+use App\Notifications\StockFaibleNotification;
+use Illuminate\Support\Facades\Notification;
 use RuntimeException;
 
 class StockService
@@ -28,6 +31,8 @@ class StockService
 
         $stock->quantite -= $quantite;
         $stock->save();
+
+        $this->notifierSiStockBoutiqueFaible($stock);
 
         return $stock;
     }
@@ -80,6 +85,8 @@ class StockService
         $stock->quantite -= $quantite;
         $stock->save();
 
+        $this->notifierSiStockMagasinFaible($stock);
+
         return $stock;
     }
 
@@ -128,5 +135,82 @@ class StockService
             'prix_vente' => $produit->prix_vente,
             'seuil_alerte' => $seuilAlerteParDefaut,
         ]);
+    }
+
+    /**
+     * Notifie les admins et le gestionnaire concerné si le stock d'une
+     * boutique vient de descendre à ou sous son seuil d'alerte.
+     */
+    private function notifierSiStockBoutiqueFaible(StockBoutique $stock): void
+    {
+        if ($stock->quantite > $stock->seuil_alerte) {
+            return;
+        }
+
+        $stock->loadMissing('produit', 'boutique.magasin.responsable');
+        $boutique = $stock->boutique;
+
+        $destinataires = User::where('role', 'admin')->get();
+        if ($boutique?->magasin?->responsable) {
+            $destinataires->push($boutique->magasin->responsable);
+        }
+
+        $this->envoyerNotificationStockFaible(
+            $destinataires->unique('id'),
+            $stock->produit?->nom ?? "produit #{$stock->produit_id}",
+            'boutique',
+            $boutique?->nom ?? "boutique #{$stock->boutique_id}",
+            $stock->quantite,
+            $stock->seuil_alerte,
+            route('boutiques.show', $stock->boutique_id)
+        );
+    }
+
+    /**
+     * Notifie les admins et le gestionnaire concerné si le stock d'un
+     * magasin vient de descendre à ou sous son seuil d'alerte.
+     */
+    private function notifierSiStockMagasinFaible(StockMagasin $stock): void
+    {
+        if ($stock->quantite > $stock->seuil_alerte) {
+            return;
+        }
+
+        $stock->loadMissing('produit', 'magasin.responsable');
+        $magasin = $stock->magasin;
+
+        $destinataires = User::where('role', 'admin')->get();
+        if ($magasin?->responsable) {
+            $destinataires->push($magasin->responsable);
+        }
+
+        $this->envoyerNotificationStockFaible(
+            $destinataires->unique('id'),
+            $stock->produit?->nom ?? "produit #{$stock->produit_id}",
+            'magasin',
+            $magasin?->nom ?? "magasin #{$stock->magasin_id}",
+            $stock->quantite,
+            $stock->seuil_alerte,
+            route('magasins.show', $stock->magasin_id)
+        );
+    }
+
+    private function envoyerNotificationStockFaible(
+        $destinataires,
+        string $produitNom,
+        string $lieuType,
+        string $lieuNom,
+        int $quantite,
+        int $seuilAlerte,
+        string $url
+    ): void {
+        if ($destinataires->isEmpty()) {
+            return;
+        }
+
+        Notification::send(
+            $destinataires,
+            new StockFaibleNotification($produitNom, $lieuType, $lieuNom, $quantite, $seuilAlerte, $url)
+        );
     }
 }

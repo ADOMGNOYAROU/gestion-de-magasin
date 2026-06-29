@@ -17,8 +17,12 @@ use App\Http\Controllers\LanguageController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return redirect('/login');
-});
+    if (auth()->check()) {
+        return redirect()->route('dashboard');
+    }
+
+    return view('welcome');
+})->name('home');
 
 // Authentication routes handled by Laravel Breeze
 require __DIR__.'/auth.php';
@@ -30,6 +34,12 @@ require __DIR__.'/subscription.php';
 Route::get('/language/{locale}', [LanguageController::class, 'switch'])->name('language.switch');
 
 Route::get('/dashboard', [DashboardController::class, 'index'])->middleware(['auth', 'vendeur'])->name('dashboard');
+
+Route::middleware('auth')->prefix('notifications')->name('notifications.')->group(function () {
+    Route::get('/', [\App\Http\Controllers\NotificationController::class, 'index'])->name('index');
+    Route::post('/{id}/read', [\App\Http\Controllers\NotificationController::class, 'markRead'])->name('read');
+    Route::post('/read-all', [\App\Http\Controllers\NotificationController::class, 'markAllRead'])->name('read_all');
+});
 
 // Routes Admin
 Route::prefix('admin')->middleware(['auth', 'admin'])->group(function () {
