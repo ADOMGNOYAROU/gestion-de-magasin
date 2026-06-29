@@ -1,13 +1,26 @@
-<x-app-layout>
-    <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-        <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg p-6">
-            <div class="text-center">
-                <h1 class="text-2xl font-bold text-gray-900 mb-4">Aucun magasin assigné</h1>
-                <p class="text-gray-600 mb-6">Vous n'êtes pas encore assigné à un magasin. Veuillez contacter l'administrateur.</p>
-                <a href="{{ route('dashboard') }}" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg">
-                    Retour au tableau de bord
-                </a>
+@extends('layouts.app')
+
+@section('content')
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-lg-6 text-center py-5">
+            <div class="empty-state-icon mb-4">
+                <i class="fas fa-building"></i>
             </div>
+            <h1 class="h4 fw-bold text-gray-800 mb-3">Aucun magasin assigné</h1>
+            <p class="text-muted mb-4">Vous n'êtes pas encore assigné à un magasin. Veuillez contacter l'administrateur.</p>
+            <a href="{{ route('dashboard') }}" class="btn btn-primary">
+                <i class="fas fa-arrow-left me-1"></i> Retour au tableau de bord
+            </a>
         </div>
     </div>
-</x-app-layout>
+</div>
+
+<style>
+.empty-state-icon {
+    width: 80px; height: 80px; border-radius: 20px; margin: 0 auto;
+    background: rgba(78, 115, 223, 0.12); color: #4e73df;
+    display: flex; align-items: center; justify-content: center; font-size: 2rem;
+}
+</style>
+@endsection

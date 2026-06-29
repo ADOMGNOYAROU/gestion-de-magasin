@@ -1281,6 +1281,11 @@
             @endif
 
             <!-- Page Header -->
+            @isset($header)
+                <div class="d-sm-flex align-items-center justify-content-between mb-4">
+                    {!! $header !!}
+                </div>
+            @endisset
             @hasSection('header')
                 <div class="d-sm-flex align-items-center justify-content-between mb-4">
                     @yield('header')
@@ -1289,6 +1294,7 @@
 
             <!-- Main Content -->
             <div class="fade-in">
+                {!! $slot ?? '' !!}
                 @yield('content')
             </div>
         </main>

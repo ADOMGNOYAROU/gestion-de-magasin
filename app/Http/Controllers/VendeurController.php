@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Boutique;
 use App\Models\StockBoutique;
 use App\Models\Vente;
 use Illuminate\Http\Request;
@@ -11,10 +10,8 @@ class VendeurController extends Controller
 {
     public function dashboard()
     {
-        // Pour simplifier, on suppose qu'un vendeur est assigné à une boutique
-        // Dans une vraie application, vous auriez une table vendeur_boutique
-        $boutique = Boutique::first(); // À adapter selon votre logique
-        
+        $boutique = auth()->user()->boutique;
+
         if (!$boutique) {
             return view('vendeur.no-boutique');
         }
