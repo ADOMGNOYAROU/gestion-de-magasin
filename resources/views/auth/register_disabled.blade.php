@@ -3,89 +3,71 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Inscription Désactivée - {{ config('app.name', 'Gestion Stock') }}</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <title>Inscription — {{ config('app.name', 'GestionMagasin') }}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --navy-dark: #0a0e27;
+            --navy: #0f172a;
+            --navy-light: #1e293b;
+        }
         body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'DM Sans', sans-serif;
+            background: linear-gradient(135deg, var(--navy-dark) 0%, var(--navy) 50%, var(--navy-light) 100%);
             min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-        .error-container {
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-            padding: 3rem;
-            text-align: center;
-            max-width: 500px;
-            width: 100%;
+        .font-display { font-family: 'Syne', sans-serif; }
+        .gradient-text {
+            background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 50%, #2563eb 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
-        .error-icon {
-            font-size: 4rem;
-            color: #dc3545;
-            margin-bottom: 1.5rem;
+        .glass-card {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
-        .error-title {
-            color: #dc3545;
-            font-size: 1.8rem;
-            font-weight: bold;
-            margin-bottom: 1rem;
-        }
-        .error-message {
-            color: #6c757d;
-            font-size: 1.1rem;
-            margin-bottom: 2rem;
-            line-height: 1.6;
-        }
-        .btn-login {
-            background: linear-gradient(45deg, #007bff, #0056b3);
-            color: white;
-            padding: 12px 30px;
-            border: none;
-            border-radius: 50px;
-            font-size: 1rem;
-            text-decoration: none;
-            display: inline-block;
+        .btn-shine {
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
             transition: all 0.3s ease;
         }
-        .btn-login:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(0,123,255,0.3);
-            color: white;
-            text-decoration: none;
+        .btn-shine::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s ease;
         }
-        .logo {
-            font-size: 2rem;
-            font-weight: bold;
-            color: #4e73df;
-            margin-bottom: 2rem;
-        }
+        .btn-shine:hover::before { left: 100%; }
+        .btn-shine:hover { box-shadow: 0 10px 25px rgba(59, 130, 246, 0.4); }
     </style>
 </head>
-<body>
-    <div class="error-container">
-        <div class="logo">
-            <i class="fas fa-warehouse"></i> {{ config('app.name', 'Gestion Stock') }}
+<body class="text-white flex items-center justify-center min-h-screen px-4">
+    <div class="w-full max-w-md text-center glass-card rounded-2xl p-10">
+        <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-blue-500/15 border border-blue-500/30 mb-6">
+            <i class="fas fa-store text-blue-400 text-2xl"></i>
         </div>
-        
-        <div class="error-icon">
-            <i class="fas fa-user-lock"></i>
-        </div>
-        
-        <h1 class="error-title">Inscription Désactivée</h1>
-        
-        <p class="error-message">
-            L'inscription automatique est actuellement désactivée pour des raisons de sécurité.<br><br>
-            Veuillez contacter votre administrateur système pour créer un nouveau compte.<br><br>
-            Si vous avez déjà un compte, veuillez vous connecter.
+
+        <h1 class="font-display text-2xl font-bold mb-3">Créez votre compte</h1>
+        <p class="text-gray-400 mb-8">
+            L'inscription se fait désormais via notre formulaire d'essai gratuit
+            ({{ config('plans.trial_days', 14) }} jours, sans carte bancaire).
         </p>
-        
-        <a href="{{ route('login') }}" class="btn-login">
-            <i class="fas fa-sign-in-alt"></i> Se Connecter
+
+        <a href="{{ route('saas.register') }}" class="btn-shine block w-full py-3 px-4 rounded-xl text-white font-semibold mb-4">
+            Créer mon compte gratuitement
+        </a>
+
+        <a href="{{ route('login') }}" class="block text-gray-400 hover:text-white text-sm transition-colors">
+            <i class="fas fa-sign-in-alt mr-1"></i> J'ai déjà un compte, me connecter
         </a>
     </div>
 </body>
