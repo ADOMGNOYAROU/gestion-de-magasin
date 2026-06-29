@@ -6,6 +6,7 @@ use App\Models\Boutique;
 use App\Models\Magasin;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 
 class BoutiqueController extends Controller
 {
@@ -55,7 +56,7 @@ class BoutiqueController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'nom' => 'required|string|max:255',
             'adresse' => 'required|string',
             'telephone' => 'nullable|string',
@@ -63,7 +64,7 @@ class BoutiqueController extends Controller
             'vendeur_id' => 'nullable|exists:users,id',
         ]);
 
-        Boutique::create($request->all());
+        Boutique::create($validated);
 
         return redirect()->route('boutiques.index')
             ->with('success', 'Boutique créée avec succès.');
@@ -110,7 +111,7 @@ class BoutiqueController extends Controller
     {
         $this->authorizeBoutiqueAccess($boutique);
         
-        $request->validate([
+        $validated = $request->validate([
             'nom' => 'required|string|max:255',
             'adresse' => 'required|string',
             'telephone' => 'nullable|string',
@@ -118,7 +119,7 @@ class BoutiqueController extends Controller
             'vendeur_id' => 'nullable|exists:users,id',
         ]);
 
-        $boutique->update($request->all());
+        $boutique->update($validated);
 
         return redirect()->route('boutiques.index')
             ->with('success', 'Boutique mise à jour avec succès.');
@@ -138,20 +139,11 @@ class BoutiqueController extends Controller
     }
 
     /**
-     * Vérifier les autorisations d'accès à la boutique
+     * Vérifier les autorisations d'accès à la boutique via le Gate manage-magasin
+     * (admin, ou gestionnaire du magasin auquel appartient la boutique).
      */
     private function authorizeBoutiqueAccess(Boutique $boutique)
     {
-        $user = auth()->user();
-        
-        if ($user->isAdmin()) {
-            return true;
-        }
-        
-        if ($user->isGestionnaire() && $boutique->magasin_id === $user->magasinResponsable?->id) {
-            return true;
-        }
-        
-        abort(403, 'Accès non autorisé.');
+        Gate::authorize('manage-magasin', $boutique->magasin);
     }
 }

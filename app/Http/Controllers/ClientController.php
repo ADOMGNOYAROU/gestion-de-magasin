@@ -46,7 +46,7 @@ class ClientController extends Controller
 
     public function update(Request $request, Client $client)
     {
-        $request->validate([
+        $validated = $request->validate([
             'nom' => 'required|string|max:255',
             'prenom' => 'nullable|string|max:255',
             'email' => 'nullable|email|unique:clients,email,' . $client->id,
@@ -54,7 +54,7 @@ class ClientController extends Controller
             'adresse' => 'nullable|string',
         ]);
 
-        $client->update($request->all());
+        $client->update($validated);
 
         return redirect()->route('clients.index')
             ->with('success', 'Client mis à jour avec succès.');

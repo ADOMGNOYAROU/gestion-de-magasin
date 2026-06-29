@@ -16,9 +16,14 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Gate;
+use App\Services\StockService;
 
 class VenteController extends Controller
 {
+    public function __construct(private StockService $stockService)
+    {
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -200,15 +205,13 @@ class VenteController extends Controller
                 $prixUnitaire = $produit->prix_vente;
                 $total = $quantite * $prixUnitaire;
 
-                // Vérifier le stock disponible
-                $stockBoutique = StockBoutique::where('produit_id', $item['produit_id'])
-                                            ->where('boutique_id', $validated['boutique_id'])
-                                            ->first();
-
-                if (!$stockBoutique || $stockBoutique->quantite < $quantite) {
-                    $quantiteDisponible = $stockBoutique ? $stockBoutique->quantite : 0;
-                    throw new \Exception("Stock insuffisant pour {$produit->nom}. Disponible: {$quantiteDisponible}, Demandé: {$quantite}");
-                }
+                // Vérifier le stock disponible et le décrémenter
+                $this->stockService->decrementerStockBoutique(
+                    $item['produit_id'],
+                    $validated['boutique_id'],
+                    $quantite,
+                    $produit->nom
+                );
 
                 // Créer VenteProduit
                 VenteProduit::create([
@@ -218,10 +221,6 @@ class VenteController extends Controller
                     'prix_unitaire' => $prixUnitaire,
                     'sous_total' => $total,
                 ]);
-
-                // Mettre à jour le stock
-                $stockBoutique->quantite -= $quantite;
-                $stockBoutique->save();
             }
 
             DB::commit();

@@ -12,12 +12,12 @@ use App\Models\VenteProduit;
 use App\Models\PaymentMethod;
 use App\Models\CashRegisterSession;
 use App\Models\StockBoutique;
+use App\Services\StockService;
 
 class POSController extends Controller
 {
-    public function __construct()
+    public function __construct(private StockService $stockService)
     {
-        // Remove middleware for now - handle auth in methods
     }
 
     /**
@@ -26,12 +26,6 @@ class POSController extends Controller
     public function index()
     {
         try {
-            // Handle authentication here instead of middleware
-            if (!Auth::check()) {
-                \Log::warning('POS access attempt without authentication');
-                return redirect()->route('login')->with('error', 'Vous devez être connecté.');
-            }
-
             $user = Auth::user();
             \Log::info('POS accessed by user: ' . $user->name . ' (role: ' . $user->role . ')');
 
@@ -597,15 +591,13 @@ class POSController extends Controller
                     'sous_total' => $sousTotal,
                 ]);
 
-                // Mettre à jour le stock
-                $stock = StockBoutique::where('produit_id', $item['produit_id'])
-                                     ->where('boutique_id', $session->boutique_id)
-                                     ->first();
-
-                if ($stock) {
-                    $stock->quantite -= $quantite;
-                    $stock->save();
-                }
+                // Vérifier le stock disponible et le décrémenter
+                $this->stockService->decrementerStockBoutique(
+                    $item['produit_id'],
+                    $session->boutique_id,
+                    $quantite,
+                    $produit->nom
+                );
 
                 $montantTotal += $sousTotal;
             }

@@ -47,7 +47,7 @@ class MagasinController extends Controller
         }
 
         try {
-            Magasin::create($request->all());
+            Magasin::create($validator->validated());
 
             return redirect()->route('magasins.index')->with('success', 'Magasin créé avec succès.');
         } catch (\Exception $e) {
@@ -94,7 +94,7 @@ class MagasinController extends Controller
                 ->withInput();
         }
 
-        $magasin->update($request->all());
+        $magasin->update($validator->validated());
 
         return redirect()->route('magasins.index')->with('success', 'Magasin mis à jour avec succès.');
     }

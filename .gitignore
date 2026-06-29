@@ -22,6 +22,7 @@
 Homestead.json
 Homestead.yaml
 Thumbs.db
+.claude/
 vendor.zip
 *.sql
 database_exports/

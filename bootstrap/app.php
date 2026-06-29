@@ -17,6 +17,9 @@ return Application::configure(basePath: dirname(__DIR__))
             'gestionnaire' => \App\Http\Middleware\GestionnaireMiddleware::class,
             'vendeur' => \App\Http\Middleware\VendeurMiddleware::class,
             'locale' => \App\Http\Middleware\SetLocale::class,
+            'tenant' => \App\Http\Middleware\IdentifyTenant::class,
+            'subscription' => \App\Http\Middleware\CheckSubscription::class,
+            'plan-limits' => \App\Http\Middleware\CheckPlanLimits::class,
         ]);
         
         // Add SetLocale middleware to web middleware group

@@ -23,20 +23,13 @@ Route::get('/', function () {
 // Authentication routes handled by Laravel Breeze
 require __DIR__.'/auth.php';
 
-Route::post('/logout', function () {
-    \Auth::logout();
-    return redirect('/login');
-})->name('logout');
+// Inscription SaaS, abonnements et paiements (Stripe/Paystack/Flutterwave)
+require __DIR__.'/subscription.php';
 
 // Language switch route
 Route::get('/language/{locale}', [LanguageController::class, 'switch'])->name('language.switch');
 
 Route::get('/dashboard', [DashboardController::class, 'index'])->middleware(['auth', 'vendeur'])->name('dashboard');
-
-// Route de test pour boutiques
-Route::get('/boutiques-test', function() {
-    return 'Test boutiques - ça marche!';
-})->middleware('auth');
 
 // Routes Admin
 Route::prefix('admin')->middleware(['auth', 'admin'])->group(function () {
@@ -173,7 +166,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/api/stock-boutique', [VenteController::class, 'getStockDisponible'])->middleware('vendeur');
     
     // Routes pour le système de caisse (POS)
-    Route::prefix('pos')->name('pos.')->middleware(['auth'])->group(function () {
+    Route::prefix('pos')->name('pos.')->middleware(['auth', 'vendeur'])->group(function () {
         Route::get('/', [POSController::class, 'index'])->name('index');
         Route::get('/open', [POSController::class, 'open'])->name('open');
         Route::post('/open', [POSController::class, 'storeOpen'])->name('store_open');
