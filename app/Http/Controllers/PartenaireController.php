@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Partenaire;
-use Illuminate\Http\Request;
+use App\Http\Requests\PartenaireRequest;
 
 class PartenaireController extends Controller
 {
@@ -28,17 +28,9 @@ class PartenaireController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(PartenaireRequest $request)
     {
-        $validated = $request->validate([
-            'nom' => 'required|string|max:255',
-            'adresse' => 'required|string|max:255',
-            'telephone' => 'required|string|max:50',
-            'email' => 'required|email|max:255|unique:partenaires,email',
-            'type_partenariat' => 'required|string|max:255',
-        ]);
-
-        Partenaire::create($validated);
+        Partenaire::create($request->validated());
 
         return redirect()->route('partenaires.index')
             ->with('success', 'Partenaire créé avec succès.');
@@ -63,17 +55,9 @@ class PartenaireController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Partenaire $partenaire)
+    public function update(PartenaireRequest $request, Partenaire $partenaire)
     {
-        $validated = $request->validate([
-            'nom' => 'required|string|max:255',
-            'adresse' => 'required|string|max:255',
-            'telephone' => 'required|string|max:50',
-            'email' => 'required|email|max:255|unique:partenaires,email,' . $partenaire->id,
-            'type_partenariat' => 'required|string|max:255',
-        ]);
-
-        $partenaire->update($validated);
+        $partenaire->update($request->validated());
 
         return redirect()->route('partenaires.index')
             ->with('success', 'Partenaire mis à jour avec succès.');

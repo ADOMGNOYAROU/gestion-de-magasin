@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Fournisseur;
-use Illuminate\Http\Request;
+use App\Http\Requests\FournisseurRequest;
 
 class FournisseurController extends Controller
 {
@@ -28,17 +28,9 @@ class FournisseurController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(FournisseurRequest $request)
     {
-        $validated = $request->validate([
-            'nom' => 'required|string|max:255',
-            'adresse' => 'required|string|max:255',
-            'telephone' => 'required|string|max:50',
-            'email' => 'required|email|max:255|unique:fournisseurs,email',
-            'contact_personne' => 'required|string|max:255',
-        ]);
-
-        Fournisseur::create($validated);
+        Fournisseur::create($request->validated());
 
         return redirect()->route('fournisseurs.index')
             ->with('success', 'Fournisseur créé avec succès.');
@@ -63,17 +55,9 @@ class FournisseurController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Fournisseur $fournisseur)
+    public function update(FournisseurRequest $request, Fournisseur $fournisseur)
     {
-        $validated = $request->validate([
-            'nom' => 'required|string|max:255',
-            'adresse' => 'required|string|max:255',
-            'telephone' => 'required|string|max:50',
-            'email' => 'required|email|max:255|unique:fournisseurs,email,' . $fournisseur->id,
-            'contact_personne' => 'required|string|max:255',
-        ]);
-
-        $fournisseur->update($validated);
+        $fournisseur->update($request->validated());
 
         return redirect()->route('fournisseurs.index')
             ->with('success', 'Fournisseur mis à jour avec succès.');

@@ -60,8 +60,14 @@ Route::middleware('auth')->group(function () {
     // Routes CRUD pour les utilisateurs (admin uniquement)
     Route::resource('users', \App\Http\Controllers\UserController::class)->middleware('admin');
     
-    // Routes CRUD pour les magasins (admin uniquement)
-    Route::resource('magasins', \App\Http\Controllers\MagasinController::class)->middleware('admin');
+    // Routes CRUD pour les magasins : création/suppression admin uniquement,
+    // consultation/édition ouvertes au gestionnaire de son propre magasin (Gate manage-magasin)
+    Route::resource('magasins', \App\Http\Controllers\MagasinController::class)
+        ->only(['index', 'create', 'store', 'destroy'])
+        ->middleware('admin');
+    Route::resource('magasins', \App\Http\Controllers\MagasinController::class)
+        ->only(['show', 'edit', 'update'])
+        ->middleware('gestionnaire');
     
     // Routes CRUD pour les fournisseurs (admin et gestionnaire uniquement)
     Route::resource('fournisseurs', FournisseurController::class)->middleware('gestionnaire');

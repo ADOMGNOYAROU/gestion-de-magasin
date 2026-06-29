@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Produit;
+use App\Http\Requests\ProduitRequest;
 use Illuminate\Support\Facades\Gate;
 
 class ProduitController extends Controller
@@ -39,18 +40,9 @@ class ProduitController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(ProduitRequest $request)
     {
-        $validated = $request->validate([
-            'nom' => 'required|max:255',
-            'categorie' => 'required',
-            'description' => 'nullable',
-            'prix_achat' => 'required|numeric|min:0',
-            'prix_vente' => 'required|numeric|min:0|gte:prix_achat',
-            'statut' => 'required|in:actif,inactif',
-        ]);
-
-        Produit::create($validated);
+        Produit::create($request->validated());
 
         return redirect()->route('produits.index')
             ->with('success', 'Produit créé avec succès.');
@@ -77,20 +69,11 @@ class ProduitController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(ProduitRequest $request, string $id)
     {
         $produit = Produit::findOrFail($id);
 
-        $validated = $request->validate([
-            'nom' => 'required|max:255',
-            'categorie' => 'required',
-            'description' => 'nullable',
-            'prix_achat' => 'required|numeric|min:0',
-            'prix_vente' => 'required|numeric|min:0|gte:prix_achat',
-            'statut' => 'required|in:actif,inactif',
-        ]);
-
-        $produit->update($validated);
+        $produit->update($request->validated());
 
         return redirect()->route('produits.index')
             ->with('success', 'Produit mis à jour avec succès.');

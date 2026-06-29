@@ -6,6 +6,7 @@ use App\Models\Magasin;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Gate;
 
 class MagasinController extends Controller
 {
@@ -62,6 +63,8 @@ class MagasinController extends Controller
      */
     public function show(Magasin $magasin)
     {
+        Gate::authorize('manage-magasin', $magasin);
+
         $magasin->load(['responsable', 'boutiques', 'stockMagasins.produit']);
 
         return view('magasins.show', compact('magasin'));
@@ -72,6 +75,8 @@ class MagasinController extends Controller
      */
     public function edit(Magasin $magasin)
     {
+        Gate::authorize('manage-magasin', $magasin);
+
         $responsables = User::whereIn('role', ['admin', 'gestionnaire'])->get();
 
         return view('magasins.edit', compact('magasin', 'responsables'));
@@ -82,11 +87,19 @@ class MagasinController extends Controller
      */
     public function update(Request $request, Magasin $magasin)
     {
-        $validator = Validator::make($request->all(), [
+        Gate::authorize('manage-magasin', $magasin);
+
+        $rules = [
             'nom' => ['required', 'string', 'max:255', 'unique:magasins,nom,' . $magasin->id],
             'localisation' => 'required|string|max:255',
-            'responsable_id' => 'required|exists:users,id',
-        ]);
+        ];
+
+        // Seul un admin peut réassigner le responsable du magasin
+        if ($request->user()->isAdmin()) {
+            $rules['responsable_id'] = 'required|exists:users,id';
+        }
+
+        $validator = Validator::make($request->all(), $rules);
 
         if ($validator->fails()) {
             return redirect()->back()

@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\EntreeStock;
 use App\Models\Produit;
-use App\Models\StockMagasin;
 use App\Models\Fournisseur;
 use App\Models\Partenaire;
 use App\Models\Magasin;
@@ -13,9 +12,15 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use App\Services\StockService;
+use App\Http\Requests\EntreeStockRequest;
 
 class EntreeStockController extends Controller
 {
+    public function __construct(private StockService $stockService)
+    {
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -81,34 +86,9 @@ class EntreeStockController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(EntreeStockRequest $request)
     {
-        $validated = $request->validate([
-            'produit_id' => 'required|exists:produits,id',
-            'magasin_id' => 'required|exists:magasins,id',
-            'fournisseur_id' => 'nullable|exists:fournisseurs,id',
-            'partenaire_id' => 'nullable|exists:partenaires,id',
-            'order_id' => 'nullable|exists:orders,id',
-            'quantite' => 'required|integer|min:1|max:2147483647',
-            'prix_unitaire' => 'required|numeric|min:0',
-            'date' => 'required|date',
-        ], [
-            'fournisseur_id.required_without' => 'Vous devez sélectionner un fournisseur ou un partenaire',
-            'partenaire_id.required_without' => 'Vous devez sélectionner un fournisseur ou un partenaire',
-        ]);
-
-        // Validation personnalisée : soit fournisseur soit partenaire
-        if (!$request->fournisseur_id && !$request->partenaire_id) {
-            return back()->withErrors([
-                'fournisseur_id' => 'Vous devez sélectionner au moins un fournisseur ou un partenaire'
-            ])->withInput();
-        }
-
-        if ($request->fournisseur_id && $request->partenaire_id) {
-            return back()->withErrors([
-                'fournisseur_id' => 'Sélectionnez soit un fournisseur, soit un partenaire (pas les deux)'
-            ])->withInput();
-        }
+        $validated = $request->validated();
 
         DB::beginTransaction();
         try {
@@ -128,27 +108,11 @@ class EntreeStockController extends Controller
             ]);
 
             // 2. Mettre à jour ou créer le stock dans le magasin
-            $stockMagasin = StockMagasin::where('produit_id', $validated['produit_id'])
-                                       ->where('magasin_id', $validated['magasin_id'])
-                                       ->first();
-
-            // Récupérer le produit pour obtenir le prix de vente
-            $produit = Produit::find($validated['produit_id']);
-
-            if ($stockMagasin) {
-                // Mettre à jour le stock existant
-                $stockMagasin->quantite += $validated['quantite'];
-                $stockMagasin->save();
-            } else {
-                // Créer un nouveau stock
-                StockMagasin::create([
-                    'produit_id' => $validated['produit_id'],
-                    'magasin_id' => $validated['magasin_id'],
-                    'quantite' => $validated['quantite'],
-                    'prix_vente' => $produit->prix_vente,
-                    'seuil_alerte' => 10, // Valeur par défaut
-                ]);
-            }
+            $this->stockService->incrementerOuCreerStockMagasin(
+                $validated['produit_id'],
+                $validated['magasin_id'],
+                $validated['quantite']
+            );
 
             // 3. Lier à la commande si spécifiée et vérifier si la commande est entièrement livrée
             if ($validated['order_id']) {
@@ -226,17 +190,13 @@ class EntreeStockController extends Controller
         DB::beginTransaction();
         try {
             $entree = EntreeStock::findOrFail($id);
-            
-            // 1. Mettre à jour le stock (soustraire la quantité)
-            $stockMagasin = StockMagasin::where('produit_id', $entree->produit_id)
-                                       ->where('magasin_id', $entree->magasin_id)
-                                       ->first();
 
-            if ($stockMagasin) {
-                $nouvelleQuantite = $stockMagasin->quantite - $entree->quantite;
-                $stockMagasin->quantite = $nouvelleQuantite;
-                $stockMagasin->save();
-            }
+            // 1. Mettre à jour le stock (soustraire la quantité, vérifie la disponibilité)
+            $this->stockService->decrementerStockMagasin(
+                $entree->produit_id,
+                $entree->magasin_id,
+                $entree->quantite
+            );
 
             // 2. Supprimer l'entrée
             $entree->delete();

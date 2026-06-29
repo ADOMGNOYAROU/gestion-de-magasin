@@ -11,9 +11,15 @@ use App\Models\Magasin;
 use App\Models\Boutique;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use App\Services\StockService;
+use App\Http\Requests\TransfertRequest;
 
 class TransfertController extends Controller
 {
+    public function __construct(private StockService $stockService)
+    {
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -81,15 +87,9 @@ class TransfertController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(TransfertRequest $request)
     {
-        $validated = $request->validate([
-            'produit_id' => 'required|exists:produits,id',
-            'magasin_id' => 'required|exists:magasins,id',
-            'boutique_id' => 'required|exists:boutiques,id',
-            'quantite' => 'required|integer|min:1',
-            'date' => 'required|date',
-        ]);
+        $validated = $request->validated();
 
         DB::beginTransaction();
         try {
@@ -99,15 +99,12 @@ class TransfertController extends Controller
                 throw new \Exception('La boutique sélectionnée n\'appartient pas au magasin spécifié.');
             }
 
-            // 2. Vérifier le stock disponible dans le magasin
-            $stockMagasin = StockMagasin::where('produit_id', $validated['produit_id'])
-                                       ->where('magasin_id', $validated['magasin_id'])
-                                       ->first();
-
-            if (!$stockMagasin || $stockMagasin->quantite < $validated['quantite']) {
-                $quantiteDisponible = $stockMagasin ? $stockMagasin->quantite : 0;
-                throw new \Exception("Stock insuffisant. Quantité disponible : {$quantiteDisponible}, Quantité demandée : {$validated['quantite']}");
-            }
+            // 2. Diminuer le stock du magasin (vérifie la disponibilité)
+            $this->stockService->decrementerStockMagasin(
+                $validated['produit_id'],
+                $validated['magasin_id'],
+                $validated['quantite']
+            );
 
             // 3. Créer le transfert
             $transfert = Transfert::create([
@@ -118,32 +115,12 @@ class TransfertController extends Controller
                 'date' => $validated['date'],
             ]);
 
-            // 4. Diminuer le stock du magasin
-            $stockMagasin->quantite -= $validated['quantite'];
-            $stockMagasin->save();
-
-            // 5. Augmenter le stock de la boutique
-            $stockBoutique = StockBoutique::where('produit_id', $validated['produit_id'])
-                                        ->where('boutique_id', $validated['boutique_id'])
-                                        ->first();
-
-            // Récupérer le produit pour obtenir le prix de vente
-            $produit = Produit::find($validated['produit_id']);
-
-            if ($stockBoutique) {
-                // Mettre à jour le stock existant
-                $stockBoutique->quantite += $validated['quantite'];
-                $stockBoutique->save();
-            } else {
-                // Créer un nouveau stock
-                StockBoutique::create([
-                    'produit_id' => $validated['produit_id'],
-                    'boutique_id' => $validated['boutique_id'],
-                    'quantite' => $validated['quantite'],
-                    'prix_vente' => $produit->prix_vente,
-                    'seuil_alerte' => 5, // Valeur par défaut pour les boutiques
-                ]);
-            }
+            // 4. Augmenter le stock de la boutique
+            $this->stockService->incrementerStockBoutique(
+                $validated['produit_id'],
+                $validated['boutique_id'],
+                $validated['quantite']
+            );
 
             DB::commit();
 
@@ -195,31 +172,20 @@ class TransfertController extends Controller
         DB::beginTransaction();
         try {
             $transfert = Transfert::findOrFail($id);
-            
-            // 1. Augmenter le stock du magasin (annuler le transfert)
-            $stockMagasin = StockMagasin::where('produit_id', $transfert->produit_id)
-                                       ->where('magasin_id', $transfert->magasin_id)
-                                       ->first();
 
-            if ($stockMagasin) {
-                $stockMagasin->quantite += $transfert->quantite;
-                $stockMagasin->save();
-            }
+            // 1. Diminuer le stock de la boutique (vérifie la disponibilité)
+            $this->stockService->decrementerStockBoutique(
+                $transfert->produit_id,
+                $transfert->boutique_id,
+                $transfert->quantite
+            );
 
-            // 2. Diminuer le stock de la boutique
-            $stockBoutique = StockBoutique::where('produit_id', $transfert->produit_id)
-                                        ->where('boutique_id', $transfert->boutique_id)
-                                        ->first();
-
-            if ($stockBoutique) {
-                $nouvelleQuantite = $stockBoutique->quantite - $transfert->quantite;
-                if ($nouvelleQuantite >= 0) {
-                    $stockBoutique->quantite = $nouvelleQuantite;
-                    $stockBoutique->save();
-                } else {
-                    throw new \Exception('Impossible d\'annuler ce transfert : stock boutique insuffisant');
-                }
-            }
+            // 2. Augmenter le stock du magasin (annuler le transfert)
+            $this->stockService->incrementerStockMagasin(
+                $transfert->produit_id,
+                $transfert->magasin_id,
+                $transfert->quantite
+            );
 
             // 3. Supprimer le transfert
             $transfert->delete();
