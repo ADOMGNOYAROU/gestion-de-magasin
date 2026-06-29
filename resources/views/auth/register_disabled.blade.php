@@ -3,7 +3,8 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Inscription — {{ config('app.name', 'GestionMagasin') }}</title>
+    <title>Inscription — {{ config('app.name', 'Asime') }}</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -52,8 +53,8 @@
 </head>
 <body class="text-white flex items-center justify-center min-h-screen px-4">
     <div class="w-full max-w-md text-center glass-card rounded-2xl p-10">
-        <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-blue-500/15 border border-blue-500/30 mb-6">
-            <i class="fas fa-store text-blue-400 text-2xl"></i>
+        <div class="inline-flex mb-6">
+            <x-application-logo class="w-16 h-16" />
         </div>
 
         <h1 class="font-display text-2xl font-bold mb-3">Créez votre compte</h1>

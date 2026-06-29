@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Abonnement expiré — {{ config('app.name', 'GestionMagasin') }}</title>
+    <title>Abonnement expiré — {{ config('app.name', 'Asime') }}</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -67,7 +68,7 @@
                 <i class="fas fa-exclamation-circle text-red-400 text-3xl"></i>
             </div>
             <h1 class="font-display text-4xl font-bold mb-3">Abonnement expiré</h1>
-            <p class="text-gray-400 max-w-xl mx-auto">Votre période d'essai ou votre abonnement est arrivé à son terme. Choisissez un plan pour continuer à utiliser {{ config('app.name', 'GestionMagasin') }}.</p>
+            <p class="text-gray-400 max-w-xl mx-auto">Votre période d'essai ou votre abonnement est arrivé à son terme. Choisissez un plan pour continuer à utiliser {{ config('app.name', 'Asime') }}.</p>
         </div>
 
         @if($tenant)
@@ -143,7 +144,7 @@
         </div>
 
         <p class="text-center mt-10 text-gray-500 text-sm">
-            &copy; {{ date('Y') }} {{ config('app.name', 'GestionMagasin') }}. Tous droits réservés.
+            &copy; {{ date('Y') }} {{ config('app.name', 'Asime') }}. Tous droits réservés.
         </p>
     </div>
 </body>

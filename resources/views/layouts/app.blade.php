@@ -11,10 +11,11 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="format-detection" content="telephone=no">
     
-    <title>{{ config('app.name', 'Gestion Stock') }} - @yield('title', 'Tableau de Bord')</title>
+    <title>{{ config('app.name', 'Asime') }} - @yield('title', 'Tableau de Bord')</title>
 
     <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
+    <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
+    <link rel="alternate icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
     
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -974,8 +975,8 @@
     <!-- Sidebar -->
     <aside class="sidebar" id="sidebar">
         <a href="{{ route('dashboard') }}" class="sidebar-brand">
-            <i class="fas fa-warehouse"></i>
-            <span class="sidebar-brand-text">Gestion Stock</span>
+            <x-application-logo style="width: 28px; height: 28px; margin-right: 0.75rem; flex-shrink: 0;" />
+            <span class="sidebar-brand-text">{{ config('app.name', 'Asime') }}</span>
         </a>
         
         @php
@@ -1296,7 +1297,7 @@
         <footer class="footer">
             <div class="text-center">
                 <small>
-                    &copy; {{ date('Y') }} {{ config('app.name', 'Gestion Stock') }}. 
+                    &copy; {{ date('Y') }} {{ config('app.name', 'Asime') }}. 
                     Tous droits réservés | 
                     Version 1.0.0
                 </small>

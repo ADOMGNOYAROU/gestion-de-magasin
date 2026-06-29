@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ config('app.name', 'GestionMagasin') }} — Gérez vos boutiques, stocks et ventes en un seul endroit</title>
+    <title>{{ config('app.name', 'Asime') }} — Gérez vos boutiques, stocks et ventes en un seul endroit</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -123,8 +124,8 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16">
                 <div class="flex items-center">
-                    <i class="fas fa-store text-blue-400 text-2xl mr-2"></i>
-                    <span class="font-display font-bold text-xl text-white">{{ config('app.name', 'GestionMagasin') }}</span>
+                    <x-application-logo class="w-8 h-8 mr-2" />
+                    <span class="font-display font-bold text-xl text-white">{{ config('app.name', 'Asime') }}</span>
                 </div>
                 <div class="flex items-center space-x-4">
                     <a href="{{ route('pricing') }}" class="text-gray-300 hover:text-white transition-colors hidden sm:inline">Tarifs</a>
@@ -217,8 +218,8 @@
             <div class="grid md:grid-cols-4 gap-12">
                 <div>
                     <div class="flex items-center mb-6">
-                        <i class="fas fa-store text-blue-400 text-2xl mr-3"></i>
-                        <span class="font-display font-bold text-xl text-white footer-logo transition-all">{{ config('app.name', 'GestionMagasin') }}</span>
+                        <x-application-logo class="w-8 h-8 mr-3" />
+                        <span class="font-display font-bold text-xl text-white footer-logo transition-all">{{ config('app.name', 'Asime') }}</span>
                     </div>
                     <p class="text-gray-400">La solution complète pour gérer votre magasin en ligne.</p>
                 </div>
@@ -246,7 +247,7 @@
                 </div>
             </div>
             <div class="border-t border-white/10 mt-12 pt-8 text-center text-gray-500">
-                <p>&copy; {{ date('Y') }} {{ config('app.name', 'GestionMagasin') }}. Tous droits réservés.</p>
+                <p>&copy; {{ date('Y') }} {{ config('app.name', 'Asime') }}. Tous droits réservés.</p>
             </div>
         </div>
     </footer>

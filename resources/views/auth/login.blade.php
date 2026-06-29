@@ -4,7 +4,8 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>{{ __('messages.connexion') }} — {{ config('app.name', 'GestionMagasin') }}</title>
+    <title>{{ __('messages.connexion') }} — {{ config('app.name', 'Asime') }}</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -67,8 +68,8 @@
     <div class="w-full max-w-md">
         <div class="text-center mb-8">
             <a href="{{ route('home') }}" class="inline-flex items-center justify-center gap-2 mb-2">
-                <i class="fas fa-store text-blue-400 text-2xl"></i>
-                <span class="font-display font-bold text-xl text-white">{{ config('app.name', 'GestionMagasin') }}</span>
+                <x-application-logo class="w-8 h-8" />
+                <span class="font-display font-bold text-xl text-white">{{ config('app.name', 'Asime') }}</span>
             </a>
         </div>
 
@@ -134,7 +135,7 @@
         </div>
 
         <p class="text-center mt-8 text-gray-500 text-sm">
-            &copy; {{ date('Y') }} {{ config('app.name', 'GestionMagasin') }}. Tous droits réservés.
+            &copy; {{ date('Y') }} {{ config('app.name', 'Asime') }}. Tous droits réservés.
         </p>
     </div>
 </body>
