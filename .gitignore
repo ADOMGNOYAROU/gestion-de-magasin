@@ -22,3 +22,12 @@
 Homestead.json
 Homestead.yaml
 Thumbs.db
+vendor.zip
+*.sql
+database_exports/
+debug_*.php
+final_test.php
+simple_test.php
+test_basic.php
+database_export.php
+export_to_folder.php
