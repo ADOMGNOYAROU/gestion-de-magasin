@@ -14,8 +14,8 @@ return [
     'starter' => [
         'name' => 'Starter',
         'description' => 'Idéal pour les petites entreprises',
-        'price' => 29000, // Prix mensuel en FCFA (≈ 29€)
-        'price_yearly' => 290000, // Prix annuel en FCFA (≈ 290€)
+        'price' => 5000, // Prix mensuel en FCFA
+        'price_yearly' => 50000, // Prix annuel en FCFA
         'stripe_price_id' => env('STRIPE_PRICE_STARTER', 'price_starter_monthly'),
         'stripe_price_id_yearly' => env('STRIPE_PRICE_STARTER_YEARLY', 'price_starter_yearly'),
         'paystack_plan_code' => env('PAYSTACK_PLAN_STARTER', 'PLN_starter_monthly'),
@@ -51,8 +51,8 @@ return [
     'pro' => [
         'name' => 'Pro',
         'description' => 'Pour les entreprises en croissance',
-        'price' => 79000, // Prix mensuel en FCFA (≈ 79€)
-        'price_yearly' => 790000, // Prix annuel en FCFA (≈ 790€)
+        'price' => 8000, // Prix mensuel en FCFA
+        'price_yearly' => 80000, // Prix annuel en FCFA
         'stripe_price_id' => env('STRIPE_PRICE_PRO', 'price_pro_monthly'),
         'stripe_price_id_yearly' => env('STRIPE_PRICE_PRO_YEARLY', 'price_pro_yearly'),
         'paystack_plan_code' => env('PAYSTACK_PLAN_PRO', 'PLN_pro_monthly'),
@@ -88,8 +88,8 @@ return [
     'enterprise' => [
         'name' => 'Enterprise',
         'description' => 'Solution complète pour grandes entreprises',
-        'price' => 199000, // Prix mensuel en FCFA (≈ 199€)
-        'price_yearly' => 1990000, // Prix annuel en FCFA (≈ 1990€)
+        'price' => 12000, // Prix mensuel en FCFA
+        'price_yearly' => 120000, // Prix annuel en FCFA
         'stripe_price_id' => env('STRIPE_PRICE_ENTERPRISE', 'price_enterprise_monthly'),
         'stripe_price_id_yearly' => env('STRIPE_PRICE_ENTERPRISE_YEARLY', 'price_enterprise_yearly'),
         'paystack_plan_code' => env('PAYSTACK_PLAN_ENTERPRISE', 'PLN_enterprise_monthly'),
