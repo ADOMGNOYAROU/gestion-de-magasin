@@ -11,6 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (Schema::hasColumn('magasins', 'localisation')) {
+            return;
+        }
+
         Schema::table('magasins', function (Blueprint $table) {
             $table->string('localisation');
         });
@@ -21,6 +25,10 @@ return new class extends Migration
      */
     public function down(): void
     {
+        if (! Schema::hasColumn('magasins', 'localisation')) {
+            return;
+        }
+
         Schema::table('magasins', function (Blueprint $table) {
             $table->dropColumn('localisation');
         });
