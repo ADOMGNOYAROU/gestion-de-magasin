@@ -1,0 +1,17 @@
+rules_version = '2';
+
+// Deny-all par défaut : toute la lecture/écriture applicative passe par l'API
+// Next.js (Firebase Admin SDK), qui contourne ces règles et porte elle-même
+// toute la logique d'autorisation (rôle, périmètre magasin/boutique).
+// Voir MIGRATION_ARCHITECTURE.md section 3 pour le détail du modèle de sécurité.
+//
+// Angular ne parle jamais directement à Firestore : seul Firebase Auth est
+// utilisé côté client. Ces règles ne servent donc que de filet de sécurité
+// si un accès client direct était tenté par erreur.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
