@@ -1,0 +1,54 @@
+<h1>Tableau de bord</h1>
+
+@if (loading()) {
+  <p>Chargement…</p>
+} @else if (error()) {
+  <p class="error">{{ error() }}</p>
+} @else if (data(); as d) {
+  <div class="stat-grid">
+    <div class="stat-card">
+      <span class="label">Produits actifs</span>
+      <span class="value">{{ d.produits_actifs }}</span>
+    </div>
+    <div class="stat-card" [class.warning]="d.stock_critique > 0">
+      <span class="label">Stock critique</span>
+      <span class="value">{{ d.stock_critique }}</span>
+    </div>
+    <div class="stat-card">
+      <span class="label">Ventes du jour</span>
+      <span class="value">{{ d.ventes_jour }}</span>
+    </div>
+    <div class="stat-card">
+      <span class="label">CA du jour</span>
+      <span class="value">{{ d.ca_jour | number: '1.0-0' }} FCFA</span>
+    </div>
+  </div>
+
+  <h2>Alertes de stock</h2>
+  @if (d.alertes.length === 0) {
+    <p class="empty">Aucune alerte de stock.</p>
+  } @else {
+    <table class="alertes-table">
+      <thead>
+        <tr>
+          <th>Produit</th>
+          <th>Site</th>
+          <th>Type</th>
+          <th>Quantité</th>
+          <th>Seuil</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (a of d.alertes; track $index) {
+          <tr>
+            <td>{{ a.produit }}</td>
+            <td>{{ a.site }}</td>
+            <td>{{ a.type }}</td>
+            <td>{{ a.quantite }}</td>
+            <td>{{ a.seuil_alerte }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+}

@@ -1,0 +1,28 @@
+<div class="shell">
+  <aside class="sidebar">
+    <div class="brand">Gestion Magasin</div>
+    <nav>
+      @for (item of navItems(); track item.path) {
+        <a [routerLink]="item.path" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: item.path === '/' }">
+          {{ item.label }}
+        </a>
+      }
+    </nav>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="user-info">
+        @if (user(); as u) {
+          <span class="email">{{ u.email }}</span>
+          <span class="role">{{ u.role }}</span>
+        }
+      </div>
+      <button type="button" (click)="logout()">Déconnexion</button>
+    </header>
+
+    <main class="content">
+      <router-outlet />
+    </main>
+  </div>
+</div>
