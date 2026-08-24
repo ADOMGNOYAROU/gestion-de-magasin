@@ -35,4 +35,9 @@ return [
         ],
     ],
 
+    'paygate' => [
+        'base_url' => env('PAYGATE_BASE_URL', 'https://paygateglobal.com'),
+        'auth_token' => env('PAYGATE_AUTH_TOKEN'),
+    ],
+
 ];

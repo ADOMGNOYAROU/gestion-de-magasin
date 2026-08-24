@@ -12,9 +12,15 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('magasins', function (Blueprint $table) {
-            $table->string('adresse')->nullable()->change();
-            $table->string('telephone')->nullable()->change();
-            $table->string('email')->nullable()->change();
+            if (Schema::hasColumn('magasins', 'adresse')) {
+                $table->string('adresse')->nullable()->change();
+            }
+            if (Schema::hasColumn('magasins', 'telephone')) {
+                $table->string('telephone')->nullable()->change();
+            }
+            if (Schema::hasColumn('magasins', 'email')) {
+                $table->string('email')->nullable()->change();
+            }
         });
     }
 
@@ -24,9 +30,15 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('magasins', function (Blueprint $table) {
-            $table->string('adresse')->nullable(false)->change();
-            $table->string('telephone')->nullable(false)->change();
-            $table->string('email')->nullable(false)->change();
+            if (Schema::hasColumn('magasins', 'adresse')) {
+                $table->string('adresse')->nullable(false)->change();
+            }
+            if (Schema::hasColumn('magasins', 'telephone')) {
+                $table->string('telephone')->nullable(false)->change();
+            }
+            if (Schema::hasColumn('magasins', 'email')) {
+                $table->string('email')->nullable(false)->change();
+            }
         });
     }
 };

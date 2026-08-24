@@ -21,8 +21,8 @@
                             <p class="dashboard-stat-label">Produits Actifs</p>
                             <p class="dashboard-stat text-gray-900">{{ $stats['produits_actifs'] ?? 0 }}</p>
                         </div>
-                        <div class="bg-blue-100 p-3 rounded-full">
-                            <svg class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <div class="bg-green-100 p-3 rounded-full">
+                            <svg class="h-6 w-6 text-green-800" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
                             </svg>
                         </div>
@@ -72,8 +72,8 @@
                             <p class="dashboard-stat-label">Ventes du jour</p>
                             <p class="dashboard-stat text-gray-900">{{ $stats['ventes_du_jour'] ?? 0 }}</p>
                         </div>
-                        <div class="bg-blue-100 p-3 rounded-full">
-                            <svg class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <div class="bg-green-100 p-3 rounded-full">
+                            <svg class="h-6 w-6 text-green-800" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
                             </svg>
                         </div>
@@ -196,7 +196,7 @@
                 </div>
             </div>
             <div class="px-6 py-3 bg-gray-50 text-right">
-                <a href="#" class="text-sm font-medium text-blue-600 hover:text-blue-500">Voir toutes les notifications</a>
+                <a href="#" class="text-sm font-medium text-green-700 hover:text-green-600">Voir toutes les notifications</a>
             </div>
         </div>
     </div>
@@ -207,7 +207,7 @@
             <div>
                 <button type="button" class="flex items-center text-sm rounded-full focus:outline-none" id="user-menu-button">
                     <span class="sr-only">Ouvrir le menu utilisateur</span>
-                    <div class="h-8 w-8 rounded-full bg-blue-500 flex items-center justify-center text-white font-medium">
+                    <div class="h-8 w-8 rounded-full bg-green-800 flex items-center justify-center text-white font-medium">
                         {{ substr(Auth::user()->name, 0, 2) }}
                     </div>
                     <span class="ml-2 text-sm font-medium text-gray-700">Gestionnaire</span>

@@ -296,115 +296,24 @@
     </div>
 </div>
 
-<!-- Scripts Chart.js -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-// Données pour les graphiques
-const ventesParJour = @json($ventesParJour);
-const ventesParProduit = @json($ventesParProduit);
-
-// Graphique ventes par jour
-const ventesParJourCtx = document.getElementById('ventesParJourChart').getContext('2d');
-const ventesParJourChart = new Chart(ventesParJourCtx, {
-    type: 'line',
-    data: {
-        labels: ventesParJour.map(item => item.date),
-        datasets: [{
-            label: 'Chiffre d\'affaires (FCFA)',
-            data: ventesParJour.map(item => item.ca),
-            borderColor: 'rgb(75, 192, 192)',
-            backgroundColor: 'rgba(75, 192, 192, 0.2)',
-            tension: 0.1,
-            fill: true
-        }, {
-            label: 'Nombre de ventes',
-            data: ventesParJour.map(item => item.ventes),
-            borderColor: 'rgb(255, 99, 132)',
-            backgroundColor: 'rgba(255, 99, 132, 0.2)',
-            tension: 0.1,
-            fill: true,
-            yAxisID: 'y1'
-        }]
-    },
-    options: {
-        responsive: true,
-        plugins: {
-            legend: {
-                position: 'top',
-            }
-        },
-        scales: {
-            y: {
-                type: 'linear',
-                display: true,
-                position: 'left',
-                title: {
-                    display: true,
-                    text: 'CA (FCFA)'
-                }
-            },
-            y1: {
-                type: 'linear',
-                display: true,
-                position: 'right',
-                title: {
-                    display: true,
-                    text: 'Ventes'
-                },
-                grid: {
-                    drawOnChartArea: false,
-                }
-            }
-        }
-    }
-});
-
-// Graphique ventes par produit
-const ventesParProduitCtx = document.getElementById('ventesParProduitChart').getContext('2d');
-const ventesParProduitChart = new Chart(ventesParProduitCtx, {
-    type: 'bar',
-    data: {
-        labels: ventesParProduit.map(item => item.nom),
-        datasets: [{
-            label: 'Quantité vendue',
-            data: ventesParProduit.map(item => item.quantite),
-            backgroundColor: 'rgba(54, 162, 235, 0.8)',
-            borderColor: 'rgba(54, 162, 235, 1)',
-            borderWidth: 1
-        }]
-    },
-    options: {
-        responsive: true,
-        plugins: {
-            legend: {
-                display: false
-            }
-        },
-        scales: {
-            y: {
-                beginAtZero: true,
-                title: {
-                    display: true,
-                    text: 'Quantité'
-                }
-            }
-        }
-    }
-});
+<!-- Données pour les graphiques (lues par resources/js/dashboard-charts.js) -->
+<script type="application/json" id="dashboard-chart-data">
+    @json(['ventesParJour' => $ventesParJour, 'ventesParProduit' => $ventesParProduit])
 </script>
+@vite(['resources/js/dashboard-charts.js'])
 
 <style>
 .border-left-primary {
-    border-left: 0.25rem solid #4e73df !important;
+    border-left: 0.25rem solid #166534 !important;
 }
 .border-left-success {
-    border-left: 0.25rem solid #1cc88a !important;
+    border-left: 0.25rem solid #22c55e !important;
 }
 .border-left-info {
-    border-left: 0.25rem solid #36b9cc !important;
+    border-left: 0.25rem solid #0e7490 !important;
 }
 .border-left-warning {
-    border-left: 0.25rem solid #f6c23e !important;
+    border-left: 0.25rem solid #ca8a04 !important;
 }
 </style>
 @endsection

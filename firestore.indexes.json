@@ -1,0 +1,68 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "ventes",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "boutiqueId", "order": "ASCENDING" },
+        { "fieldPath": "dateVente", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "ventes",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "userId", "order": "ASCENDING" },
+        { "fieldPath": "dateVente", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "ventes",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "dateVente", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "stocksBoutique",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "boutiqueId", "order": "ASCENDING" },
+        { "fieldPath": "quantite", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "stocksMagasin",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "magasinId", "order": "ASCENDING" },
+        { "fieldPath": "quantite", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "entreesStock",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "magasinId", "order": "ASCENDING" },
+        { "fieldPath": "dateEntree", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "transferts",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "magasinId", "order": "ASCENDING" },
+        { "fieldPath": "date", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "transferts",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "boutiqueId", "order": "ASCENDING" },
+        { "fieldPath": "date", "order": "DESCENDING" }
+      ]
+    }
+  ]
+}

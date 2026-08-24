@@ -15,7 +15,7 @@
     <div class="min-h-screen flex bg-gray-50">
 
         {{-- Panneau de marque --}}
-        <div class="relative hidden w-1/2 flex-col justify-between overflow-hidden bg-gradient-to-br from-indigo-700 via-indigo-800 to-slate-900 p-12 text-white lg:flex">
+        <div class="relative hidden w-1/2 flex-col justify-between overflow-hidden bg-gradient-to-br from-green-800 via-green-900 to-slate-900 p-12 text-white lg:flex">
             <div class="absolute -top-24 -right-24 h-96 w-96 rounded-full bg-white/5"></div>
             <div class="absolute -bottom-32 -left-16 h-80 w-80 rounded-full bg-white/5"></div>
 
@@ -32,7 +32,7 @@
                 <h1 class="max-w-md text-3xl font-bold leading-tight tracking-tight">
                     Pilotez vos stocks et vos ventes depuis un seul endroit.
                 </h1>
-                <p class="mt-4 max-w-md text-indigo-100/80">
+                <p class="mt-4 max-w-md text-green-100/80">
                     Magasins, boutiques, fournisseurs, caisse et rapports : toute votre activité centralisée en temps réel.
                 </p>
 
@@ -43,7 +43,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
                             </svg>
                         </span>
-                        <span class="text-sm text-indigo-50">Suivi des stocks multi-sites en temps réel</span>
+                        <span class="text-sm text-green-50">Suivi des stocks multi-sites en temps réel</span>
                     </li>
                     <li class="flex items-center gap-3">
                         <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/10">
@@ -51,7 +51,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 1.905-4.79 2.288-7.408.055-.377-.228-.717-.61-.717H5.106M14.25 14.25L15.75 5.25M9.75 14.25L8.25 5.25" />
                             </svg>
                         </span>
-                        <span class="text-sm text-indigo-50">Caisse (POS) rapide pour vos vendeurs</span>
+                        <span class="text-sm text-green-50">Caisse (POS) rapide pour vos vendeurs</span>
                     </li>
                     <li class="flex items-center gap-3">
                         <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/10">
@@ -59,12 +59,12 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
                             </svg>
                         </span>
-                        <span class="text-sm text-indigo-50">Rapports de vente et de stock exportables</span>
+                        <span class="text-sm text-green-50">Rapports de vente et de stock exportables</span>
                     </li>
                 </ul>
             </div>
 
-            <p class="relative text-xs text-indigo-100/60">&copy; {{ date('Y') }} Gestion de Magasin. Tous droits réservés.</p>
+            <p class="relative text-xs text-green-100/60">&copy; {{ date('Y') }} Gestion de Magasin. Tous droits réservés.</p>
         </div>
 
         {{-- Formulaire de connexion --}}
@@ -72,7 +72,7 @@
             <div class="mx-auto w-full max-w-sm">
 
                 <div class="mb-8 flex items-center gap-3 lg:hidden">
-                    <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-600 text-white">
+                    <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-green-800 text-white">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-6 w-6">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21" />
                         </svg>
@@ -115,7 +115,7 @@
                         <div class="flex items-center justify-between">
                             <x-input-label for="password" value="Mot de passe" />
                             @if (Route::has('password.request'))
-                                <a class="text-sm font-medium text-indigo-600 hover:text-indigo-500" href="{{ route('password.request') }}">
+                                <a class="text-sm font-medium text-green-700 hover:text-green-600" href="{{ route('password.request') }}">
                                     Mot de passe oublié ?
                                 </a>
                             @endif
@@ -144,12 +144,12 @@
 
                     <div class="flex items-center">
                         <input id="remember" type="checkbox" name="remember"
-                            class="h-4 w-4 rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500">
+                            class="h-4 w-4 rounded border-gray-300 text-green-700 shadow-sm focus:ring-green-600">
                         <label for="remember" class="ms-2 text-sm text-gray-600">Se souvenir de moi</label>
                     </div>
 
                     <button type="submit" x-bind:disabled="loading"
-                        class="flex w-full items-center justify-center gap-2 rounded-md bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-70">
+                        class="flex w-full items-center justify-center gap-2 rounded-md bg-green-800 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-600 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-70">
                         <svg x-show="loading" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="h-4 w-4 animate-spin">
                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
@@ -160,7 +160,7 @@
 
                 <p class="mt-8 text-center text-sm text-gray-500">
                     Pas encore de compte ?
-                    <a href="{{ route('register') }}" class="font-medium text-indigo-600 hover:text-indigo-500">S'inscrire</a>
+                    <a href="{{ route('register') }}" class="font-medium text-green-700 hover:text-green-600">S'inscrire</a>
                 </p>
             </div>
         </div>

@@ -3,7 +3,6 @@
 @section('title', 'Gestion des Caisses')
 
 @section('breadcrumb')
-    <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Accueil</a></li>
     <li class="breadcrumb-item active">Gestion des Caisses</li>
 @endsection
 

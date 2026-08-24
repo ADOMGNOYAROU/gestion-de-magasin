@@ -62,7 +62,7 @@
                                             <span class="badge bg-info">Vendeur</span>
                                         @endif
                                     </td>
-                                    <td>{{ $user->magasin ? $user->magasin->nom : 'N/A' }}</td>
+                                    <td>{{ $user->magasinResponsable ? $user->magasinResponsable->nom : 'N/A' }}</td>
                                     <td>{{ $user->created_at->format('d/m/Y') }}</td>
                                     <td>
                                         <a href="{{ route('users.show', $user) }}" class="btn btn-sm btn-info">

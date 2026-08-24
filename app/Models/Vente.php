@@ -154,6 +154,7 @@ class Vente extends Model
             'prix_unitaire' => $prix,
             'remise' => $remise,
             'remise_pourcentage' => $prix > 0 ? ($remise / $prix) * 100 : 0,
+            'sous_total' => ($prix - $remise) * $quantite,
         ]);
 
         $venteProduit->calculerSousTotal();
