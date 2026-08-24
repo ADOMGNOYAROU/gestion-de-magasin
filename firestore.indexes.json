@@ -63,6 +63,15 @@
         { "fieldPath": "boutiqueId", "order": "ASCENDING" },
         { "fieldPath": "date", "order": "DESCENDING" }
       ]
+    },
+    {
+      "collectionGroup": "cashRegisterSessions",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "vendeurId", "order": "ASCENDING" },
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "dateOuverture", "order": "DESCENDING" }
+      ]
     }
   ]
 }
