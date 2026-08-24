@@ -3,6 +3,7 @@ import { ApiError, authenticateWithRole } from '@/lib/auth';
 import { CashRegisterSessionDoc } from '@/lib/format/cash-register-session';
 import { getDb } from '@/lib/firebase-admin';
 import { resolveField } from '@/lib/firestore/resolve-field';
+import { notifyIfNewlyCritical } from '@/lib/notifications/stock-alert';
 import { venteSchema } from '@/lib/schemas/vente';
 
 interface VenteDoc {
@@ -110,8 +111,6 @@ function generateTicketPrefix(): string {
 // stock, VenteController ne le fait pas. À reconsidérer si ce comportement n'est pas
 // voulu, mais migrer à l'identique d'abord plutôt que de changer la logique métier
 // sans validation explicite.
-//
-// TODO(Phase 3) : porter StockAlertNotifier une fois `notifications` conçue.
 export const POST = withErrorHandling(async (request) => {
   const authUser = await authenticateWithRole(request, 'vendeur');
   const body = venteSchema.parse(await request.json());
@@ -132,6 +131,7 @@ export const POST = withErrorHandling(async (request) => {
     if (!boutiqueSnap.exists) {
       throw new ApiError(422, 'Boutique introuvable.');
     }
+    const magasinId = (boutiqueSnap.data() as { magasinId: string | null }).magasinId ?? null;
 
     const openSessionSnap = await tx.get(
       db
@@ -206,10 +206,22 @@ export const POST = withErrorHandling(async (request) => {
       tx.set(venteRef.collection('produits').doc(), ligne as VenteLigneDoc);
     });
 
+    const alertesAVerifier: {
+      produitId: string;
+      produitNom: string;
+      quantiteAvant: number;
+      seuilAlerte: number;
+    }[] = [];
     stockSnaps.forEach((stockSnap, i) => {
       if (stockSnap.exists) {
-        const stock = stockSnap.data() as { quantite: number };
+        const stock = stockSnap.data() as { quantite: number; seuilAlerte: number };
         tx.update(stockRefs[i], { quantite: stock.quantite - body.lignes[i].quantite });
+        alertesAVerifier.push({
+          produitId: body.lignes[i].produitId,
+          produitNom: (produitSnaps[i].data() as ProduitDoc).nom,
+          quantiteAvant: stock.quantite,
+          seuilAlerte: stock.seuilAlerte,
+        });
       }
     });
 
@@ -223,8 +235,28 @@ export const POST = withErrorHandling(async (request) => {
       tx.update(sessionDoc.ref, { montantTheorique });
     }
 
-    return { id: venteRef.id, numero_ticket: numeroTicket, montant_total: montantTotal, monnaie };
+    return { id: venteRef.id, numero_ticket: numeroTicket, montant_total: montantTotal, monnaie, magasinId, alertesAVerifier };
   });
 
-  return Response.json(result, { status: 201 });
+  // Best-effort : ne doit jamais faire échouer une vente déjà validée.
+  try {
+    const boutiqueNom = (await resolveField('boutiques', boutiqueId, 'nom')) ?? boutiqueId;
+    for (const ligne of result.alertesAVerifier) {
+      const quantiteVendue = body.lignes.find((l) => l.produitId === ligne.produitId)?.quantite ?? 0;
+      await notifyIfNewlyCritical({
+        produitId: ligne.produitId,
+        produitNom: ligne.produitNom,
+        site: boutiqueNom,
+        quantiteAvant: ligne.quantiteAvant,
+        quantiteApres: ligne.quantiteAvant - quantiteVendue,
+        seuilAlerte: ligne.seuilAlerte,
+        magasinId: result.magasinId,
+      });
+    }
+  } catch (error) {
+    console.error('notifyIfNewlyCritical a échoué (vente déjà validée, non bloquant) :', error);
+  }
+
+  const { magasinId: _magasinId, alertesAVerifier: _alertes, ...response } = result;
+  return Response.json(response, { status: 201 });
 });

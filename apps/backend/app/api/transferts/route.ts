@@ -2,6 +2,7 @@ import { withErrorHandling } from '@/lib/api-handler';
 import { ApiError, authenticateWithRole } from '@/lib/auth';
 import { getDb } from '@/lib/firebase-admin';
 import { resolveField } from '@/lib/firestore/resolve-field';
+import { notifyIfNewlyCritical } from '@/lib/notifications/stock-alert';
 import { transfertSchema } from '@/lib/schemas/transfert';
 
 interface TransfertDoc {
@@ -16,6 +17,7 @@ interface TransfertDoc {
 interface StockDoc {
   quantite: number;
   prixVente: number | null;
+  seuilAlerte: number;
 }
 
 // Reprend TransfertController::index() (50 derniers transferts).
@@ -48,8 +50,6 @@ export const GET = withErrorHandling(async (request) => {
 // Reprend TransfertController::store() : vérifie la dispo, décrémente le stock
 // magasin, incrémente le stock boutique et crée le transfert, dans une seule
 // transaction Firestore (équivalent du DB::transaction()+lockForUpdate() Laravel).
-//
-// TODO(Phase 3) : porter StockAlertNotifier une fois `notifications` conçue.
 export const POST = withErrorHandling(async (request) => {
   await authenticateWithRole(request, 'gestionnaire');
   const body = transfertSchema.parse(await request.json());
@@ -61,7 +61,7 @@ export const POST = withErrorHandling(async (request) => {
 
   const date = new Date().toISOString().slice(0, 10);
 
-  await db.runTransaction(async (tx) => {
+  const { quantiteAvant, seuilAlerte } = await db.runTransaction(async (tx) => {
     const [stockMagasinSnap, stockBoutiqueSnap] = await Promise.all([
       tx.get(stockMagasinRef),
       tx.get(stockBoutiqueRef),
@@ -96,7 +96,28 @@ export const POST = withErrorHandling(async (request) => {
       date,
     };
     tx.set(transfertRef, transfert);
+
+    return { quantiteAvant: stockMagasin.quantite, seuilAlerte: stockMagasin.seuilAlerte };
   });
+
+  // Best-effort : ne doit jamais faire échouer un transfert déjà validé.
+  try {
+    const [produitNom, magasinNom] = await Promise.all([
+      resolveField('produits', body.produitId, 'nom'),
+      resolveField('magasins', body.magasinId, 'nom'),
+    ]);
+    await notifyIfNewlyCritical({
+      produitId: body.produitId,
+      produitNom: produitNom ?? body.produitId,
+      site: magasinNom ?? body.magasinId,
+      quantiteAvant,
+      quantiteApres: quantiteAvant - body.quantite,
+      seuilAlerte,
+      magasinId: body.magasinId,
+    });
+  } catch (error) {
+    console.error('notifyIfNewlyCritical a échoué (transfert déjà validé, non bloquant) :', error);
+  }
 
   return Response.json({ id: transfertRef.id }, { status: 201 });
 });
