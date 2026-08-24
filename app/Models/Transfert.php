@@ -7,11 +7,12 @@ use Illuminate\Database\Eloquent\Model;
 class Transfert extends Model
 {
     protected $fillable = [
-        'produit_id', 
-        'magasin_id', 
-        'boutique_id', 
-        'quantite', 
-        'date'
+        'produit_id',
+        'magasin_id',
+        'boutique_id',
+        'quantite',
+        'date',
+        'notes',
     ];
 
     protected $casts = [

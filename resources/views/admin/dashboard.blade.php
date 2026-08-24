@@ -21,8 +21,8 @@
                             <p class="dashboard-stat-label">Utilisateurs</p>
                             <p class="dashboard-stat counter">{{ $stats['utilisateurs'] ?? 0 }}</p>
                         </div>
-                        <div class="bg-blue-100 p-3 rounded-full">
-                            <i class="fas fa-users text-blue-600"></i>
+                        <div class="bg-green-100 p-3 rounded-full">
+                            <i class="fas fa-users text-green-800"></i>
                         </div>
                     </div>
                 </div>

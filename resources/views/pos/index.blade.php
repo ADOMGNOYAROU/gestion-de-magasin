@@ -3,7 +3,6 @@
 @section('title', 'Caisse - ' . $boutique->nom)
 
 @section('breadcrumb')
-    <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Accueil</a></li>
     <li class="breadcrumb-item active">Caisse</li>
 @endsection
 
@@ -61,16 +60,16 @@
                                     data-product-price="{{ $produit->prix_vente }}"
                                     data-product-category="{{ $produit->categorie }}"
                                     {{ $produit->stock_disponible <= 0 ? 'disabled' : '' }}>
+                                @if($produit->stock_disponible <= 0)
+                                    <span class="stock-out-ribbon">Rupture</span>
+                                @endif
                                 <div class="text-start p-2">
                                     <strong class="d-block mb-1" style="font-size: 0.85rem; line-height: 1.2;">{{ Str::limit($produit->nom, 18) }}</strong>
                                     <small class="text-muted d-block mb-1" style="font-size: 0.75rem;">{{ $produit->categorie }}</small>
                                     <span class="fw-bold d-block mb-1" style="font-size: 0.8rem;">{{ number_format($produit->prix_vente, 0, ',', ' ') }} FCFA</span>
                                     <small class="text-{{ $produit->stock_disponible > 10 ? 'success' : ($produit->stock_disponible > 0 ? 'warning' : 'danger') }}" style="font-size: 0.7rem;">
-                                        Stock: {{ $produit->stock_disponible ?? 'NULL' }}
+                                        Stock: {{ $produit->stock_disponible ?? 0 }}
                                     </small>
-                                    @if(!$produit->stock_disponible && $produit->stock_disponible !== 0)
-                                        <br><small class="text-danger" style="font-size: 0.7rem;">DEBUG: Stock non chargé</small>
-                                    @endif
                                 </div>
                             </button>
                         </div>
@@ -101,20 +100,30 @@
 
                 <!-- Total -->
                 <div class="border-top pt-3">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <strong>Total:</strong>
-                        <strong id="cartTotal">0 FCFA</strong>
+                    <div class="cart-total-row d-flex justify-content-between align-items-center mb-3">
+                        <strong>Total</strong>
+                        <strong id="cartTotal" style="font-size: 1.15rem;">0 FCFA</strong>
                     </div>
 
                     <!-- Méthode de paiement -->
                     <div class="mb-3">
                         <label class="form-label">Mode de paiement:</label>
-                        <div class="btn-group w-100" role="group">
+                        <div class="payment-method-grid">
                             @foreach($paymentMethods as $method)
+                            @php
+                                $paymentIcon = match($method->code) {
+                                    'cash' => 'fa-money-bill-wave',
+                                    'card' => 'fa-credit-card',
+                                    'check' => 'fa-money-check-alt',
+                                    'mobile' => 'fa-mobile-alt',
+                                    default => 'fa-wallet',
+                                };
+                            @endphp
                             <input type="radio" class="btn-check" name="paymentMethod"
                                    id="payment{{ $method->code }}" value="{{ $method->id }}"
                                    {{ $method->code === 'cash' ? 'checked' : '' }}>
                             <label class="btn btn-outline-primary" for="payment{{ $method->code }}">
+                                <i class="fas {{ $paymentIcon }}"></i>
                                 {{ $method->name }}
                             </label>
                             @endforeach
@@ -353,14 +362,14 @@ function updateCartDisplay() {
     }
 
     let total = 0;
-    let html = '<div class="list-group">';
+    let html = '';
 
     cart.forEach(item => {
         const itemTotal = item.prix_unitaire * item.quantite;
         total += itemTotal;
 
         html += `
-            <div class="list-group-item d-flex justify-content-between align-items-center">
+            <div class="cart-item d-flex justify-content-between align-items-center">
                 <div class="flex-grow-1">
                     <strong>${item.nom}</strong><br>
                     <small class="text-muted">${item.categorie}</small>
@@ -371,7 +380,7 @@ function updateCartDisplay() {
                     </div>
                 </div>
                 <div class="text-end">
-                    <div>${formatCurrency(itemTotal)}</div>
+                    <div class="fw-bold">${formatCurrency(itemTotal)}</div>
                     <button class="btn btn-sm btn-outline-danger mt-1" onclick="removeFromCart(${item.produit_id})">
                         <i class="fas fa-trash"></i>
                     </button>
@@ -379,8 +388,6 @@ function updateCartDisplay() {
             </div>
         `;
     });
-
-    html += '</div>';
     cartItems.innerHTML = html;
     cartTotal.textContent = formatCurrency(total);
     checkoutBtn.disabled = false;
@@ -489,7 +496,7 @@ function toggleCashInput() {
     const cashDiv = document.getElementById('cashReceivedDiv');
 
     if (selectedPayment && selectedPayment.value) {
-        const paymentMethod = @json($paymentMethods)->find(m => m.id == selectedPayment.value);
+        const paymentMethod = @json($paymentMethods).find(m => m.id == selectedPayment.value);
         cashDiv.style.display = paymentMethod && paymentMethod.code === 'cash' ? 'block' : 'none';
     }
 }
@@ -503,7 +510,7 @@ function checkout() {
     }
 
     const paymentMethodId = selectedPayment.value;
-    const paymentMethod = @json($paymentMethods)->find(m => m.id == paymentMethodId);
+    const paymentMethod = @json($paymentMethods).find(m => m.id == paymentMethodId);
     let montantRecu = getCartTotal();
 
     if (paymentMethod.code === 'cash') {

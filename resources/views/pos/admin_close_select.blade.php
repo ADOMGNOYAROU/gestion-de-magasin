@@ -3,7 +3,6 @@
 @section('title', 'Fermer une caisse')
 
 @section('breadcrumb')
-    <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Accueil</a></li>
     <li class="breadcrumb-item"><a href="{{ route('pos.index') }}">Gestion des Caisses</a></li>
     <li class="breadcrumb-item active">Fermer une caisse</li>
 @endsection

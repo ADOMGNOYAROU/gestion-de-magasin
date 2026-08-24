@@ -94,8 +94,10 @@
                                         <td>
                                             @if($entree->fournisseur)
                                                 <span class="badge bg-primary">F: {{ $entree->fournisseur->nom }}</span>
-                                            @else
+                                            @elseif($entree->partenaire)
                                                 <span class="badge bg-warning">P: {{ $entree->partenaire->nom }}</span>
+                                            @else
+                                                <span class="badge bg-secondary">N/A</span>
                                             @endif
                                         </td>
                                         <td>

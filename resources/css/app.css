@@ -31,19 +31,19 @@
 
 /* Styles pour les barres latérales colorées */
 .border-primary {
-    border-left-color: #3b82f6; /* blue-500 */
+    border-left-color: #166534; /* forest green */
 }
 
 .border-success {
-    border-left-color: #10b981; /* emerald-500 */
+    border-left-color: #22c55e; /* green-500 */
 }
 
 .border-warning {
-    border-left-color: #f59e0b; /* amber-500 */
+    border-left-color: #ca8a04; /* gold */
 }
 
 .border-danger {
-    border-left-color: #ef4444; /* red-500 */
+    border-left-color: #b91c1c; /* red-700 */
 }
 
 /* Styles pour les onglets */
@@ -59,6 +59,50 @@
 
 .nav-tab.active {
     @apply text-blue-600 border-blue-500 font-semibold;
+}
+
+/* Badges de répartition des rôles (tableau de bord admin) */
+.badge-admin,
+.badge-gestionnaire,
+.badge-vendeur {
+    @apply inline-flex items-center justify-center px-2.5 py-0.5 rounded-full text-xs font-semibold min-w-[1.75rem];
+}
+
+.badge-admin {
+    @apply bg-blue-100 text-blue-700;
+}
+
+.badge-gestionnaire {
+    @apply bg-amber-100 text-amber-700;
+}
+
+.badge-vendeur {
+    @apply bg-emerald-100 text-emerald-700;
+}
+
+/* Cartes "Actions rapides" (tableau de bord admin) */
+.action-card {
+    @apply block bg-white rounded-lg border border-gray-100 p-4 shadow-sm;
+    transition: all 0.2s ease;
+}
+
+.action-card:hover {
+    @apply shadow-md border-gray-200;
+    transform: translateY(-2px);
+}
+
+.border-info {
+    border-left-color: #0e7490; /* teal-700 */
+}
+
+/* Alerte de stock clignotante */
+@keyframes pulseAlert {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.25); }
+    50% { box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); }
+}
+
+.pulse-alert {
+    animation: pulseAlert 2.5s ease-in-out infinite;
 }
 
 /* Style pour les notifications */
@@ -81,4 +125,351 @@
 
 .animate-fadeInUp {
     animation: fadeInUp 0.5s ease-out forwards;
+}
+
+/* ==========================================================================
+   Design "premium" pour les pages Bootstrap (listes, formulaires, CRUD)
+   Ces règles surchargent volontairement Bootstrap (même spécificité, mais
+   chargées après lui) pour donner un look plus moderne à tout le site sans
+   avoir à retoucher chaque vue individuellement.
+   ========================================================================== */
+
+.card {
+    border: none;
+    border-radius: 0.9rem;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 4px 12px rgba(15, 23, 42, 0.05);
+}
+
+.card .card-body {
+    padding: 1.5rem;
+}
+
+.card .card-header {
+    background: transparent;
+    border-bottom: 1px solid #eef2f7;
+    font-weight: 700;
+    padding: 1.1rem 1.5rem;
+}
+
+/* En-têtes de tableau : look clair "SaaS" plutôt que barre sombre */
+thead.table-dark,
+thead.table-dark th {
+    background-color: #f8fafc !important;
+    color: #64748b !important;
+    border-color: #eef2f7 !important;
+    box-shadow: none !important;
+}
+
+.table {
+    margin-bottom: 0;
+    --bs-table-hover-bg: #f8fafc;
+}
+
+.table thead th {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 0.9rem 1.1rem;
+    border-bottom-width: 1px;
+}
+
+.table tbody td {
+    padding: 0.85rem 1.1rem;
+    vertical-align: middle;
+    color: #334155;
+}
+
+.table tbody tr {
+    transition: background-color 0.15s ease;
+}
+
+/* Badges arrondis et lisibles */
+.badge {
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    padding: 0.4em 0.75em;
+    border-radius: 999px;
+}
+
+/* Boutons et groupes de boutons */
+.btn {
+    border-radius: 0.6rem;
+    font-weight: 600;
+}
+
+.btn-group > .btn {
+    border-radius: 0.5rem !important;
+}
+
+.btn-group > .btn:not(:last-child) {
+    margin-right: 0.35rem;
+}
+
+.btn-sm {
+    border-radius: 0.5rem;
+}
+
+/* Champs de formulaire */
+.form-control,
+.form-select {
+    border-radius: 0.6rem;
+    border-color: #e2e8f0;
+    padding: 0.6rem 0.9rem;
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: #166534;
+    box-shadow: 0 0 0 3px rgba(22, 101, 52, 0.12);
+}
+
+/* États vides plus soignés */
+.table td.text-center.py-4 i {
+    opacity: 0.35;
+}
+
+/* ==========================================================================
+   Page Caisse (POS)
+   ========================================================================== */
+.product-btn {
+    position: relative;
+    border-width: 1.5px;
+    border-radius: 0.75rem;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+    overflow: hidden;
+}
+
+.product-btn:not(:disabled):hover,
+.product-btn:not(:disabled):focus {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 18px rgba(22, 101, 52, 0.16);
+    border-color: #166534;
+}
+
+.product-btn:disabled {
+    opacity: 0.55;
+    filter: grayscale(0.5);
+    cursor: not-allowed;
+}
+
+.stock-out-ribbon {
+    position: absolute;
+    top: 0.4rem;
+    right: 0.4rem;
+    font-size: 0.6rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    background: #b91c1c;
+    color: #fff;
+    padding: 0.15rem 0.5rem;
+    border-radius: 999px;
+    line-height: 1.4;
+}
+
+/* Modes de paiement en grille (le btn-group horizontal débordait avec 4 libellés) */
+.payment-method-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+}
+
+.payment-method-grid .btn-check + label {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.3rem;
+    width: 100%;
+    margin: 0;
+    padding: 0.65rem 0.4rem;
+    font-size: 0.78rem;
+    border-radius: 0.65rem;
+}
+
+.payment-method-grid .btn-check + label i {
+    font-size: 1.05rem;
+}
+
+/* Articles du panier */
+.cart-item {
+    background: #f8fafc;
+    border: 1px solid #eef2f7;
+    border-radius: 0.65rem;
+    padding: 0.75rem 0.9rem;
+    margin-bottom: 0.6rem;
+}
+
+.cart-item:last-child {
+    margin-bottom: 0;
+}
+
+.cart-total-row {
+    background: linear-gradient(135deg, #166534 0%, #14532d 100%);
+    color: #fff;
+    border-radius: 0.75rem;
+    padding: 0.9rem 1.1rem;
+}
+
+/* ==========================================================================
+   Bootstrap : couleurs sémantiques
+   Bootstrap fige les boutons outline, badges, alertes, pagination et cases
+   à cocher avec des couleurs codées en dur par variable de composant
+   (--bs-btn-*, --bs-alert-*...), indépendantes de --bs-primary/--bs-info
+   défini plus haut. On les réaligne ici sur la palette de l'application.
+   ========================================================================== */
+.btn-outline-primary {
+    --bs-btn-color: #166534;
+    --bs-btn-border-color: #166534;
+    --bs-btn-hover-bg: #166534;
+    --bs-btn-hover-border-color: #166534;
+    --bs-btn-active-bg: #14532d;
+    --bs-btn-active-border-color: #14532d;
+    --bs-btn-disabled-color: #166534;
+    --bs-btn-disabled-border-color: #166534;
+    --bs-btn-focus-shadow-rgb: 22, 101, 52;
+}
+
+.btn-outline-info {
+    --bs-btn-color: #0e7490;
+    --bs-btn-border-color: #0e7490;
+    --bs-btn-hover-bg: #0e7490;
+    --bs-btn-hover-border-color: #0e7490;
+    --bs-btn-active-bg: #0c5c73;
+    --bs-btn-active-border-color: #0c5c73;
+    --bs-btn-disabled-color: #0e7490;
+    --bs-btn-disabled-border-color: #0e7490;
+    --bs-btn-focus-shadow-rgb: 14, 116, 144;
+}
+
+.btn-outline-success {
+    --bs-btn-color: #16a34a;
+    --bs-btn-border-color: #16a34a;
+    --bs-btn-hover-bg: #16a34a;
+    --bs-btn-hover-border-color: #16a34a;
+    --bs-btn-active-bg: #15803d;
+    --bs-btn-active-border-color: #15803d;
+    --bs-btn-disabled-color: #16a34a;
+    --bs-btn-disabled-border-color: #16a34a;
+    --bs-btn-focus-shadow-rgb: 22, 163, 74;
+}
+
+.btn-outline-warning {
+    --bs-btn-color: #ca8a04;
+    --bs-btn-border-color: #ca8a04;
+    --bs-btn-hover-color: #422006;
+    --bs-btn-hover-bg: #ca8a04;
+    --bs-btn-hover-border-color: #ca8a04;
+    --bs-btn-active-color: #422006;
+    --bs-btn-active-bg: #a16207;
+    --bs-btn-active-border-color: #a16207;
+    --bs-btn-disabled-color: #ca8a04;
+    --bs-btn-disabled-border-color: #ca8a04;
+    --bs-btn-focus-shadow-rgb: 202, 138, 4;
+}
+
+.btn-outline-danger {
+    --bs-btn-color: #b91c1c;
+    --bs-btn-border-color: #b91c1c;
+    --bs-btn-hover-bg: #b91c1c;
+    --bs-btn-hover-border-color: #b91c1c;
+    --bs-btn-active-bg: #991b1b;
+    --bs-btn-active-border-color: #991b1b;
+    --bs-btn-disabled-color: #b91c1c;
+    --bs-btn-disabled-border-color: #b91c1c;
+    --bs-btn-focus-shadow-rgb: 185, 28, 28;
+}
+
+.btn-info {
+    --bs-btn-color: #fff;
+    --bs-btn-bg: #0e7490;
+    --bs-btn-border-color: #0e7490;
+    --bs-btn-hover-color: #fff;
+    --bs-btn-hover-bg: #0c5c73;
+    --bs-btn-hover-border-color: #0c5c73;
+    --bs-btn-active-bg: #0c5c73;
+    --bs-btn-active-border-color: #0c5c73;
+    --bs-btn-disabled-bg: #0e7490;
+    --bs-btn-disabled-border-color: #0e7490;
+}
+
+.badge.bg-primary, .bg-primary { background-color: #166534 !important; }
+.badge.bg-info, .bg-info { background-color: #0e7490 !important; color: #fff !important; }
+.badge.bg-success, .bg-success { background-color: #22c55e !important; }
+.badge.bg-warning, .bg-warning { background-color: #ca8a04 !important; color: #fff !important; }
+.badge.bg-danger, .bg-danger { background-color: #b91c1c !important; }
+
+.alert-primary {
+    --bs-alert-color: #14532d;
+    --bs-alert-bg: #dcfce7;
+    --bs-alert-border-color: #bbf7d0;
+}
+.alert-info {
+    --bs-alert-color: #0c4a5e;
+    --bs-alert-bg: #cffafe;
+    --bs-alert-border-color: #a5f3fc;
+}
+.alert-success {
+    --bs-alert-color: #14532d;
+    --bs-alert-bg: #dcfce7;
+    --bs-alert-border-color: #bbf7d0;
+}
+.alert-warning {
+    --bs-alert-color: #713f12;
+    --bs-alert-bg: #fef3c7;
+    --bs-alert-border-color: #fde68a;
+}
+.alert-danger {
+    --bs-alert-color: #7f1d1d;
+    --bs-alert-bg: #fee2e2;
+    --bs-alert-border-color: #fecaca;
+}
+
+.page-link {
+    color: #166534;
+}
+.page-link:hover {
+    color: #14532d;
+}
+.page-item.active .page-link {
+    background-color: #166534;
+    border-color: #166534;
+}
+
+.form-check-input:checked {
+    background-color: #166534;
+    border-color: #166534;
+}
+.form-check-input:focus {
+    border-color: #166534;
+    box-shadow: 0 0 0 0.25rem rgba(22, 101, 52, 0.25);
+}
+
+/* ==========================================================================
+   Topbar : notifications / menu utilisateur
+   ========================================================================== */
+.dropdown-menu {
+    border: none;
+    border-radius: 0.75rem;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
+    padding: 0.5rem;
+}
+
+.dropdown-menu .dropdown-item {
+    border-radius: 0.5rem;
+    padding: 0.55rem 0.75rem;
+}
+
+.dropdown-menu .dropdown-item:hover,
+.dropdown-menu .dropdown-item:focus {
+    background-color: #f8fafc;
+}
+
+.dropdown-menu .dropdown-header {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #94a3b8;
 }
