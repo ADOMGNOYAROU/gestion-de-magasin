@@ -1,0 +1,126 @@
+<h1>Point de vente</h1>
+
+@if (error(); as e) {
+  <p class="error">{{ e }}</p>
+}
+
+@if (loadingSession()) {
+  <p>Chargement…</p>
+} @else if (!session()) {
+  <div class="panel narrow">
+    <h2>Ouvrir une session de caisse</h2>
+    <label>
+      Montant initial en caisse
+      <input type="number" min="0" [ngModel]="montantInitial()" (ngModelChange)="montantInitial.set($event)" />
+    </label>
+    <div class="actions">
+      <button type="button" class="primary" (click)="ouvrirSession()">Ouvrir la session</button>
+    </div>
+  </div>
+} @else {
+  <div class="session-bar">
+    <span>Session ouverte — montant théorique : <strong>{{ session()!.montant_theorique | number: '1.0-0' }} FCFA</strong></span>
+    <div class="close-session">
+      <input
+        type="number"
+        min="0"
+        placeholder="Montant final"
+        [ngModel]="montantFinalFermeture()"
+        (ngModelChange)="montantFinalFermeture.set($event)"
+      />
+      <button type="button" (click)="fermerSession()">Fermer la session</button>
+    </div>
+  </div>
+
+  @if (dernierTicket(); as ticket) {
+    <div class="panel ticket">
+      <strong>Ticket {{ ticket.numero_ticket }}</strong> — Total : {{ ticket.montant_total | number: '1.0-0' }} FCFA
+      — Monnaie à rendre : {{ ticket.monnaie | number: '1.0-0' }} FCFA
+    </div>
+  }
+
+  <div class="pos-layout">
+    <div class="catalogue">
+      <input class="search" type="text" placeholder="Rechercher un produit…" [ngModel]="search()" (ngModelChange)="search.set($event)" />
+      <div class="produits-grid">
+        @for (p of filteredProduits(); track p.id) {
+          <button type="button" class="produit-card" (click)="ajouterAuPanier(p)">
+            <span class="nom">{{ p.nom }}</span>
+            <span class="prix">{{ p.prix_vente | number: '1.0-0' }} FCFA</span>
+          </button>
+        }
+      </div>
+    </div>
+
+    <div class="panier">
+      <h2>Panier</h2>
+      @if (cart().length === 0) {
+        <p class="empty">Aucun article.</p>
+      } @else {
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Produit</th>
+              <th class="right">Qté</th>
+              <th class="right">Remise</th>
+              <th class="right">Sous-total</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (l of cart(); track l.produit.id) {
+              <tr>
+                <td>{{ l.produit.nom }}</td>
+                <td class="right">
+                  <input
+                    type="number"
+                    min="1"
+                    class="qty-input"
+                    [ngModel]="l.quantite"
+                    (ngModelChange)="changerQuantite(l.produit.id, $event)"
+                  />
+                </td>
+                <td class="right">
+                  <input
+                    type="number"
+                    min="0"
+                    class="qty-input"
+                    [ngModel]="l.remise"
+                    (ngModelChange)="changerRemise(l.produit.id, $event)"
+                  />
+                </td>
+                <td class="right">{{ (l.produit.prix_vente - l.remise) * l.quantite | number: '1.0-0' }} FCFA</td>
+                <td><button type="button" class="danger" (click)="retirerDuPanier(l.produit.id)">×</button></td>
+              </tr>
+            }
+          </tbody>
+        </table>
+
+        <p class="total">Total : {{ total() | number: '1.0-0' }} FCFA</p>
+
+        <label>
+          Mode de paiement
+          <select [ngModel]="paymentMethodId()" (ngModelChange)="paymentMethodId.set($event)">
+            <option value="" disabled>— Choisir —</option>
+            @for (m of paymentMethods(); track m.id) {
+              <option [value]="m.id">{{ m.name }}</option>
+            }
+          </select>
+        </label>
+        <label>
+          Montant reçu
+          <input type="number" min="0" [ngModel]="montantRecu()" (ngModelChange)="montantRecu.set($event)" />
+        </label>
+
+        <button
+          type="button"
+          class="primary encaisser"
+          [disabled]="submitting() || !paymentMethodId()"
+          (click)="encaisser()"
+        >
+          Encaisser
+        </button>
+      }
+    </div>
+  </div>
+}

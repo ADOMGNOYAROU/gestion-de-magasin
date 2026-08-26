@@ -55,7 +55,17 @@ export const routes: Routes = [
         loadComponent: () => import('./features/transferts/transferts').then((m) => m.Transferts),
         canActivate: [roleGuard('gestionnaire')],
       },
-      // Les autres modules métier (POS, ventes, rapports, utilisateurs) viennent ensuite.
+      {
+        path: 'pos',
+        loadComponent: () => import('./features/pos/pos').then((m) => m.Pos),
+        canActivate: [roleGuard('vendeur')],
+      },
+      {
+        path: 'ventes',
+        loadComponent: () => import('./features/ventes/ventes').then((m) => m.Ventes),
+        canActivate: [roleGuard('vendeur')],
+      },
+      // Les autres modules métier (rapports, utilisateurs) viennent ensuite.
     ],
   },
   { path: '**', redirectTo: '' },

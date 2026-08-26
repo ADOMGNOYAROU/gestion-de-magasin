@@ -1,0 +1,66 @@
+<h1>Ventes</h1>
+
+@if (error(); as e) {
+  <p class="error">{{ e }}</p>
+}
+
+@if (loading()) {
+  <p>Chargement…</p>
+} @else {
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Ticket</th>
+        <th>Date</th>
+        <th>Boutique</th>
+        <th>Paiement</th>
+        <th class="right">Total</th>
+        <th>Statut</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (v of ventes(); track v.id) {
+        <tr class="clickable" (click)="toggle(v.id)">
+          <td>{{ v.numero_ticket }}</td>
+          <td>{{ v.date_vente }}</td>
+          <td>{{ v.boutique }}</td>
+          <td>{{ v.mode_paiement }}</td>
+          <td class="right">{{ v.montant_total | number: '1.0-0' }} FCFA</td>
+          <td>{{ v.status }}</td>
+        </tr>
+        @if (expanded() === v.id) {
+          <tr>
+            <td colspan="6">
+              <table class="data-table nested">
+                <thead>
+                  <tr>
+                    <th>Produit</th>
+                    <th class="right">Quantité</th>
+                    <th class="right">Prix unitaire</th>
+                    <th class="right">Remise</th>
+                    <th class="right">Sous-total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (l of v.lignes; track $index) {
+                    <tr>
+                      <td>{{ l.produit }}</td>
+                      <td class="right">{{ l.quantite }}</td>
+                      <td class="right">{{ l.prix_unitaire | number: '1.0-0' }} FCFA</td>
+                      <td class="right">{{ l.remise | number: '1.0-0' }} FCFA</td>
+                      <td class="right">{{ l.sous_total | number: '1.0-0' }} FCFA</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </td>
+          </tr>
+        }
+      } @empty {
+        <tr>
+          <td colspan="6" class="empty">Aucune vente.</td>
+        </tr>
+      }
+    </tbody>
+  </table>
+}

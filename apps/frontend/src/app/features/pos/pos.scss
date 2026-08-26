@@ -1,0 +1,138 @@
+.panel.narrow {
+  max-width: 360px;
+
+  label {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    font-size: 0.8rem;
+    color: #4b5563;
+    margin-bottom: 1rem;
+  }
+
+  input {
+    font: inherit;
+    padding: 0.45rem 0.6rem;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+  }
+}
+
+.session-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #eef1fb;
+  border-radius: 8px;
+  padding: 0.75rem 1.1rem;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+
+  .close-session {
+    display: flex;
+    gap: 0.5rem;
+
+    input {
+      width: 130px;
+      padding: 0.4rem 0.6rem;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      font: inherit;
+    }
+  }
+}
+
+.panel.ticket {
+  background: #e6f4ea;
+  color: #1e7e34;
+  margin-bottom: 1rem;
+}
+
+.pos-layout {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 1.25rem;
+  align-items: start;
+}
+
+.catalogue {
+  .produits-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 0.75rem;
+  }
+
+  .produit-card {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.3rem;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 0.75rem 0.9rem;
+    cursor: pointer;
+    text-align: left;
+
+    &:hover {
+      border-color: #4e73df;
+    }
+
+    .nom {
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: #2e3a4b;
+    }
+
+    .prix {
+      color: #6b7280;
+      font-size: 0.85rem;
+    }
+  }
+}
+
+.panier {
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  padding: 1.1rem 1.25rem;
+
+  h2 {
+    margin-top: 0;
+  }
+
+  label {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    font-size: 0.8rem;
+    color: #4b5563;
+    margin-top: 0.9rem;
+  }
+
+  input,
+  select {
+    font: inherit;
+    padding: 0.45rem 0.6rem;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+  }
+
+  .qty-input {
+    width: 60px;
+  }
+
+  .total {
+    font-weight: 700;
+    font-size: 1.05rem;
+    text-align: right;
+    margin: 0.75rem 0 0;
+  }
+
+  .encaisser {
+    width: 100%;
+    margin-top: 1rem;
+    padding: 0.7rem;
+    font-size: 0.95rem;
+  }
+}

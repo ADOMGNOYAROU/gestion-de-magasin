@@ -1,0 +1,13 @@
+.clickable {
+  cursor: pointer;
+
+  &:hover {
+    background: #f9fafb;
+  }
+}
+
+.nested {
+  box-shadow: none;
+  margin: 0.5rem 0 0.5rem 1.5rem;
+  width: calc(100% - 1.5rem);
+}
