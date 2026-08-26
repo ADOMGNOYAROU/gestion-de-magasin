@@ -1,0 +1,98 @@
+<div class="header-row">
+  <h1>Utilisateurs</h1>
+  <button type="button" class="primary" (click)="openCreate()">+ Nouvel utilisateur</button>
+</div>
+
+@if (error(); as e) {
+  <p class="error">{{ e }}</p>
+}
+
+@if (showForm()) {
+  <div class="panel">
+    <h2>{{ editingId() ? "Modifier l'utilisateur" : 'Nouvel utilisateur' }}</h2>
+    <form [formGroup]="form" (ngSubmit)="submit()">
+      <div class="grid">
+        <label>
+          Nom
+          <input type="text" formControlName="name" />
+        </label>
+        <label>
+          Email
+          <input type="email" formControlName="email" />
+        </label>
+        <label>
+          Mot de passe {{ editingId() ? '(laisser vide pour ne pas changer)' : '' }}
+          <input type="password" formControlName="password" />
+        </label>
+        <label>
+          Rôle
+          <select formControlName="role">
+            <option value="admin">Admin</option>
+            <option value="gestionnaire">Gestionnaire</option>
+            <option value="vendeur">Vendeur</option>
+          </select>
+        </label>
+        <label>
+          Magasin (si gestionnaire)
+          <select formControlName="magasinId">
+            <option value="">— Aucun —</option>
+            @for (m of magasins(); track m.id) {
+              <option [value]="m.id">{{ m.nom }}</option>
+            }
+          </select>
+        </label>
+        <label>
+          Boutique (si vendeur)
+          <select formControlName="boutiqueId">
+            <option value="">— Aucune —</option>
+            @for (b of boutiques(); track b.id) {
+              <option [value]="b.id">{{ b.nom }}</option>
+            }
+          </select>
+        </label>
+      </div>
+      <div class="actions">
+        <button type="submit" class="primary">Enregistrer</button>
+        <button type="button" (click)="cancel()">Annuler</button>
+      </div>
+    </form>
+  </div>
+}
+
+@if (loading()) {
+  <p>Chargement…</p>
+} @else {
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Nom</th>
+        <th>Email</th>
+        <th>Rôle</th>
+        <th>Magasin</th>
+        <th>Boutique</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (u of users(); track u.id) {
+        <tr>
+          <td>{{ u.name }}</td>
+          <td>{{ u.email }}</td>
+          <td><span class="badge">{{ u.role }}</span></td>
+          <td>{{ u.magasin_nom || '—' }}</td>
+          <td>{{ u.boutique_nom || '—' }}</td>
+          <td class="row-actions">
+            <button type="button" (click)="openEdit(u)">Modifier</button>
+            @if (u.id !== currentUid()) {
+              <button type="button" class="danger" (click)="remove(u)">Supprimer</button>
+            }
+          </td>
+        </tr>
+      } @empty {
+        <tr>
+          <td colspan="6" class="empty">Aucun utilisateur.</td>
+        </tr>
+      }
+    </tbody>
+  </table>
+}

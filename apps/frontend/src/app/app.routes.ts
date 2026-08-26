@@ -65,7 +65,16 @@ export const routes: Routes = [
         loadComponent: () => import('./features/ventes/ventes').then((m) => m.Ventes),
         canActivate: [roleGuard('vendeur')],
       },
-      // Les autres modules métier (rapports, utilisateurs) viennent ensuite.
+      {
+        path: 'rapports',
+        loadComponent: () => import('./features/rapports/rapports').then((m) => m.Rapports),
+        canActivate: [roleGuard('gestionnaire')],
+      },
+      {
+        path: 'utilisateurs',
+        loadComponent: () => import('./features/utilisateurs/utilisateurs').then((m) => m.Utilisateurs),
+        canActivate: [roleGuard('admin')],
+      },
     ],
   },
   { path: '**', redirectTo: '' },

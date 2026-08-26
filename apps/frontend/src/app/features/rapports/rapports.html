@@ -1,0 +1,43 @@
+<h1>Rapports</h1>
+
+@if (error(); as e) {
+  <p class="error">{{ e }}</p>
+}
+
+<div class="panel">
+  <h2>Rapport de stock</h2>
+  <p>État du stock (magasins et boutiques), produits en alerte ou en rupture.</p>
+  <button type="button" class="primary" [disabled]="loadingKey() === 'stock'" (click)="telechargerStock()">
+    {{ loadingKey() === 'stock' ? 'Génération…' : 'Télécharger le PDF' }}
+  </button>
+</div>
+
+<div class="panel">
+  <h2>Rapport des partenaires</h2>
+  <p>Historique des achats par partenaire.</p>
+  <button type="button" class="primary" [disabled]="loadingKey() === 'partenaires'" (click)="telechargerPartenaires()">
+    {{ loadingKey() === 'partenaires' ? 'Génération…' : 'Télécharger le PDF' }}
+  </button>
+</div>
+
+<div class="panel">
+  <h2>Rapport de ventes</h2>
+  <div class="grid">
+    <label>
+      Du
+      <input type="date" [ngModel]="dateDebut()" (ngModelChange)="dateDebut.set($event)" />
+    </label>
+    <label>
+      Au
+      <input type="date" [ngModel]="dateFin()" (ngModelChange)="dateFin.set($event)" />
+    </label>
+  </div>
+  <div class="actions">
+    <button type="button" class="primary" [disabled]="loadingKey() === 'ventes-pdf'" (click)="telechargerVentes('pdf')">
+      {{ loadingKey() === 'ventes-pdf' ? 'Génération…' : 'Télécharger le PDF' }}
+    </button>
+    <button type="button" [disabled]="loadingKey() === 'ventes-excel'" (click)="telechargerVentes('excel')">
+      {{ loadingKey() === 'ventes-excel' ? 'Génération…' : 'Télécharger l\'Excel' }}
+    </button>
+  </div>
+</div>
