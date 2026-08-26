@@ -5,32 +5,79 @@
 }
 
 .sidebar {
-  width: 240px;
+  width: 250px;
   flex-shrink: 0;
   background: #232c3a;
   color: #fff;
   display: flex;
   flex-direction: column;
+  overflow-y: auto;
 
   .brand {
-    padding: 1.4rem 1.4rem;
-    font-weight: 700;
-    font-size: 1.05rem;
-    letter-spacing: -0.01em;
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    padding: 1.25rem 1.4rem;
     border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+
+    .brand-mark {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      flex-shrink: 0;
+      border-radius: 8px;
+      background: #4e73df;
+      color: #fff;
+
+      svg {
+        width: 19px;
+        height: 19px;
+      }
+    }
+
+    .brand-text {
+      font-weight: 700;
+      font-size: 1.02rem;
+      letter-spacing: -0.01em;
+    }
   }
 
   nav {
     display: flex;
     flex-direction: column;
+    padding: 0.6rem 0.75rem 1.25rem;
+  }
+
+  .nav-group {
+    display: flex;
+    flex-direction: column;
     gap: 0.1rem;
-    padding: 0.9rem 0.75rem;
+    margin-top: 1.1rem;
+
+    &:first-child {
+      margin-top: 0.4rem;
+    }
+  }
+
+  .nav-group-label {
+    padding: 0 0.85rem;
+    margin-bottom: 0.3rem;
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: rgba(255, 255, 255, 0.35);
   }
 
   a {
-    padding: 0.55rem 0.85rem;
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    padding: 0.5rem 0.85rem;
     border-radius: 7px;
-    color: rgba(255, 255, 255, 0.65);
+    color: rgba(255, 255, 255, 0.7);
     text-decoration: none;
     font-size: 0.87rem;
     font-weight: 500;
@@ -38,14 +85,35 @@
       background-color 0.12s ease,
       color 0.12s ease;
 
+    .nav-icon {
+      display: flex;
+      flex-shrink: 0;
+      width: 18px;
+      height: 18px;
+      opacity: 0.75;
+
+      svg {
+        width: 100%;
+        height: 100%;
+      }
+    }
+
     &:hover {
       background: rgba(255, 255, 255, 0.06);
       color: #fff;
+
+      .nav-icon {
+        opacity: 1;
+      }
     }
 
     &.active {
       background: #4e73df;
       color: #fff;
+
+      .nav-icon {
+        opacity: 1;
+      }
     }
   }
 }
