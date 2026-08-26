@@ -1,7 +1,6 @@
 export const environment = {
   production: true,
-  // À remplacer par l'URL du service Render "gestion-backend" une fois déployé.
-  apiBaseUrl: 'https://REPLACE-WITH-RENDER-BACKEND-URL',
+  apiBaseUrl: 'https://gestion-de-magasin.vercel.app',
   firebase: {
     apiKey: 'AIzaSyDwcG1eEAWlDaFdcuIFKYQVOPCNRic0igc',
     authDomain: 'magasin-pos-app.firebaseapp.com',
