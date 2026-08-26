@@ -1,0 +1,93 @@
+<div class="header-row">
+  <h1>Produits</h1>
+  <button type="button" class="primary" (click)="openCreate()">+ Nouveau produit</button>
+</div>
+
+@if (error(); as e) {
+  <p class="error">{{ e }}</p>
+}
+
+@if (showForm()) {
+  <div class="panel">
+    <h2>{{ editingId() ? 'Modifier le produit' : 'Nouveau produit' }}</h2>
+    <form [formGroup]="form" (ngSubmit)="submit()">
+      <div class="grid">
+        <label>
+          Nom
+          <input type="text" formControlName="nom" />
+        </label>
+        <label>
+          Catégorie
+          <input type="text" formControlName="categorie" />
+        </label>
+        <label class="full">
+          Description
+          <textarea formControlName="description" rows="2"></textarea>
+        </label>
+        <label>
+          Référence
+          <input type="text" formControlName="reference" />
+        </label>
+        <label>
+          Statut
+          <select formControlName="statut">
+            <option value="actif">Actif</option>
+            <option value="inactif">Inactif</option>
+          </select>
+        </label>
+        <label>
+          Prix d'achat
+          <input type="number" formControlName="prixAchat" min="0" />
+        </label>
+        <label>
+          Prix de vente
+          <input type="number" formControlName="prixVente" min="0" />
+        </label>
+      </div>
+      <div class="actions">
+        <button type="submit" class="primary">Enregistrer</button>
+        <button type="button" (click)="cancel()">Annuler</button>
+      </div>
+    </form>
+  </div>
+}
+
+<input class="search" type="text" placeholder="Rechercher un produit…" [value]="search()" (input)="search.set($any($event.target).value)" />
+
+@if (loading()) {
+  <p>Chargement…</p>
+} @else {
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Nom</th>
+        <th>Catégorie</th>
+        <th>Référence</th>
+        <th class="right">Prix achat</th>
+        <th class="right">Prix vente</th>
+        <th>Statut</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (p of filtered(); track p.id) {
+        <tr>
+          <td>{{ p.nom }}</td>
+          <td>{{ p.categorie }}</td>
+          <td>{{ p.reference || '—' }}</td>
+          <td class="right">{{ p.prix_achat | number: '1.0-0' }} FCFA</td>
+          <td class="right">{{ p.prix_vente | number: '1.0-0' }} FCFA</td>
+          <td><span class="badge" [class.inactive]="p.statut === 'inactif'">{{ p.statut }}</span></td>
+          <td class="row-actions">
+            <button type="button" (click)="openEdit(p)">Modifier</button>
+            <button type="button" class="danger" (click)="remove(p)">Supprimer</button>
+          </td>
+        </tr>
+      } @empty {
+        <tr>
+          <td colspan="7" class="empty">Aucun produit.</td>
+        </tr>
+      }
+    </tbody>
+  </table>
+}

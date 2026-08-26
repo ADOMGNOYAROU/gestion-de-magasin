@@ -1,0 +1,78 @@
+<div class="header-row">
+  <h1>Fournisseurs</h1>
+  <button type="button" class="primary" (click)="openCreate()">+ Nouveau fournisseur</button>
+</div>
+
+@if (error(); as e) {
+  <p class="error">{{ e }}</p>
+}
+
+@if (showForm()) {
+  <div class="panel">
+    <h2>{{ editingId() ? 'Modifier le fournisseur' : 'Nouveau fournisseur' }}</h2>
+    <form [formGroup]="form" (ngSubmit)="submit()">
+      <div class="grid">
+        <label>
+          Nom
+          <input type="text" formControlName="nom" />
+        </label>
+        <label>
+          Adresse
+          <input type="text" formControlName="adresse" />
+        </label>
+        <label>
+          Téléphone
+          <input type="text" formControlName="telephone" />
+        </label>
+        <label>
+          Email
+          <input type="email" formControlName="email" />
+        </label>
+        <label>
+          Contact
+          <input type="text" formControlName="contactPersonne" />
+        </label>
+      </div>
+      <div class="actions">
+        <button type="submit" class="primary">Enregistrer</button>
+        <button type="button" (click)="cancel()">Annuler</button>
+      </div>
+    </form>
+  </div>
+}
+
+@if (loading()) {
+  <p>Chargement…</p>
+} @else {
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Nom</th>
+        <th>Adresse</th>
+        <th>Téléphone</th>
+        <th>Email</th>
+        <th>Contact</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (f of fournisseurs(); track f.id) {
+        <tr>
+          <td>{{ f.nom }}</td>
+          <td>{{ f.adresse }}</td>
+          <td>{{ f.telephone }}</td>
+          <td>{{ f.email }}</td>
+          <td>{{ f.contact_personne }}</td>
+          <td class="row-actions">
+            <button type="button" (click)="openEdit(f)">Modifier</button>
+            <button type="button" class="danger" (click)="remove(f)">Supprimer</button>
+          </td>
+        </tr>
+      } @empty {
+        <tr>
+          <td colspan="6" class="empty">Aucun fournisseur.</td>
+        </tr>
+      }
+    </tbody>
+  </table>
+}

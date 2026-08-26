@@ -1,0 +1,78 @@
+<div class="header-row">
+  <h1>Partenaires</h1>
+  <button type="button" class="primary" (click)="openCreate()">+ Nouveau partenaire</button>
+</div>
+
+@if (error(); as e) {
+  <p class="error">{{ e }}</p>
+}
+
+@if (showForm()) {
+  <div class="panel">
+    <h2>{{ editingId() ? 'Modifier le partenaire' : 'Nouveau partenaire' }}</h2>
+    <form [formGroup]="form" (ngSubmit)="submit()">
+      <div class="grid">
+        <label>
+          Nom
+          <input type="text" formControlName="nom" />
+        </label>
+        <label>
+          Adresse
+          <input type="text" formControlName="adresse" />
+        </label>
+        <label>
+          Téléphone
+          <input type="text" formControlName="telephone" />
+        </label>
+        <label>
+          Email
+          <input type="email" formControlName="email" />
+        </label>
+        <label>
+          Type de partenariat
+          <input type="text" formControlName="typePartenariat" />
+        </label>
+      </div>
+      <div class="actions">
+        <button type="submit" class="primary">Enregistrer</button>
+        <button type="button" (click)="cancel()">Annuler</button>
+      </div>
+    </form>
+  </div>
+}
+
+@if (loading()) {
+  <p>Chargement…</p>
+} @else {
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Nom</th>
+        <th>Adresse</th>
+        <th>Téléphone</th>
+        <th>Email</th>
+        <th>Type</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (p of partenaires(); track p.id) {
+        <tr>
+          <td>{{ p.nom }}</td>
+          <td>{{ p.adresse }}</td>
+          <td>{{ p.telephone }}</td>
+          <td>{{ p.email }}</td>
+          <td>{{ p.type_partenariat }}</td>
+          <td class="row-actions">
+            <button type="button" (click)="openEdit(p)">Modifier</button>
+            <button type="button" class="danger" (click)="remove(p)">Supprimer</button>
+          </td>
+        </tr>
+      } @empty {
+        <tr>
+          <td colspan="6" class="empty">Aucun partenaire.</td>
+        </tr>
+      }
+    </tbody>
+  </table>
+}

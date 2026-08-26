@@ -1,0 +1,71 @@
+<div class="header-row">
+  <h1>Magasins</h1>
+  <button type="button" class="primary" (click)="openCreate()">+ Nouveau magasin</button>
+</div>
+
+@if (error(); as e) {
+  <p class="error">{{ e }}</p>
+}
+
+@if (showForm()) {
+  <div class="panel">
+    <h2>{{ editingId() ? 'Modifier le magasin' : 'Nouveau magasin' }}</h2>
+    <form [formGroup]="form" (ngSubmit)="submit()">
+      <div class="grid">
+        <label>
+          Nom
+          <input type="text" formControlName="nom" />
+        </label>
+        <label>
+          Localisation
+          <input type="text" formControlName="localisation" />
+        </label>
+        <label>
+          Responsable
+          <select formControlName="responsableId">
+            <option value="">— Aucun —</option>
+            @for (g of gestionnaires(); track g.id) {
+              <option [value]="g.id">{{ g.name }}</option>
+            }
+          </select>
+        </label>
+      </div>
+      <div class="actions">
+        <button type="submit" class="primary">Enregistrer</button>
+        <button type="button" (click)="cancel()">Annuler</button>
+      </div>
+    </form>
+  </div>
+}
+
+@if (loading()) {
+  <p>Chargement…</p>
+} @else {
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Nom</th>
+        <th>Localisation</th>
+        <th>Responsable</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (m of magasins(); track m.id) {
+        <tr>
+          <td>{{ m.nom }}</td>
+          <td>{{ m.localisation }}</td>
+          <td>{{ m.responsable || '—' }}</td>
+          <td class="row-actions">
+            <button type="button" (click)="openEdit(m)">Modifier</button>
+            <button type="button" class="danger" (click)="remove(m)">Supprimer</button>
+          </td>
+        </tr>
+      } @empty {
+        <tr>
+          <td colspan="4" class="empty">Aucun magasin.</td>
+        </tr>
+      }
+    </tbody>
+  </table>
+}

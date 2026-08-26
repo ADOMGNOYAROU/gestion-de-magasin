@@ -29,9 +29,14 @@ async function formatUser(id: string, data: UserDoc) {
   };
 }
 
-// Reprend UserController::index().
+// Reprend UserController::index(). Accessible dès gestionnaire (pas seulement
+// admin comme les mutations POST/PUT/DELETE ci-dessous) : contrairement à
+// UserController (API), l'écran boutiques du contrôleur web
+// (BoutiqueController::create/edit) interroge déjà tous les vendeurs sans
+// restriction par magasin pour peupler le champ "vendeur" — un gestionnaire a
+// donc toujours pu voir cette liste pour assigner un vendeur à une boutique.
 export const GET = withErrorHandling(async (request) => {
-  await authenticateWithRole(request, 'admin');
+  await authenticateWithRole(request, 'gestionnaire');
 
   const snapshot = await getDb().collection('users').orderBy('name').get();
   const users = await Promise.all(snapshot.docs.map((doc) => formatUser(doc.id, doc.data() as UserDoc)));
