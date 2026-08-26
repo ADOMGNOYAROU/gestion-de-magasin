@@ -1,0 +1,93 @@
+<div class="header-row">
+  <h1>Transferts</h1>
+  <button type="button" class="primary" (click)="openCreate()">+ Nouveau transfert</button>
+</div>
+
+@if (error(); as e) {
+  <p class="error">{{ e }}</p>
+}
+
+@if (showForm()) {
+  <div class="panel">
+    <h2>Nouveau transfert</h2>
+    <form [formGroup]="form" (ngSubmit)="submit()">
+      <div class="grid">
+        <label>
+          Produit
+          <select formControlName="produitId">
+            <option value="" disabled>— Choisir —</option>
+            @for (p of produits(); track p.id) {
+              <option [value]="p.id">{{ p.nom }}</option>
+            }
+          </select>
+        </label>
+        @if (isAdmin()) {
+          <label>
+            Magasin d'origine
+            <select formControlName="magasinId">
+              <option value="" disabled>— Choisir —</option>
+              @for (m of magasins(); track m.id) {
+                <option [value]="m.id">{{ m.nom }}</option>
+              }
+            </select>
+          </label>
+        }
+        <label>
+          Boutique de destination
+          <select formControlName="boutiqueId">
+            <option value="" disabled>— Choisir —</option>
+            @for (b of boutiques(); track b.id) {
+              <option [value]="b.id">{{ b.nom }}</option>
+            }
+          </select>
+        </label>
+        <label>
+          Quantité
+          <input type="number" formControlName="quantite" min="1" />
+        </label>
+        <label class="full">
+          Notes
+          <textarea formControlName="notes" rows="2"></textarea>
+        </label>
+      </div>
+      @if (stockDisponible(); as qte) {
+        <p class="hint">Stock disponible dans ce magasin : <strong>{{ qte }}</strong></p>
+      }
+      <div class="actions">
+        <button type="submit" class="primary">Enregistrer</button>
+        <button type="button" (click)="cancel()">Annuler</button>
+      </div>
+    </form>
+  </div>
+}
+
+@if (loading()) {
+  <p>Chargement…</p>
+} @else {
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>Produit</th>
+        <th>Magasin</th>
+        <th>Boutique</th>
+        <th class="right">Quantité</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (t of transferts(); track t.id) {
+        <tr>
+          <td>{{ t.date }}</td>
+          <td>{{ t.produit }}</td>
+          <td>{{ t.magasin }}</td>
+          <td>{{ t.boutique }}</td>
+          <td class="right">{{ t.quantite }}</td>
+        </tr>
+      } @empty {
+        <tr>
+          <td colspan="5" class="empty">Aucun transfert.</td>
+        </tr>
+      }
+    </tbody>
+  </table>
+}

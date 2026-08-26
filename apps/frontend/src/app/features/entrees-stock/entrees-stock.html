@@ -1,0 +1,113 @@
+<div class="header-row">
+  <h1>Entrées de stock</h1>
+  <button type="button" class="primary" (click)="openCreate()">+ Nouvelle entrée</button>
+</div>
+
+@if (error(); as e) {
+  <p class="error">{{ e }}</p>
+}
+
+@if (showForm()) {
+  <div class="panel">
+    <h2>Nouvelle entrée de stock</h2>
+    <form [formGroup]="form" (ngSubmit)="submit()">
+      <div class="grid">
+        <label>
+          Produit
+          <select formControlName="produitId">
+            <option value="" disabled>— Choisir —</option>
+            @for (p of produits(); track p.id) {
+              <option [value]="p.id">{{ p.nom }}</option>
+            }
+          </select>
+        </label>
+        @if (isAdmin()) {
+          <label>
+            Magasin
+            <select formControlName="magasinId">
+              <option value="" disabled>— Choisir —</option>
+              @for (m of magasins(); track m.id) {
+                <option [value]="m.id">{{ m.nom }}</option>
+              }
+            </select>
+          </label>
+        }
+        <label>
+          Fournisseur
+          <select formControlName="fournisseurId">
+            <option value="">— Aucun —</option>
+            @for (f of fournisseurs(); track f.id) {
+              <option [value]="f.id">{{ f.nom }}</option>
+            }
+          </select>
+        </label>
+        <label>
+          Partenaire
+          <select formControlName="partenaireId">
+            <option value="">— Aucun —</option>
+            @for (p of partenaires(); track p.id) {
+              <option [value]="p.id">{{ p.nom }}</option>
+            }
+          </select>
+        </label>
+        <label>
+          Quantité
+          <input type="number" formControlName="quantite" min="1" />
+        </label>
+        <label>
+          Prix unitaire
+          <input type="number" formControlName="prixUnitaire" min="0" />
+        </label>
+        <label>
+          Numéro de bon
+          <input type="text" formControlName="numeroBon" />
+        </label>
+        <label class="full">
+          Notes
+          <textarea formControlName="notes" rows="2"></textarea>
+        </label>
+      </div>
+      <div class="actions">
+        <button type="submit" class="primary">Enregistrer</button>
+        <button type="button" (click)="cancel()">Annuler</button>
+      </div>
+    </form>
+  </div>
+}
+
+@if (loading()) {
+  <p>Chargement…</p>
+} @else {
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>Produit</th>
+        <th>Magasin</th>
+        <th>Fournisseur</th>
+        <th>Partenaire</th>
+        <th class="right">Quantité</th>
+        <th class="right">Prix unitaire</th>
+        <th class="right">Total</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (e of entrees(); track e.id) {
+        <tr>
+          <td>{{ e.date_entree }}</td>
+          <td>{{ e.produit }}</td>
+          <td>{{ e.magasin }}</td>
+          <td>{{ e.fournisseur || '—' }}</td>
+          <td>{{ e.partenaire || '—' }}</td>
+          <td class="right">{{ e.quantite }}</td>
+          <td class="right">{{ e.prix_unitaire | number: '1.0-0' }} FCFA</td>
+          <td class="right">{{ e.montant_total | number: '1.0-0' }} FCFA</td>
+        </tr>
+      } @empty {
+        <tr>
+          <td colspan="8" class="empty">Aucune entrée de stock.</td>
+        </tr>
+      }
+    </tbody>
+  </table>
+}

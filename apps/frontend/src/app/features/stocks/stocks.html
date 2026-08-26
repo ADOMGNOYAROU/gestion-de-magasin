@@ -1,0 +1,49 @@
+<h1>Stocks</h1>
+
+@if (error(); as e) {
+  <p class="error">{{ e }}</p>
+}
+
+<div class="tabs">
+  <button type="button" [class.active]="onglet() === 'magasins'" (click)="onglet.set('magasins')">Magasins</button>
+  <button type="button" [class.active]="onglet() === 'boutiques'" (click)="onglet.set('boutiques')">Boutiques</button>
+</div>
+
+@if (loading()) {
+  <p>Chargement…</p>
+} @else {
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Produit</th>
+        <th>Site</th>
+        <th class="right">Quantité</th>
+        <th class="right">Seuil d'alerte</th>
+        <th>Statut</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (s of current(); track s.id) {
+        <tr>
+          <td>{{ s.produit_nom }}</td>
+          <td>{{ s.site_nom }}</td>
+          <td class="right">{{ s.quantite }}</td>
+          <td class="right">{{ s.seuil_alerte }}</td>
+          <td>
+            @if (s.quantite === 0) {
+              <span class="badge danger">Rupture</span>
+            } @else if (s.en_alerte) {
+              <span class="badge warning">Alerte</span>
+            } @else {
+              <span class="badge">OK</span>
+            }
+          </td>
+        </tr>
+      } @empty {
+        <tr>
+          <td colspan="5" class="empty">Aucun stock.</td>
+        </tr>
+      }
+    </tbody>
+  </table>
+}
