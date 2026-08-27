@@ -1,0 +1,29 @@
+<div class="header-row">
+  <div>
+    <span class="eyebrow">Rôle · {{ roleLabel() }}</span>
+    <h1>{{ guide().title }}</h1>
+  </div>
+</div>
+
+<p class="intro">{{ guide().intro }}</p>
+
+<div class="nav-scope">
+  <span class="nav-scope-label">Vos écrans{{ roleLabel() === 'Vendeur' ? '' : ' en plus du tableau de bord, du POS et des ventes' }} :</span>
+  <div class="chips">
+    @for (item of guide().navScope; track item) {
+      <span class="chip">{{ item }}</span>
+    }
+  </div>
+</div>
+
+<div class="tasks">
+  @for (task of guide().tasks; track task.title; let i = $index) {
+    <div class="task">
+      <span class="task-num">{{ i + 1 }}</span>
+      <div class="task-content">
+        <h2>{{ task.title }}</h2>
+        <p>{{ task.body }}</p>
+      </div>
+    </div>
+  }
+</div>

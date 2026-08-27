@@ -32,6 +32,7 @@ const ICONS: Record<string, string> = {
   rapports: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h9l3 3v17H6Z"/><path d="M9 17v-3M12.5 17v-6M16 17v-2"/></svg>`,
   magasins: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18"/><path d="M9 21v-5h6v5"/><rect x="8" y="7" width="2" height="2"/><rect x="14" y="7" width="2" height="2"/><rect x="8" y="12" width="2" height="2"/><rect x="14" y="12" width="2" height="2"/></svg>`,
   utilisateurs: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><circle cx="18" cy="9" r="2.2"/><path d="M15.5 14a5 5 0 0 1 5 5"/></svg>`,
+  aide: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.3 9a2.7 2.7 0 0 1 5.2.9c0 1.6-2.2 2.1-2.2 3.6"/><path d="M12 17h.01"/></svg>`,
 };
 
 const LOGO_MARK = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9 4 4h16l1 5"/><path d="M4 9v10.5A1.5 1.5 0 0 0 5.5 21h13a1.5 1.5 0 0 0 1.5-1.5V9"/><path d="M9 21v-6h6v6"/></svg>`;
@@ -72,6 +73,10 @@ const NAV_GROUPS: NavGroup[] = [
       { label: 'Magasins', path: '/magasins', minRole: 'admin', icon: ICONS['magasins'] },
       { label: 'Utilisateurs', path: '/utilisateurs', minRole: 'admin', icon: ICONS['utilisateurs'] },
     ],
+  },
+  {
+    label: null,
+    items: [{ label: 'Aide', path: '/aide', minRole: 'vendeur', icon: ICONS['aide'] }],
   },
 ];
 
