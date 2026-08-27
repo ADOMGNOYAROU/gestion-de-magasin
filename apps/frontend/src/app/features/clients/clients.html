@@ -1,0 +1,80 @@
+<div class="header-row">
+  <h1>Clients</h1>
+  <button type="button" class="primary" (click)="openCreate()">+ Nouveau client</button>
+</div>
+
+@if (error(); as e) {
+  <p class="error">{{ e }}</p>
+}
+
+@if (showForm()) {
+  <div class="panel">
+    <h2>{{ editingId() ? 'Modifier le client' : 'Nouveau client' }}</h2>
+    <form [formGroup]="form" (ngSubmit)="submit()">
+      <div class="grid">
+        <label>
+          Nom
+          <input type="text" formControlName="nom" />
+        </label>
+        <label>
+          Prénom
+          <input type="text" formControlName="prenom" />
+        </label>
+        <label>
+          Téléphone
+          <input type="text" formControlName="telephone" />
+        </label>
+        <label>
+          Email
+          <input type="email" formControlName="email" />
+        </label>
+        <label class="full">
+          Adresse
+          <input type="text" formControlName="adresse" />
+        </label>
+      </div>
+      <div class="actions">
+        <button type="submit" class="primary">Enregistrer</button>
+        <button type="button" (click)="cancel()">Annuler</button>
+      </div>
+    </form>
+  </div>
+}
+
+<input class="search" type="text" placeholder="Rechercher un client…" [value]="search()" (input)="search.set($any($event.target).value)" />
+
+@if (loading()) {
+  <p>Chargement…</p>
+} @else {
+  <div class="table-wrap">
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Nom</th>
+        <th>Prénom</th>
+        <th>Téléphone</th>
+        <th>Email</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (c of filtered(); track c.id) {
+        <tr>
+          <td>{{ c.nom }}</td>
+          <td>{{ c.prenom || '—' }}</td>
+          <td>{{ c.telephone || '—' }}</td>
+          <td>{{ c.email || '—' }}</td>
+          <td class="row-actions">
+            <button type="button" (click)="openEdit(c)">Modifier</button>
+            <button type="button" class="danger" (click)="remove(c)">Supprimer</button>
+          </td>
+        </tr>
+      } @empty {
+        <tr>
+          <td colspan="5" class="empty">Aucun client.</td>
+        </tr>
+      }
+    </tbody>
+  </table>
+  </div>
+}

@@ -66,6 +66,21 @@ export const routes: Routes = [
         canActivate: [roleGuard('vendeur')],
       },
       {
+        path: 'clients',
+        loadComponent: () => import('./features/clients/clients').then((m) => m.Clients),
+        canActivate: [roleGuard('vendeur')],
+      },
+      {
+        path: 'credits',
+        loadComponent: () => import('./features/credits/credits').then((m) => m.Credits),
+        canActivate: [roleGuard('vendeur')],
+      },
+      {
+        path: 'commandes',
+        loadComponent: () => import('./features/commandes/commandes').then((m) => m.Commandes),
+        canActivate: [roleGuard('gestionnaire')],
+      },
+      {
         path: 'rapports',
         loadComponent: () => import('./features/rapports/rapports').then((m) => m.Rapports),
         canActivate: [roleGuard('gestionnaire')],

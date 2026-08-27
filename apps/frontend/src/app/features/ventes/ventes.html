@@ -15,6 +15,7 @@
         <th>Date</th>
         <th>Boutique</th>
         <th>Paiement</th>
+        <th>Client</th>
         <th class="right">Total</th>
         <th>Statut</th>
       </tr>
@@ -25,13 +26,21 @@
           <td>{{ v.numero_ticket }}</td>
           <td>{{ v.date_vente }}</td>
           <td>{{ v.boutique }}</td>
-          <td>{{ v.mode_paiement }}</td>
+          <td>
+            {{ v.mode_paiement }}
+            @if (v.payment_type === 'credit') {
+              <span class="badge warning">Crédit</span>
+            } @else if (v.payment_type === 'mixed') {
+              <span class="badge warning">Mixte</span>
+            }
+          </td>
+          <td>{{ v.client || '—' }}</td>
           <td class="right">{{ v.montant_total | number: '1.0-0' }} FCFA</td>
           <td>{{ v.status }}</td>
         </tr>
         @if (expanded() === v.id) {
           <tr>
-            <td colspan="6">
+            <td colspan="7">
               <table class="data-table nested">
                 <thead>
                   <tr>
@@ -59,7 +68,7 @@
         }
       } @empty {
         <tr>
-          <td colspan="6" class="empty">Aucune vente.</td>
+          <td colspan="7" class="empty">Aucune vente.</td>
         </tr>
       }
     </tbody>

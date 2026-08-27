@@ -108,14 +108,37 @@
           </select>
         </label>
         <label>
-          Montant reçu
-          <input type="number" min="0" [ngModel]="montantRecu()" (ngModelChange)="montantRecu.set($event)" />
+          Type de paiement
+          <select [ngModel]="paymentType()" (ngModelChange)="paymentType.set($event)">
+            <option value="immediate">Immédiat</option>
+            <option value="credit">Crédit</option>
+            <option value="mixed">Mixte (acompte)</option>
+          </select>
         </label>
+
+        @if (paymentType() !== 'immediate') {
+          <label>
+            Client
+            <select [ngModel]="clientId()" (ngModelChange)="clientId.set($event)">
+              <option value="" disabled>— Choisir —</option>
+              @for (c of clients(); track c.id) {
+                <option [value]="c.id">{{ c.nom }} {{ c.prenom }}</option>
+              }
+            </select>
+          </label>
+        }
+
+        @if (paymentType() !== 'credit') {
+          <label>
+            Montant reçu
+            <input type="number" min="0" [ngModel]="montantRecu()" (ngModelChange)="montantRecu.set($event)" />
+          </label>
+        }
 
         <button
           type="button"
           class="primary encaisser"
-          [disabled]="submitting() || !paymentMethodId()"
+          [disabled]="submitting() || !paymentMethodId() || (paymentType() !== 'immediate' && !clientId())"
           (click)="encaisser()"
         >
           Encaisser

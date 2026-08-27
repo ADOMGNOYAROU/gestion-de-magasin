@@ -27,6 +27,12 @@ interface PaymentMethod {
   code: string;
 }
 
+interface Client {
+  id: string;
+  nom: string;
+  prenom: string | null;
+}
+
 interface CartLine {
   produit: Produit;
   quantite: number;
@@ -57,10 +63,13 @@ export class Pos {
 
   protected readonly produits = signal<Produit[]>([]);
   protected readonly paymentMethods = signal<PaymentMethod[]>([]);
+  protected readonly clients = signal<Client[]>([]);
   protected readonly search = signal('');
   protected readonly cart = signal<CartLine[]>([]);
   protected readonly paymentMethodId = signal('');
   protected readonly montantRecu = signal(0);
+  protected readonly paymentType = signal<'immediate' | 'credit' | 'mixed'>('immediate');
+  protected readonly clientId = signal('');
 
   protected readonly error = signal<string | null>(null);
   protected readonly dernierTicket = signal<VenteResult | null>(null);
@@ -85,6 +94,7 @@ export class Pos {
     this.http
       .get<PaymentMethod[]>(`${API}/api/payment-methods`)
       .subscribe({ next: (res) => this.paymentMethods.set(res) });
+    this.http.get<Client[]>(`${API}/api/clients`).subscribe({ next: (res) => this.clients.set(res) });
   }
 
   private refreshSession(): void {
@@ -148,10 +158,16 @@ export class Pos {
 
   protected encaisser(): void {
     if (this.cart().length === 0 || !this.paymentMethodId()) return;
+    if (this.paymentType() !== 'immediate' && !this.clientId()) {
+      this.error.set('Un client est requis pour une vente à crédit ou mixte.');
+      return;
+    }
 
     const payload = {
       paymentMethodId: this.paymentMethodId(),
-      montantRecu: this.montantRecu(),
+      montantRecu: this.paymentType() === 'credit' ? 0 : this.montantRecu(),
+      paymentType: this.paymentType(),
+      clientId: this.clientId() || null,
       lignes: this.cart().map((l) => ({ produitId: l.produit.id, quantite: l.quantite, remise: l.remise })),
     };
 
@@ -162,6 +178,8 @@ export class Pos {
         this.dernierTicket.set(res);
         this.cart.set([]);
         this.montantRecu.set(0);
+        this.paymentType.set('immediate');
+        this.clientId.set('');
         this.submitting.set(false);
         this.refreshSession();
       },

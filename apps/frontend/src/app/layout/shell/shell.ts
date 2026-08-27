@@ -33,6 +33,9 @@ const ICONS: Record<string, string> = {
   magasins: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18"/><path d="M9 21v-5h6v5"/><rect x="8" y="7" width="2" height="2"/><rect x="14" y="7" width="2" height="2"/><rect x="8" y="12" width="2" height="2"/><rect x="14" y="12" width="2" height="2"/></svg>`,
   utilisateurs: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><circle cx="18" cy="9" r="2.2"/><path d="M15.5 14a5 5 0 0 1 5 5"/></svg>`,
   aide: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.3 9a2.7 2.7 0 0 1 5.2.9c0 1.6-2.2 2.1-2.2 3.6"/><path d="M12 17h.01"/></svg>`,
+  clients: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg>`,
+  credits: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/><line x1="6" y1="15" x2="10" y2="15"/></svg>`,
+  commandes: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h2l1.6 12.4a2 2 0 0 0 2 1.6h8a2 2 0 0 0 2-1.6L21 8H7"/><circle cx="10" cy="21" r="1.3"/><circle cx="18" cy="21" r="1.3"/><path d="M9 11h8"/></svg>`,
 };
 
 const LOGO_MARK = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9 4 4h16l1 5"/><path d="M4 9v10.5A1.5 1.5 0 0 0 5.5 21h13a1.5 1.5 0 0 0 1.5-1.5V9"/><path d="M9 21v-6h6v6"/></svg>`;
@@ -44,6 +47,8 @@ const NAV_GROUPS: NavGroup[] = [
     items: [
       { label: 'POS (Caisse)', path: '/pos', minRole: 'vendeur', icon: ICONS['pos'] },
       { label: 'Ventes', path: '/ventes', minRole: 'vendeur', icon: ICONS['ventes'] },
+      { label: 'Clients', path: '/clients', minRole: 'vendeur', icon: ICONS['clients'] },
+      { label: 'Crédits clients', path: '/credits', minRole: 'vendeur', icon: ICONS['credits'] },
     ],
   },
   {
@@ -61,6 +66,7 @@ const NAV_GROUPS: NavGroup[] = [
       { label: 'Boutiques', path: '/boutiques', minRole: 'gestionnaire', icon: ICONS['boutiques'] },
       { label: 'Fournisseurs', path: '/fournisseurs', minRole: 'gestionnaire', icon: ICONS['fournisseurs'] },
       { label: 'Partenaires', path: '/partenaires', minRole: 'gestionnaire', icon: ICONS['partenaires'] },
+      { label: 'Commandes fournisseurs', path: '/commandes', minRole: 'gestionnaire', icon: ICONS['commandes'] },
     ],
   },
   {

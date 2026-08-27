@@ -1,0 +1,30 @@
+.ligne-form {
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+  margin-bottom: 1rem;
+
+  select,
+  input {
+    font: inherit;
+    font-size: 0.9rem;
+    padding: 0.5rem 0.65rem;
+    border: 1px solid #d1d5db;
+    border-radius: 7px;
+  }
+
+  input[type='number'] {
+    width: 110px;
+  }
+}
+
+.lignes-table {
+  margin-bottom: 0.5rem;
+}
+
+.total-lignes {
+  text-align: right;
+  font-weight: 700;
+  color: #2e3a4b;
+  margin: 0.5rem 0 0;
+}

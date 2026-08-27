@@ -1,0 +1,47 @@
+.clickable {
+  cursor: pointer;
+
+  &:hover {
+    background: #f9fafb;
+  }
+}
+
+.detail-panel {
+  padding: 1rem 0.5rem;
+}
+
+.nested {
+  box-shadow: none;
+  margin: 0 0 1rem;
+}
+
+.payment-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 0.75rem;
+  align-items: end;
+  max-width: 560px;
+
+  label {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    font-size: 0.8rem;
+    color: #4b5563;
+
+    &.full {
+      grid-column: 1 / -1;
+    }
+  }
+
+  input {
+    font: inherit;
+    padding: 0.45rem 0.6rem;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+  }
+
+  button {
+    grid-column: 1 / -1;
+  }
+}

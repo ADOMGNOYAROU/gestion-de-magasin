@@ -1,0 +1,99 @@
+<h1>Crédits clients</h1>
+
+@if (error(); as e) {
+  <p class="error">{{ e }}</p>
+}
+
+@if (loading()) {
+  <p>Chargement…</p>
+} @else {
+  <div class="table-wrap">
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Client</th>
+        <th>Boutique</th>
+        <th>Ticket</th>
+        <th class="right">Total</th>
+        <th class="right">Solde restant</th>
+        <th>Statut</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (c of credits(); track c.id) {
+        <tr class="clickable" (click)="toggle(c)">
+          <td>{{ c.client }}</td>
+          <td>{{ c.boutique }}</td>
+          <td>{{ c.numero_ticket }}</td>
+          <td class="right">{{ c.total_amount }} FCFA</td>
+          <td class="right">{{ c.remaining_balance }} FCFA</td>
+          <td>
+            @if (c.status === 'paid') {
+              <span class="badge">Soldé</span>
+            } @else {
+              <span class="badge warning">En cours</span>
+            }
+          </td>
+        </tr>
+        @if (expandedId() === c.id) {
+          <tr>
+            <td colspan="6">
+              @if (detailLoading()) {
+                <p>Chargement du détail…</p>
+              } @else if (detail(); as d) {
+                <div class="detail-panel">
+                  <h2>Historique des paiements</h2>
+                  @if (d.paiements.length === 0) {
+                    <p class="empty">Aucun paiement enregistré.</p>
+                  } @else {
+                    <table class="data-table nested">
+                      <thead>
+                        <tr>
+                          <th>Date</th>
+                          <th class="right">Montant</th>
+                          <th>Notes</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        @for (p of d.paiements; track p.id) {
+                          <tr>
+                            <td>{{ p.payment_date }}</td>
+                            <td class="right">{{ p.amount }} FCFA</td>
+                            <td>{{ p.notes || '—' }}</td>
+                          </tr>
+                        }
+                      </tbody>
+                    </table>
+                  }
+
+                  @if (d.status !== 'paid') {
+                    <form [formGroup]="paymentForm" (ngSubmit)="ajouterPaiement(c); $event.stopPropagation()" (click)="$event.stopPropagation()" class="payment-form">
+                      <label>
+                        Montant
+                        <input type="number" formControlName="amount" min="0.01" [attr.max]="d.remaining_balance" />
+                      </label>
+                      <label>
+                        Date
+                        <input type="date" formControlName="paymentDate" />
+                      </label>
+                      <label class="full">
+                        Notes
+                        <input type="text" formControlName="notes" />
+                      </label>
+                      <button type="submit" class="primary">Enregistrer le paiement</button>
+                    </form>
+                  }
+                </div>
+              }
+            </td>
+          </tr>
+        }
+      } @empty {
+        <tr>
+          <td colspan="6" class="empty">Aucun crédit.</td>
+        </tr>
+      }
+    </tbody>
+  </table>
+  </div>
+}

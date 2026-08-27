@@ -11,6 +11,8 @@ interface VenteDoc {
   userId: string;
   sessionCaisseId: string | null;
   paymentMethodId: string;
+  paymentType: 'immediate' | 'credit' | 'mixed';
+  clientId: string | null;
   montantTotal: number;
   montantRecu: number;
   monnaie: number;
@@ -34,6 +36,15 @@ interface ProduitDoc {
   prixVente: number;
 }
 
+interface CreditDoc {
+  venteId: string;
+  clientId: string;
+  totalAmount: number;
+  remainingBalance: number;
+  status: 'active' | 'paid';
+  createdAt: string;
+}
+
 // Reprend VenteController::index() : 50 dernières ventes, restreintes à sa propre
 // boutique pour un vendeur (les gestionnaires/admins voient tout).
 export const GET = withErrorHandling(async (request) => {
@@ -54,9 +65,10 @@ export const GET = withErrorHandling(async (request) => {
   const ventes = await Promise.all(
     snapshot.docs.map(async (doc) => {
       const data = doc.data() as VenteDoc;
-      const [boutiqueNom, modePaiement, lignesSnapshot] = await Promise.all([
+      const [boutiqueNom, modePaiement, clientNom, lignesSnapshot] = await Promise.all([
         resolveField('boutiques', data.boutiqueId, 'nom'),
         resolveField('paymentMethods', data.paymentMethodId, 'name'),
+        resolveField('clients', data.clientId, 'nom'),
         doc.ref.collection('produits').get(),
       ]);
 
@@ -78,6 +90,8 @@ export const GET = withErrorHandling(async (request) => {
         id: doc.id,
         numero_ticket: data.numeroTicket,
         boutique: boutiqueNom,
+        client: clientNom,
+        payment_type: data.paymentType ?? 'immediate',
         montant_total: data.montantTotal,
         montant_recu: data.montantRecu,
         monnaie: data.monnaie,
@@ -100,17 +114,20 @@ function generateTicketPrefix(): string {
   return `TKT-${y}${m}${d}-`;
 }
 
-// Reprend VenteController::store() : le checkout POS. Vérifie/décrémente le stock
-// boutique et met à jour le montant théorique de la session de caisse dans une
-// seule transaction Firestore.
+// Reprend VenteController::store() : le checkout POS, plus le paiement à
+// crédit/mixte (centro : VenteController web + CreditController).
 //
-// Reproduit fidèlement un comportement du code Laravel actuel qui peut surprendre :
-// si aucune ligne de stock n'existe pour un produit dans cette boutique, la vente
-// passe quand même (aucune vérification de disponibilité au checkout, contrairement
-// aux transferts). Ce n'est pas un bug introduit ici — TransfertController valide le
-// stock, VenteController ne le fait pas. À reconsidérer si ce comportement n'est pas
-// voulu, mais migrer à l'identique d'abord plutôt que de changer la logique métier
-// sans validation explicite.
+// Le stock n'est décrémenté qu'à hauteur de la fraction réellement payée
+// (100% en immédiat, 0% en crédit pur, proportionnel en mixte) — la
+// marchandise est considérée "réservée" tant qu'elle n'est pas payée, et se
+// décrémente au fil des paiements de crédit (voir POST /api/credits/[id]/paiements).
+// C'est une réconciliation délibérée de deux comportements incohérents
+// trouvés dans centro : son VenteController web décrémente 100% du stock à la
+// vente ET son CreditController décrémente à nouveau proportionnellement à
+// chaque paiement, ce qui double-compte pour toute vente à crédit ou mixte.
+//
+// Reproduit fidèlement un comportement existant : aucune vérification de
+// disponibilité de stock au checkout (contrairement aux transferts).
 export const POST = withErrorHandling(async (request) => {
   const authUser = await authenticateWithRole(request, 'vendeur');
   const body = venteSchema.parse(await request.json());
@@ -123,6 +140,7 @@ export const POST = withErrorHandling(async (request) => {
   const db = getDb();
   const boutiqueRef = db.collection('boutiques').doc(boutiqueId);
   const venteRef = db.collection('ventes').doc();
+  const creditRef = db.collection('credits').doc();
   const ticketPrefix = generateTicketPrefix();
 
   const result = await db.runTransaction(async (tx) => {
@@ -132,6 +150,12 @@ export const POST = withErrorHandling(async (request) => {
       throw new ApiError(422, 'Boutique introuvable.');
     }
     const magasinId = (boutiqueSnap.data() as { magasinId: string | null }).magasinId ?? null;
+
+    const clientRef = body.clientId ? db.collection('clients').doc(body.clientId) : null;
+    const clientSnap = clientRef ? await tx.get(clientRef) : null;
+    if (clientRef && !clientSnap?.exists) {
+      throw new ApiError(422, 'Client introuvable.');
+    }
 
     const openSessionSnap = await tx.get(
       db
@@ -155,7 +179,7 @@ export const POST = withErrorHandling(async (request) => {
       db
         .collection('ventes')
         .where('numeroTicket', '>=', ticketPrefix)
-        .where('numeroTicket', '<', ticketPrefix + '')
+        .where('numeroTicket', '<', ticketPrefix + '')
         .orderBy('numeroTicket', 'desc')
         .limit(1),
     );
@@ -184,7 +208,14 @@ export const POST = withErrorHandling(async (request) => {
       return { produitId: ligne.produitId, quantite: ligne.quantite, prixUnitaire, remise, remisePourcentage, sousTotal };
     });
 
-    const monnaie = body.montantRecu - montantTotal;
+    if (body.paymentType === 'mixed' && body.montantRecu > montantTotal) {
+      throw new ApiError(422, 'Le montant reçu ne peut pas dépasser le total de la vente.');
+    }
+
+    const montantRecu = body.paymentType === 'credit' ? 0 : body.montantRecu;
+    const monnaie = body.paymentType === 'immediate' ? montantRecu - montantTotal : 0;
+
+    const fractionPayee = body.paymentType === 'immediate' ? 1 : body.paymentType === 'credit' ? 0 : montantTotal > 0 ? montantRecu / montantTotal : 0;
 
     // --- Écritures ---
     const vente: VenteDoc = {
@@ -192,8 +223,10 @@ export const POST = withErrorHandling(async (request) => {
       userId: authUser.uid,
       sessionCaisseId: sessionDoc?.id ?? null,
       paymentMethodId: body.paymentMethodId,
+      paymentType: body.paymentType,
+      clientId: body.clientId ?? null,
       montantTotal,
-      montantRecu: body.montantRecu,
+      montantRecu,
       monnaie,
       numeroTicket,
       status: 'terminee',
@@ -206,6 +239,20 @@ export const POST = withErrorHandling(async (request) => {
       tx.set(venteRef.collection('produits').doc(), ligne as VenteLigneDoc);
     });
 
+    let creditCree = false;
+    if (body.paymentType === 'credit' || (body.paymentType === 'mixed' && montantRecu < montantTotal)) {
+      const credit: CreditDoc = {
+        venteId: venteRef.id,
+        clientId: body.clientId!,
+        totalAmount: montantTotal,
+        remainingBalance: montantTotal - montantRecu,
+        status: 'active',
+        createdAt: new Date().toISOString(),
+      };
+      tx.set(creditRef, credit);
+      creditCree = true;
+    }
+
     const alertesAVerifier: {
       produitId: string;
       produitNom: string;
@@ -214,8 +261,10 @@ export const POST = withErrorHandling(async (request) => {
     }[] = [];
     stockSnaps.forEach((stockSnap, i) => {
       if (stockSnap.exists) {
+        const decrement = Math.round(fractionPayee * body.lignes[i].quantite);
+        if (decrement <= 0) return;
         const stock = stockSnap.data() as { quantite: number; seuilAlerte: number };
-        tx.update(stockRefs[i], { quantite: stock.quantite - body.lignes[i].quantite });
+        tx.update(stockRefs[i], { quantite: stock.quantite - decrement });
         alertesAVerifier.push({
           produitId: body.lignes[i].produitId,
           produitNom: (produitSnaps[i].data() as ProduitDoc).nom,
@@ -231,18 +280,29 @@ export const POST = withErrorHandling(async (request) => {
         (sum, d) => sum + ((d.data() as VenteDoc).montantTotal ?? 0),
         0,
       );
-      const montantTheorique = session.montantInitial + totalVentesExistantes + montantTotal;
+      // Le montant théorique en caisse ne doit refléter que l'argent réellement encaissé.
+      const montantTheorique = session.montantInitial + totalVentesExistantes + montantRecu;
       tx.update(sessionDoc.ref, { montantTheorique });
     }
 
-    return { id: venteRef.id, numero_ticket: numeroTicket, montant_total: montantTotal, monnaie, magasinId, alertesAVerifier };
+    return {
+      id: venteRef.id,
+      numero_ticket: numeroTicket,
+      montant_total: montantTotal,
+      monnaie,
+      credit_id: creditCree ? creditRef.id : null,
+      magasinId,
+      alertesAVerifier,
+      fractionPayee,
+    };
   });
 
   // Best-effort : ne doit jamais faire échouer une vente déjà validée.
   try {
     const boutiqueNom = (await resolveField('boutiques', boutiqueId, 'nom')) ?? boutiqueId;
     for (const ligne of result.alertesAVerifier) {
-      const quantiteVendue = body.lignes.find((l) => l.produitId === ligne.produitId)?.quantite ?? 0;
+      const ligneOriginale = body.lignes.find((l) => l.produitId === ligne.produitId);
+      const quantiteVendue = Math.round(result.fractionPayee * (ligneOriginale?.quantite ?? 0));
       await notifyIfNewlyCritical({
         produitId: ligne.produitId,
         produitNom: ligne.produitNom,
@@ -257,6 +317,6 @@ export const POST = withErrorHandling(async (request) => {
     console.error('notifyIfNewlyCritical a échoué (vente déjà validée, non bloquant) :', error);
   }
 
-  const { magasinId: _magasinId, alertesAVerifier: _alertes, ...response } = result;
+  const { magasinId: _magasinId, alertesAVerifier: _alertes, fractionPayee: _fraction, ...response } = result;
   return Response.json(response, { status: 201 });
 });

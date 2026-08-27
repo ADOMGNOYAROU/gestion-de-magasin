@@ -22,6 +22,9 @@ interface Vente {
   status: string;
   date_vente: string;
   lignes: VenteLigne[];
+  payment_type: 'immediate' | 'credit' | 'mixed' | null;
+  client: string | null;
+  credit_id: string | null;
 }
 
 @Component({
