@@ -298,6 +298,33 @@ button {
   border: 1px solid var(--border-soft);
 }
 
+.empty-state {
+  text-align: center;
+  padding: 3.5rem 1.5rem;
+  background: var(--surface);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  color: var(--ink-faint);
+
+  svg {
+    width: 40px;
+    height: 40px;
+    margin-bottom: 0.75rem;
+    color: var(--ink-faint);
+  }
+
+  h2 {
+    margin: 0 0 0.4rem;
+    color: var(--ink);
+  }
+
+  p {
+    margin: 0 0 1.25rem;
+    font-size: 0.9rem;
+  }
+}
+
 .badge {
   display: inline-flex;
   align-items: center;

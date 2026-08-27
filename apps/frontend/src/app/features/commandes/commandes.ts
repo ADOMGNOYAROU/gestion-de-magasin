@@ -1,6 +1,6 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { environment } from '../../../environments/environment';
 import { AuthService } from '../../core/auth.service';
 
@@ -30,7 +30,7 @@ const API = `${environment.apiBaseUrl}/api/orders`;
 
 @Component({
   selector: 'app-commandes',
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, FormsModule],
   templateUrl: './commandes.html',
   styleUrl: './commandes.scss',
 })
@@ -49,6 +49,8 @@ export class Commandes {
   protected readonly error = signal<string | null>(null);
   protected readonly showForm = signal(false);
   protected readonly lignes = signal<Ligne[]>([]);
+  protected readonly search = signal('');
+  protected readonly statusFilter = signal('');
 
   protected readonly form = this.fb.nonNullable.group({
     fournisseurId: ['', Validators.required],
@@ -78,9 +80,12 @@ export class Commandes {
     }
   }
 
-  private load(): void {
+  protected load(): void {
     this.loading.set(true);
-    this.http.get<Order[]>(API).subscribe({
+    let params = new HttpParams();
+    if (this.search().trim()) params = params.set('search', this.search().trim());
+    if (this.statusFilter()) params = params.set('status', this.statusFilter());
+    this.http.get<Order[]>(API, { params }).subscribe({
       next: (res) => {
         this.orders.set(res);
         this.loading.set(false);
@@ -90,6 +95,12 @@ export class Commandes {
         this.loading.set(false);
       },
     });
+  }
+
+  protected resetFiltres(): void {
+    this.search.set('');
+    this.statusFilter.set('');
+    this.load();
   }
 
   protected openCreate(): void {

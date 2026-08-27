@@ -1,3 +1,24 @@
+.filters-row {
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+  margin-bottom: 1.25rem;
+  flex-wrap: wrap;
+
+  .search {
+    margin-bottom: 0;
+    flex: 1 1 240px;
+  }
+
+  select {
+    font: inherit;
+    font-size: 0.9rem;
+    padding: 0.55rem 0.7rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+  }
+}
+
 .ligne-form {
   display: flex;
   gap: 0.6rem;
