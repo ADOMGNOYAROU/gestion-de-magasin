@@ -28,8 +28,11 @@ function formatProduit(id: string, data: ProduitDoc) {
   };
 }
 
+// Lecture ouverte dès le rôle vendeur : le POS a besoin du catalogue pour
+// encaisser, contrairement à la gestion du catalogue (POST/PUT/DELETE) qui
+// reste réservée à gestionnaire+ (cf. routes/web.php: gestionnaire middleware).
 export const GET = withErrorHandling(async (request) => {
-  await authenticateWithRole(request, 'gestionnaire');
+  await authenticateWithRole(request, 'vendeur');
 
   const { searchParams } = new URL(request.url);
   const withTrashed = searchParams.get('with_trashed') === 'true' || searchParams.get('with_trashed') === '1';
