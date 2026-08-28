@@ -1,4 +1,4 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { AuthService, hasRole } from '../../core/auth.service';
@@ -39,6 +39,13 @@ const ICONS: Record<string, string> = {
 };
 
 const LOGO_MARK = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9 4 4h16l1 5"/><path d="M4 9v10.5A1.5 1.5 0 0 0 5.5 21h13a1.5 1.5 0 0 0 1.5-1.5V9"/><path d="M9 21v-6h6v6"/></svg>`;
+const CHEVRON = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>`;
+
+const ROLE_BADGE_CLASS: Record<string, string> = {
+  admin: 'danger',
+  gestionnaire: 'info',
+  vendeur: 'success',
+};
 
 const NAV_GROUPS: NavGroup[] = [
   { label: null, items: [{ label: 'Tableau de bord', path: '/', minRole: 'vendeur', icon: ICONS['dashboard'] }] },
@@ -99,6 +106,7 @@ export class Shell {
 
   protected readonly user = this.authService.user;
   protected readonly logoMark: SafeHtml = this.sanitizer.bypassSecurityTrustHtml(LOGO_MARK);
+  protected readonly chevron: SafeHtml = this.sanitizer.bypassSecurityTrustHtml(CHEVRON);
 
   protected readonly navGroups = computed(() => {
     const role = this.user()?.role ?? null;
@@ -107,6 +115,40 @@ export class Shell {
       items: group.items.filter((item) => hasRole(role, item.minRole)),
     })).filter((group) => group.items.length > 0);
   });
+
+  // Un groupe s'ouvre par défaut s'il contient la page actuellement affichée
+  // (reprend $stockActive/$ventesActive/$adminActive de app.blade.php).
+  private readonly expandedGroups = signal<Set<string>>(
+    new Set(
+      NAV_GROUPS.filter(
+        (g) => g.label && g.items.some((item) => item.path !== '/' && this.router.url.startsWith(item.path)),
+      ).map((g) => g.label as string),
+    ),
+  );
+
+  protected isExpanded(label: string | null): boolean {
+    return label === null || this.expandedGroups().has(label);
+  }
+
+  protected toggleGroup(label: string | null): void {
+    if (!label) return;
+    const next = new Set(this.expandedGroups());
+    if (next.has(label)) {
+      next.delete(label);
+    } else {
+      next.add(label);
+    }
+    this.expandedGroups.set(next);
+  }
+
+  protected roleBadgeClass(role: string | null): string {
+    return role ? (ROLE_BADGE_CLASS[role] ?? 'brand') : 'brand';
+  }
+
+  protected initials(email: string | null): string {
+    if (!email) return '?';
+    return email.slice(0, 2).toUpperCase();
+  }
 
   protected icon(svg: string): SafeHtml {
     return this.sanitizer.bypassSecurityTrustHtml(svg);

@@ -1,26 +1,33 @@
 /* Styles partagés par les écrans CRUD (produits, magasins, boutiques, stocks...) :
-   évite de dupliquer le même tableau/panneau/formulaire dans chaque composant. */
+   évite de dupliquer le même tableau/panneau/formulaire dans chaque composant.
+   Palette et typographie reprises du thème SB Admin 2 utilisé par la branche
+   centro (resources/views/layouts/app.blade.php). */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 :root {
-  --ink: #1f2937;
+  --ink: #2e3440;
   --ink-soft: #4b5563;
-  --ink-faint: #6b7280;
-  --bg: #f4f6fb;
+  --ink-faint: #858796;
+  --bg: #f8f9fc;
   --surface: #ffffff;
-  --border: #e5e7eb;
-  --border-soft: #f0f1f5;
+  --border: #e3e6f0;
+  --border-soft: #eef0f7;
   --brand: #4e73df;
-  --brand-dark: #3d5fc4;
+  --brand-dark: #2e59d9;
   --brand-soft: #eef1fb;
   --danger: #e74a3b;
   --danger-soft: #fbe7e6;
-  --success: #1e7e34;
-  --success-soft: #e6f4ea;
-  --warning: #92660b;
+  --success: #1cc88a;
+  --success-soft: #e3faf1;
+  --info: #36b9cc;
+  --info-soft: #e6f8fa;
+  --warning: #b45309;
   --warning-soft: #fdf3d8;
-  --radius: 10px;
-  --radius-sm: 7px;
-  --shadow: 0 1px 2px rgba(16, 24, 40, 0.04), 0 1px 6px rgba(16, 24, 40, 0.06);
+  --radius: 14px;
+  --radius-sm: 8px;
+  --shadow: 0 0.15rem 1rem 0 rgba(58, 59, 69, 0.1);
+  --shadow-lg: 0 0.25rem 2rem 0 rgba(58, 59, 69, 0.15);
 }
 
 * {
@@ -30,12 +37,7 @@
 body {
   margin: 0;
   background: var(--bg);
-  font-family:
-    system-ui,
-    -apple-system,
-    'Segoe UI',
-    Roboto,
-    sans-serif;
+  font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   color: var(--ink);
   font-size: 14px;
   line-height: 1.5;
@@ -125,6 +127,18 @@ button {
       border-color: #eba8a2;
     }
   }
+
+  &.success {
+    background: var(--success);
+    border-color: var(--success);
+    color: #fff;
+    box-shadow: 0 1px 2px rgba(28, 200, 138, 0.25);
+
+    &:hover:not(:disabled) {
+      background: #17a877;
+      border-color: #17a877;
+    }
+  }
 }
 
 .error {
@@ -145,9 +159,10 @@ button {
 
 .panel {
   background: var(--surface);
-  border: 1px solid var(--border-soft);
+  border: none;
+  border-left: 4px solid var(--brand);
   border-radius: var(--radius);
-  box-shadow: var(--shadow);
+  box-shadow: var(--shadow-lg);
   padding: 1.5rem 1.75rem;
   margin-bottom: 1.75rem;
 
@@ -233,8 +248,8 @@ button {
 .table-wrap {
   overflow-x: auto;
   border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  border: 1px solid var(--border-soft);
+  box-shadow: var(--shadow-lg);
+  border: none;
 }
 
 .data-table {
@@ -302,9 +317,9 @@ button {
   text-align: center;
   padding: 3.5rem 1.5rem;
   background: var(--surface);
-  border: 1px solid var(--border-soft);
+  border: none;
   border-radius: var(--radius);
-  box-shadow: var(--shadow);
+  box-shadow: var(--shadow-lg);
   color: var(--ink-faint);
 
   svg {
@@ -345,5 +360,15 @@ button {
   &.danger {
     background: var(--danger-soft);
     color: var(--danger);
+  }
+
+  &.info {
+    background: var(--info-soft);
+    color: var(--info);
+  }
+
+  &.brand {
+    background: var(--brand-soft);
+    color: var(--brand);
   }
 }

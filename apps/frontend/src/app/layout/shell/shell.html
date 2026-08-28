@@ -8,13 +8,20 @@
       @for (group of navGroups(); track $index) {
         <div class="nav-group">
           @if (group.label) {
-            <div class="nav-group-label">{{ group.label }}</div>
+            <button type="button" class="nav-group-label" (click)="toggleGroup(group.label)">
+              {{ group.label }}
+              <span class="chevron" [class.open]="isExpanded(group.label)" [innerHTML]="chevron"></span>
+            </button>
           }
-          @for (item of group.items; track item.path) {
-            <a [routerLink]="item.path" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: item.path === '/' }">
-              <span class="nav-icon" [innerHTML]="icon(item.icon)"></span>
-              {{ item.label }}
-            </a>
+          @if (isExpanded(group.label)) {
+            <div class="nav-group-items">
+              @for (item of group.items; track item.path) {
+                <a [routerLink]="item.path" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: item.path === '/' }">
+                  <span class="nav-icon" [innerHTML]="icon(item.icon)"></span>
+                  {{ item.label }}
+                </a>
+              }
+            </div>
           }
         </div>
       }
@@ -25,8 +32,11 @@
     <header class="topbar">
       <div class="user-info">
         @if (user(); as u) {
-          <span class="email">{{ u.email }}</span>
-          <span class="role">{{ u.role }}</span>
+          <span class="avatar">{{ initials(u.email) }}</span>
+          <span class="details">
+            <span class="email">{{ u.email }}</span>
+            <span class="badge" [class]="roleBadgeClass(u.role)">{{ u.role }}</span>
+          </span>
         }
       </div>
       <button type="button" (click)="logout()">Déconnexion</button>
@@ -35,5 +45,9 @@
     <main class="content">
       <router-outlet />
     </main>
+
+    <footer class="app-footer">
+      <small>Gestion Magasin — tous droits réservés</small>
+    </footer>
   </div>
 </div>
