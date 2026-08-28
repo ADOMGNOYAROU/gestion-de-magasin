@@ -1,6 +1,8 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, effect, inject, signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
-import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { filter, map } from 'rxjs';
 import { AuthService, hasRole } from '../../core/auth.service';
 
 interface NavItem {
@@ -116,15 +118,40 @@ export class Shell {
     })).filter((group) => group.items.length > 0);
   });
 
-  // Un groupe s'ouvre par défaut s'il contient la page actuellement affichée
-  // (reprend $stockActive/$ventesActive/$adminActive de app.blade.php).
-  private readonly expandedGroups = signal<Set<string>>(
-    new Set(
-      NAV_GROUPS.filter(
-        (g) => g.label && g.items.some((item) => item.path !== '/' && this.router.url.startsWith(item.path)),
-      ).map((g) => g.label as string),
+  // Un groupe s'ouvre dès qu'il contient la page actuellement affichée
+  // (reprend $stockActive/$ventesActive/$adminActive de app.blade.php). Le
+  // Shell est un composant de route parent monté une seule fois pour toute
+  // la session : il faut donc réévaluer ceci à chaque navigation, pas juste
+  // à la construction, sinon le lien actif reste caché dans un groupe replié.
+  private readonly currentUrl = toSignal(
+    this.router.events.pipe(
+      filter((e) => e instanceof NavigationEnd),
+      map(() => this.router.url),
     ),
+    { initialValue: this.router.url },
   );
+
+  private readonly expandedGroups = signal<Set<string>>(new Set(this.groupsMatchingUrl(this.router.url)));
+
+  private readonly autoExpandOnNavigation = effect(() => {
+    const matching = this.groupsMatchingUrl(this.currentUrl());
+    if (matching.length === 0) return;
+    const next = new Set(this.expandedGroups());
+    let changed = false;
+    for (const label of matching) {
+      if (!next.has(label)) {
+        next.add(label);
+        changed = true;
+      }
+    }
+    if (changed) this.expandedGroups.set(next);
+  });
+
+  private groupsMatchingUrl(url: string): string[] {
+    return NAV_GROUPS.filter(
+      (g) => g.label && g.items.some((item) => item.path !== '/' && url.startsWith(item.path)),
+    ).map((g) => g.label as string);
+  }
 
   protected isExpanded(label: string | null): boolean {
     return label === null || this.expandedGroups().has(label);

@@ -1,9 +1,9 @@
 /* Styles partagés par les écrans CRUD (produits, magasins, boutiques, stocks...) :
    évite de dupliquer le même tableau/panneau/formulaire dans chaque composant.
    Palette et typographie reprises du thème SB Admin 2 utilisé par la branche
-   centro (resources/views/layouts/app.blade.php). */
-
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+   centro (resources/views/layouts/app.blade.php). La police Inter est chargée
+   via <link preconnect> dans index.html plutôt qu'un @import CSS ici, pour
+   éviter la requête bloquante supplémentaire qu'implique un @import distant. */
 
 :root {
   --ink: #2e3440;
